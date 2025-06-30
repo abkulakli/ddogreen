@@ -20,6 +20,11 @@ ddotlp
 *.so
 *.a
 
+# Test files (temporary)
+test_*
+*_test
+*_test.cpp
+
 # Log files
 *.log
 
@@ -35,3 +40,6 @@ Thumbs.db
 # Runtime files
 *.pid
 *.lock
+
+# Memory Bank is intentionally tracked
+# memory-bank/ should be committed to git
