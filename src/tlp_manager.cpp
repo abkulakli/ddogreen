@@ -21,17 +21,17 @@ bool TLPManager::setPerformanceMode() {
     if (m_currentMode == "performance") {
         return true;  // Already in performance mode
     }
-    
+
     Logger::info("Switching to performance mode (tlp start)");
     std::string output = executeCommandWithOutput("sudo " + std::string(Config::TLP_START_COMMAND) + " 2>&1");
-    
+
     if (!output.empty()) {
         std::string cleanedOutput = cleanTLPOutput(output);
         if (!cleanedOutput.empty()) {
             Logger::info("TLP output: " + cleanedOutput);
         }
     }
-    
+
     // Check if command was successful (TLP doesn't always return proper exit codes)
     if (output.find("Error") == std::string::npos && output.find("error") == std::string::npos) {
         m_currentMode = "performance";
@@ -47,17 +47,17 @@ bool TLPManager::setBatteryMode() {
     if (m_currentMode == "battery") {
         return true;  // Already in battery mode
     }
-    
+
     Logger::info("Switching to battery mode (tlp bat)");
     std::string output = executeCommandWithOutput("sudo " + std::string(Config::TLP_BAT_COMMAND) + " 2>&1");
-    
+
     if (!output.empty()) {
         std::string cleanedOutput = cleanTLPOutput(output);
         if (!cleanedOutput.empty()) {
             Logger::info("TLP output: " + cleanedOutput);
         }
     }
-    
+
     // Check if command was successful (TLP doesn't always return proper exit codes)
     if (output.find("Error") == std::string::npos && output.find("error") == std::string::npos) {
         m_currentMode = "battery";
@@ -116,12 +116,12 @@ std::string TLPManager::executeCommandWithOutput(const std::string& command) {
 
 std::string TLPManager::cleanTLPOutput(const std::string& output) {
     std::string cleaned = output;
-    
+
     // Remove trailing newlines and whitespace
     while (!cleaned.empty() && (cleaned.back() == '\n' || cleaned.back() == '\r' || cleaned.back() == ' ')) {
         cleaned.pop_back();
     }
-    
+
     // Replace multiple spaces/tabs with single space
     std::string result;
     bool lastWasSpace = false;
@@ -141,6 +141,6 @@ std::string TLPManager::cleanTLPOutput(const std::string& output) {
             lastWasSpace = false;
         }
     }
-    
+
     return result;
 }

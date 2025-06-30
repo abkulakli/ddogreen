@@ -23,6 +23,6 @@ private:
     bool executeCommand(const std::string& command);
     std::string executeCommandWithOutput(const std::string& command);
     std::string cleanTLPOutput(const std::string& output);
-    
+
     std::string m_currentMode;
 };
