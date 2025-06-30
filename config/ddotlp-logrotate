@@ -1,0 +1,11 @@
+# Logrotate configuration for ddotlp
+/var/log/ddotlp.log {
+    daily
+    missingok
+    rotate 30
+    compress
+    delaycompress
+    notifempty
+    copytruncate
+    su root root
+}

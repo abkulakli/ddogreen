@@ -1,0 +1,27 @@
+[Unit]
+Description=Dynamic TLP Power Management Daemon
+Documentation=https://github.com/yourusername/ddotlp
+After=multi-user.target
+
+[Service]
+Type=forking
+ExecStart=/usr/local/bin/ddotlp --daemon
+ExecReload=/bin/kill -HUP $MAINPID
+PIDFile=/var/run/ddotlp.pid
+Restart=always
+RestartSec=10
+User=root
+Group=root
+
+# Security settings
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/log /var/run /tmp /proc
+PrivateTmp=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+
+[Install]
+WantedBy=multi-user.target
