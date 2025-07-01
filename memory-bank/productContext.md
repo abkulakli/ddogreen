@@ -22,7 +22,7 @@ ddotlp provides an automated, intelligent solution that:
 ### User Experience Goals
 1. **Invisible Operation**: Users should not need to think about power management
 2. **Intelligent Decisions**: System should switch modes based on actual activity, not just user input
-3. **Reliable Performance**: When working, system should be in performance mode
+3. **Reliable Performance**: When working, system should be in auto mode
 4. **Extended Battery**: When idle, system should maximize battery life
 5. **Easy Monitoring**: Users can check logs to understand system behavior
 
@@ -30,16 +30,16 @@ ddotlp provides an automated, intelligent solution that:
 ```
 System Boot → Service Starts → Monitor CPU Usage → Detect Activity Patterns
      ↓
-Active CPU Usage (>15%) → Performance Mode (tlp start)
+Active CPU Usage (>15%) → Auto Mode (tlp start)
      ↓
 Idle CPU Usage (<15% for 5+ min) → Battery Mode (tlp bat)
      ↓
-Activity Resumes → Performance Mode → Continue Monitoring
+Activity Resumes → Auto Mode → Continue Monitoring
 ```
 
 ### Business Value
 1. **Extended Battery Life**: Automatic battery mode when system is idle
-2. **Better Performance**: Automatic performance mode when actively working
+2. **Better Performance**: Automatic auto mode when actively working
 3. **Reduced Complexity**: No manual power management needed
 4. **Universal Deployment**: Works across different environments and setups
 

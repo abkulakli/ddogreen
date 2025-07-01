@@ -1,6 +1,5 @@
 #include "tlp_manager.h"
 #include "logger.h"
-#include "config.h"
 #include <cstdlib>
 #include <iostream>
 #include <memory>
@@ -17,13 +16,13 @@ TLPManager::TLPManager() : m_currentMode("unknown") {
 TLPManager::~TLPManager() {
 }
 
-bool TLPManager::setPerformanceMode() {
-    if (m_currentMode == "performance") {
-        return true;  // Already in performance mode
+bool TLPManager::setAutoMode() {
+    if (m_currentMode == "auto") {
+        return true;  // Already in auto mode
     }
 
-    Logger::info("Switching to performance mode (tlp start)");
-    std::string output = executeCommandWithOutput(std::string(Config::TLP_START_COMMAND) + " 2>&1");
+    Logger::info("Switching to auto mode (tlp start)");
+    std::string output = executeCommandWithOutput("tlp start 2>&1");
 
     if (!output.empty()) {
         std::string cleanedOutput = cleanTLPOutput(output);
@@ -34,11 +33,11 @@ bool TLPManager::setPerformanceMode() {
 
     // Check if command was successful (TLP doesn't always return proper exit codes)
     if (output.find("Error") == std::string::npos && output.find("error") == std::string::npos) {
-        m_currentMode = "performance";
-        Logger::info("Successfully switched to performance mode");
+        m_currentMode = "auto";
+        Logger::info("Successfully switched to auto mode");
         return true;
     } else {
-        Logger::error("Failed to switch to performance mode");
+        Logger::error("Failed to switch to auto mode");
         return false;
     }
 }
@@ -49,7 +48,7 @@ bool TLPManager::setBatteryMode() {
     }
 
     Logger::info("Switching to battery mode (tlp bat)");
-    std::string output = executeCommandWithOutput(std::string(Config::TLP_BAT_COMMAND) + " 2>&1");
+    std::string output = executeCommandWithOutput("tlp bat 2>&1");
 
     if (!output.empty()) {
         std::string cleanedOutput = cleanTLPOutput(output);
@@ -70,15 +69,48 @@ bool TLPManager::setBatteryMode() {
 }
 
 std::string TLPManager::getCurrentMode() {
-    std::string output = executeCommandWithOutput(std::string(Config::TLP_STATUS_COMMAND));
+    std::string output = executeCommandWithOutput("tlp-stat -s");
 
     // Parse the output to determine current mode
-    if (output.find("TLP_DEFAULT_MODE=AC") != std::string::npos ||
-        output.find("Mode = AC") != std::string::npos) {
-        m_currentMode = "performance";
-    } else if (output.find("TLP_DEFAULT_MODE=BAT") != std::string::npos ||
-               output.find("Mode = BAT") != std::string::npos) {
-        m_currentMode = "battery";
+    // Look for "Mode" followed by "=" and then the actual mode value
+    // This handles any amount of whitespace between Mode, =, and the value
+
+    size_t modePos = output.find("Mode");
+    if (modePos != std::string::npos) {
+        // Find the equals sign after "Mode"
+        size_t equalsPos = output.find("=", modePos);
+        if (equalsPos != std::string::npos) {
+            // Find the end of the line
+            size_t endPos = output.find("\n", equalsPos);
+            if (endPos != std::string::npos) {
+                // Extract the value after the equals sign
+                std::string modeValue = output.substr(equalsPos + 1, endPos - equalsPos - 1);
+
+                // Trim whitespace and extract just the mode part (before any parentheses)
+                size_t start = modeValue.find_first_not_of(" \t");
+                if (start != std::string::npos) {
+                    size_t end = modeValue.find_first_of(" \t(", start);
+                    if (end == std::string::npos) end = modeValue.length();
+
+                    std::string mode = modeValue.substr(start, end - start);
+
+                    if (mode == "AC") {
+                        m_currentMode = "auto";
+                    } else if (mode == "battery") {
+                        m_currentMode = "battery";
+                    }
+                }
+            }
+        }
+    }
+
+    // Fallback: check for older TLP_DEFAULT_MODE format
+    if (m_currentMode == "unknown") {
+        if (output.find("TLP_DEFAULT_MODE=AC") != std::string::npos) {
+            m_currentMode = "auto";
+        } else if (output.find("TLP_DEFAULT_MODE=BAT") != std::string::npos) {
+            m_currentMode = "battery";
+        }
     }
 
     return m_currentMode;
@@ -100,17 +132,18 @@ std::string TLPManager::executeCommandWithOutput(const std::string& command) {
     std::array<char, 128> buffer;
     std::string result;
 
-    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(command.c_str(), "r"), pclose);
-
+    // Use a simple FILE* with manual cleanup to avoid template attribute warnings
+    FILE* pipe = popen(command.c_str(), "r");
     if (!pipe) {
         Logger::error("Failed to execute command: " + command);
         return "";
     }
 
-    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+    while (fgets(buffer.data(), buffer.size(), pipe) != nullptr) {
         result += buffer.data();
     }
 
+    pclose(pipe);
     return result;
 }
 

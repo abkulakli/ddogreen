@@ -1,20 +1,40 @@
 #pragma once
+#include <string>
 
-namespace Config {
-    // Default idle timeout in seconds (5 minutes)
-    constexpr int DEFAULT_IDLE_TIMEOUT = 300;
+class Config {
+public:
+    static Config& getInstance();
+    bool loadFromFile(const std::string& configPath = "/etc/ddotlp/ddotlp.conf");
 
-    // Log file path
-    constexpr const char* LOG_FILE = "/var/log/ddotlp.log";
+    // Getters
+    int getIdleTimeout() const { return idleTimeout; }
+    double getCpuThreshold() const { return cpuThreshold; }
+    const std::string& getLogLevel() const { return logLevel; }
+    const std::string& getLogFile() const { return logFile; }
+    bool isAutoSwitchEnabled() const { return autoSwitchEnabled; }
+    const std::string& getTlpStartCommand() const { return tlpStartCommand; }
+    const std::string& getTlpBatCommand() const { return tlpBatCommand; }
+    const std::string& getTlpStatusCommand() const { return tlpStatusCommand; }
 
-    // PID file path
-    constexpr const char* PID_FILE = "/run/ddotlp.pid";
+    // Constants
+    static constexpr const char* DEFAULT_CONFIG_FILE = "/etc/ddotlp/ddotlp.conf";
+    static constexpr const char* DEFAULT_LOG_FILE = "/var/log/ddotlp.log";
+    static constexpr const char* PID_FILE = "/run/ddotlp.pid";
+    static constexpr int DEFAULT_IDLE_TIMEOUT = 300;
+    static constexpr double DEFAULT_CPU_THRESHOLD = 15.0;
 
-    // Config file path
-    constexpr const char* CONFIG_FILE = "/etc/ddotlp/ddotlp.conf";
+private:
+    Config() = default;
+    void setDefaults();
+    std::string trim(const std::string& str);
 
-    // TLP commands
-    constexpr const char* TLP_START_COMMAND = "tlp start";
-    constexpr const char* TLP_BAT_COMMAND = "tlp bat";
-    constexpr const char* TLP_STATUS_COMMAND = "tlp-stat -s";
-}
+    // Configuration values
+    int idleTimeout = DEFAULT_IDLE_TIMEOUT;
+    double cpuThreshold = DEFAULT_CPU_THRESHOLD;
+    std::string logLevel = "INFO";
+    std::string logFile = DEFAULT_LOG_FILE;
+    bool autoSwitchEnabled = true;
+    std::string tlpStartCommand = "tlp start";
+    std::string tlpBatCommand = "tlp bat";
+    std::string tlpStatusCommand = "tlp-stat -s";
+};

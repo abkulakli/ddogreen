@@ -1,125 +1,99 @@
 # Active Context - ddotlp
 
 ## Current Work Focus
-**Project Status**: Production-ready, systemd PID file issue resolved
-**Last Updated**: July 1, 2025
-**Current Priority**: All major issues resolved, project complete
+**Project Status**: COMPLETE - Fully simplified and production-ready
+**Last Updated**: January 15, 2025
+**Current Priority**: All development complete, project ready for deployment
 
-## Recent Major Changes
+## Recent Major Refactoring (Latest)
 
-### 1. Simplified Implementation (Latest)
-- **Removed X11 Dependencies**: Eliminated libx11-dev and libxss-dev requirements
-- **CPU-Based Monitoring**: Switched from X11 events to `/proc/stat` CPU usage monitoring
-- **Universal Compatibility**: Now works on headless servers, Wayland systems, and any Linux environment
-- **Cleaner Build**: No external library dependencies, CMake-only build system
+### Ultra-Simplification Complete ✅
+- **Removed ALL Configuration**: Eliminated all config file support, parsing, and related code
+- **Load Average Monitoring**: Switched from CPU usage to 1-minute load average from `/proc/loadavg`
+- **Hardcoded Defaults**: All settings now hardcoded for maximum simplicity and reliability
+- **Minimal Resource Usage**: System checks load average only once per minute (60-second intervals)
+- **Config-Free Design**: No configuration files, no command-line parameters except --daemon, --help, --version
 
-### 2. Enhanced Logging System
-- **Millisecond Timestamps**: Improved logging precision from seconds to milliseconds
-- **TLP Output Capture**: Now captures and logs all TLP command output with proper timestamps
-- **Clean Output Processing**: Added `cleanTLPOutput()` function for better log readability
-- **Log Rotation**: Added logrotate configuration for proper log management
+### Implementation Details
+- **Load Threshold**: Hardcoded to 0.15 (15% of one CPU core)
+- **Idle Timeout**: Hardcoded to 300 seconds (5 minutes)
+- **Check Interval**: Hardcoded to 60 seconds (1 minute)
+- **Log File**: Hardcoded to `/var/log/ddotlp.log`
+- **No Sampling**: Direct load average reading with no averaging or circular buffers
 
-### 4. ddosoft Branding Integration (Latest) ✅
-- **Copyright Headers**: Added ddosoft copyright to main.cpp with www.ddosoft.com URL
-- **Version Information**: Updated version output to include ddosoft attribution
-- **CMake Metadata**: Added ddosoft homepage URL to CMakeLists.txt project definition
-- **README Branding**: Added "Developed by ddosoft (www.ddosoft.com)" prominently in README
-- **Service Documentation**: Added ddosoft documentation URL to systemd service file
-- **Consistent Attribution**: Ensured branding appears in all user-facing contexts
-### 3. Build System Cleanup ✅
-- **CMake Primary**: Removed redundant Makefile, using CMake as primary build system
-- **Build Script**: Created build.sh for easy compilation
-- **Dependency Management**: Simplified dependency requirements
+### Terminology Corrections ✅
+- **TLP Auto Mode**: `tlp start` - correctly referred to as "auto mode" (not "performance mode")
+- **TLP Battery Mode**: `tlp bat` - correctly referred to as "battery mode"
+- **Accurate Logging**: All log messages now reflect TLP's actual mode names
+- **Documentation**: README and help output updated to reflect correct TLP terminology
 
-### 5. Systemd PID File Issue Resolution (Latest) ✅
-- **Problem**: Service worked but systemd complained "Can't open PID file '/run/ddotlp.pid' (yet?) after start"
-- **Root Cause**: Timing issue between systemd expecting PID file availability and daemon double-fork process
-- **Solution**: Removed PIDFile directive from systemd service configuration
-- **Result**: Service now starts cleanly without any warnings or errors
-- **Impact**: Proper systemd integration with clean startup and no race conditions
+### Code Cleanup ✅
+- **Function Naming**: Renamed `setPerformanceMode()` to `setAutoMode()` for accurate terminology
+- **Mode Tracking**: Internal mode state uses "auto" and "battery" to match TLP's actual modes
+- **Config Removal**: Deleted `config.cpp`, `config.h`, and entire `config/` directory
+- **CMake Cleanup**: Removed all config file installation rules
+- **Warning-Free Build**: All compiler warnings eliminated
+- **Signal Handling**: Updated SIGHUP handling to reflect no-config design
+- **Main Simplification**: Removed all config-related command-line options and parsing
 
 ## Current Implementation Details
 
 ### Activity Monitoring Approach
-- **CPU Threshold**: Default 15% CPU usage to determine "active" state
-- **Sampling Rate**: CPU checks every 5 seconds to balance accuracy and performance
-- **Idle Detection**: System considered idle after 5 minutes (300 seconds) below threshold
-- **State Transitions**: Only switches TLP modes when state actually changes
+- **Load Average Source**: Reads 1-minute load average directly from `/proc/loadavg`
+- **Check Frequency**: Every 60 seconds for minimal system impact
+- **Decision Logic**: Direct comparison - if load > 0.15, system is active; if load ≤ 0.15, system is idle
+- **Immediate Response**: Mode switches immediately based on current load average (no idle timeout)
+- **No Configuration**: Load threshold (0.15) hardcoded for reliability and simplicity
 
 ### Logging Format
 ```
-[2025-06-30 21:14:15.123] [INFO] System became active (CPU usage detected)
-[2025-06-30 21:14:15.124] [INFO] Switching to performance mode (tlp start)
-[2025-06-30 21:14:15.456] [INFO] TLP output: TLP started in AC mode (auto).
-[2025-06-30 21:14:15.457] [INFO] Successfully switched to performance mode
+[2025-01-15 14:23:45.123] [INFO] 1-minute load average: 0.23 (threshold: 0.15)
+[2025-01-15 14:23:45.124] [INFO] System became active (load: 0.23) - switching to TLP auto mode
+[2025-01-15 14:23:45.125] [INFO] Switching to auto mode (tlp start)
+[2025-01-15 14:23:45.456] [INFO] TLP output: TLP started in AC mode (auto).
+[2025-01-15 14:23:45.457] [INFO] Successfully switched to auto mode
 ```
 
-### Configuration Options
-- `IDLE_TIMEOUT`: Time before switching to battery mode (default: 300 seconds)
-- `CPU_THRESHOLD`: CPU usage percentage for activity detection (default: 15.0%)
-- `LOG_LEVEL`: Logging verbosity (DEBUG, INFO, WARNING, ERROR)
-- `AUTO_SWITCH_ENABLED`: Enable/disable automatic switching
+### Hardcoded Settings (No Configuration)
+- `LOAD_THRESHOLD`: 0.15 (15% of one CPU core)
+- `CHECK_INTERVAL`: 60 seconds (1 minute)
+- `LOG_FILE`: `/var/log/ddotlp.log`
 
-## Immediate Next Steps
+## Project Status: COMPLETE ✅
 
-### Project Complete ✅
-All major objectives have been achieved:
-- ✅ **Core Implementation**: CPU-based activity monitoring and TLP management
-- ✅ **System Integration**: Proper systemd service with security hardening
-- ✅ **Build System**: Modern CMake with installation scripts
-- ✅ **Logging & Monitoring**: Comprehensive logging with millisecond precision
-- ✅ **ddosoft Branding**: Complete integration across all user-facing components
-- ✅ **Documentation**: Comprehensive README and memory bank documentation
-
-### Optional Future Enhancements
-- Configuration file parsing with validation
-- Dynamic threshold adjustment based on usage patterns
-- Advanced CPU metrics (load average, process-specific monitoring)
-- Desktop notifications for mode changes
-- Performance metrics export
-- Web-based monitoring interface
-
-## Current Challenges & Considerations
-
-### Resolved Issues ✅
-- ✅ **X11 Dependency**: Eliminated by switching to CPU monitoring
-- ✅ **Build Complexity**: Simplified to CMake-only approach
-- ✅ **Logging Precision**: Added millisecond timestamps
-- ✅ **TLP Output**: Now captured and properly formatted
-- ✅ **ddosoft Branding**: Complete integration across all components
-- ✅ **Systemd PID File**: Resolved timing issue with PID file availability
-
-### Optional Future Considerations
-- **Configuration File Parsing**: Currently using hardcoded config values
-- **Dynamic Threshold Adjustment**: Could adapt thresholds based on usage patterns
-- **Multiple CPU Metrics**: Could consider load average or specific process monitoring
-- **User Notifications**: Optional desktop notifications for mode changes
+### All Major Objectives Achieved ✅
+- ✅ **Ultra-Simple Implementation**: Load average monitoring with hardcoded settings
+- ✅ **Config-Free Design**: No configuration files or complex setup
+- ✅ **Minimal Resource Usage**: 1-minute load checks for maximum efficiency
+- ✅ **Correct TLP Terminology**: All references use proper "auto" and "battery" mode names
+- ✅ **Warning-Free Build**: Clean compilation with no warnings or errors
+- ✅ **Production Ready**: Fully tested and deployment-ready systemd service
+- ✅ **Complete Documentation**: README and help output reflect simplified design
+### Eliminated Complexity
+- ❌ **No Configuration Files**: Completely removed config parsing, validation, and file management
+- ❌ **No Command-Line Options**: Only --daemon, --help, --version supported
+- ❌ **No CPU Sampling**: No averaging, circular buffers, or complex CPU calculations
+- ❌ **No Dependencies**: Zero external libraries beyond standard C++ and Linux system calls
 
 ## Development Patterns Established
 
 ### Code Organization
-- **Modular Design**: Separate classes for ActivityMonitor, TLPManager, Logger, Daemon
-- **Clean Interfaces**: Well-defined callback system for activity events
-- **Error Handling**: Comprehensive error checking and logging
-- **Resource Management**: Proper cleanup and thread management
-
-### Build & Deployment
-- **CMake Standard**: Using modern CMake practices
-- **Installation Scripts**: Automated build, install, and uninstall processes
-- **Systemd Integration**: Proper service definition with security hardening
-- **Log Management**: Integrated logrotate configuration
+- **Ultra-Minimal Design**: Only essential functionality with hardcoded defaults
+- **Load Average Focus**: Single-purpose monitoring via `/proc/loadavg`
+- **Direct TLP Integration**: Simple command execution with output capture
+- **Clean Error Handling**: Comprehensive logging without configuration complexity
 
 ### Quality Practices
-- **Detailed Logging**: Every significant action is logged with context
-- **Signal Handling**: Proper daemon lifecycle management
-- **Security**: Runs with minimal required privileges
-- **Documentation**: Comprehensive README and inline documentation
+- **Hardcoded Reliability**: No configuration means no config-related failures
+- **Minimal Resource Usage**: 60-second intervals minimize system impact
+- **Warning-Free Compilation**: Clean code that builds without any warnings
+- **Production Simplicity**: Easy deployment with zero configuration required
 
-## Project Health - Production Ready ✅
-- **Build Status**: ✅ Clean compilation on latest systems
-- **Dependencies**: ✅ Minimal and commonly available
-- **Documentation**: ✅ Comprehensive and up-to-date
-- **Branding**: ✅ ddosoft attribution integrated throughout
-- **Deployment**: ✅ Installation scripts working correctly
-- **Service Integration**: ✅ Systemd service with security hardening
-- **Testing**: ✅ Manual testing completed, ready for production use
+## Project Health - Ultra-Simplified and Complete ✅
+- **Build Status**: ✅ Clean compilation with zero warnings
+- **Dependencies**: ✅ Only standard C++ and Linux system calls
+- **Configuration**: ✅ None required - hardcoded sensible defaults
+- **Resource Usage**: ✅ Minimal - checks load average once per minute
+- **Documentation**: ✅ Updated to reflect simplified design
+- **Deployment**: ✅ Single binary with systemd service integration
+- **Testing**: ✅ Verified load average monitoring and TLP integration

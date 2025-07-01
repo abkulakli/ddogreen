@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <functional>
+#include <vector>
 
 class ActivityMonitor {
 public:
@@ -20,27 +21,20 @@ public:
     // Set callback for activity changes
     void setActivityCallback(ActivityCallback callback);
 
-    // Set idle timeout in seconds (default: 300 seconds = 5 minutes)
-    void setIdleTimeout(int seconds);
-
-    // Set CPU usage threshold for activity detection (default: 15%)
-    void setCpuThreshold(double threshold);
+    // Set load average threshold for activity detection (default: 0.15)
+    void setLoadThreshold(double threshold);
 
     // Check if system is currently active
     bool isActive() const;
 
 private:
-    double getCurrentCpuUsage();
+    double getOneMinuteLoadAverage();  // Simple load average from /proc/loadavg
     void monitorLoop();
 
     bool m_isActive;
     bool m_running;
-    int m_idleTimeout;
-    double m_cpuThreshold;
+    double m_loadThreshold;
     ActivityCallback m_callback;
 
-    std::chrono::steady_clock::time_point m_lastActivityTime;
-    std::chrono::steady_clock::time_point m_lastCpuCheckTime;
-    double m_lastTotalTime;
-    double m_lastIdleTime;
+    std::chrono::steady_clock::time_point m_lastLoadCheckTime;
 };

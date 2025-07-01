@@ -14,7 +14,6 @@
 #include "tlp_manager.h"
 #include "daemon.h"
 #include "logger.h"
-#include "config.h"
 #include <iostream>
 #include <thread>
 #include <chrono>
@@ -25,10 +24,13 @@ void printUsage(const char* programName) {
     std::cout << "Usage: " << programName << " [OPTIONS]\n"
               << "Options:\n"
               << "  -d, --daemon      Run as daemon\n"
-              << "  -t, --timeout     Idle timeout in seconds (default: 300)\n"
-              << "  -c, --cpu         CPU threshold for activity detection (default: 15.0)\n"
               << "  -h, --help        Show this help message\n"
-              << "  -v, --version     Show version information\n";
+              << "  -v, --version     Show version information\n"
+              << "\n"
+              << "Hardcoded settings:\n"
+              << "  - Load threshold: 0.15 (15% of one CPU core)\n"
+              << "  - Check interval: 60 seconds (1 minute)\n"
+              << "  - Decision based on: Most recent 1-minute load average\n";
 }
 
 void printVersion() {
@@ -39,40 +41,22 @@ void printVersion() {
 
 int main(int argc, char* argv[]) {
     bool runAsDaemon = false;
-    int idleTimeout = Config::DEFAULT_IDLE_TIMEOUT;
-    double cpuThreshold = 15.0;  // Default 15% CPU threshold
 
-    // Parse command line arguments
+    // Parse command line arguments (simplified)
     static struct option long_options[] = {
-        {"daemon",   no_argument,       0, 'd'},
-        {"timeout",  required_argument, 0, 't'},
-        {"cpu",      required_argument, 0, 'c'},
-        {"help",     no_argument,       0, 'h'},
-        {"version",  no_argument,       0, 'v'},
+        {"daemon",   no_argument, 0, 'd'},
+        {"help",     no_argument, 0, 'h'},
+        {"version",  no_argument, 0, 'v'},
         {0, 0, 0, 0}
     };
 
     int option_index = 0;
     int c;
 
-    while ((c = getopt_long(argc, argv, "dt:c:hv", long_options, &option_index)) != -1) {
+    while ((c = getopt_long(argc, argv, "dhv", long_options, &option_index)) != -1) {
         switch (c) {
             case 'd':
                 runAsDaemon = true;
-                break;
-            case 't':
-                idleTimeout = std::atoi(optarg);
-                if (idleTimeout <= 0) {
-                    std::cerr << "Invalid timeout value: " << optarg << std::endl;
-                    return 1;
-                }
-                break;
-            case 'c':
-                cpuThreshold = std::atof(optarg);
-                if (cpuThreshold < 0.0 || cpuThreshold > 100.0) {
-                    std::cerr << "Invalid CPU threshold value: " << optarg << std::endl;
-                    return 1;
-                }
                 break;
             case 'h':
                 printUsage(argv[0]);
@@ -88,14 +72,20 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    // Initialize logger first
+    Logger::init();
+
+    // Use hardcoded default values for simplicity
+    const double loadThreshold = 0.15; // 15% load average (0.15 load)
+
     // Check if running as root
     if (geteuid() != 0) {
         std::cerr << "This program must be run as root to execute TLP commands." << std::endl;
         return 1;
     }
 
-    // Initialize logger
-    Logger::init(Config::LOG_FILE);
+    // Initialize logger with default log file
+    Logger::init("/var/log/ddotlp.log");
 
     if (runAsDaemon) {
         if (!Daemon::daemonize()) {
@@ -117,17 +107,16 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // Set idle timeout and CPU threshold
-    activityMonitor.setIdleTimeout(idleTimeout);
-    activityMonitor.setCpuThreshold(cpuThreshold);
+    // Set hardcoded values
+    activityMonitor.setLoadThreshold(loadThreshold);
 
     // Set up activity callback
     activityMonitor.setActivityCallback([&tlpManager](bool isActive) {
         if (isActive) {
-            // User is active, switch to performance mode
-            tlpManager.setPerformanceMode();
+            // System is active, switch to TLP auto mode (tlp start)
+            tlpManager.setAutoMode();
         } else {
-            // User is idle, switch to battery mode
+            // System is idle, switch to TLP battery mode (tlp bat)
             tlpManager.setBatteryMode();
         }
     });
@@ -151,7 +140,7 @@ int main(int argc, char* argv[]) {
 
     // Remove PID file
     if (runAsDaemon) {
-        unlink(Config::PID_FILE);
+        unlink("/run/ddotlp.pid");
     }
 
     return 0;

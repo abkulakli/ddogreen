@@ -1,19 +1,33 @@
 # ddotlp - Dynamic TLP Power Management
 
-A Linux service that automatically manages TLP power settings based on system activity. It switches between performance mode when the system is active (high CPU usage) and battery saving mode when the system is idle (low CPU usage).
+A simple Linux service that automatically manages TLP power settings based on system load average. It switches between TLP auto mode when the system is active (high load) and TLP battery mode when the system is idle (low load).
 
 **Developed by ddosoft (www.ddosoft.com)**
 
 ## Features
 
-- **Automatic TLP Management**: Switches between `tlp start` (performance) and `tlp bat` (battery) modes
-- **CPU-Based Activity Detection**: Uses CPU usage monitoring to detect system activity
-- **Configurable Idle Timeout**: Default 5 minutes, customizable
-- **Configurable CPU Threshold**: Default 15% CPU usage threshold for activity detection
+- **Automatic TLP Management**: Switches between `tlp start` (auto mode) and `tlp bat` (battery mode)
+- **Load Average Detection**: Uses 1-minute load average from `/proc/loadavg` for stable activity detection
+- **Ultra Simple**: No configuration files - hardcoded sensible defaults
+- **Minimal Resource Usage**: Checks load average once per minute
 - **Systemd Integration**: Runs as a proper Linux system service
-- **Logging**: Comprehensive logging for debugging and monitoring
-- **Signal Handling**: Graceful shutdown and configuration reload
-- **No X11 Dependencies**: Works on headless servers and desktop systems alike
+- **Comprehensive Logging**: Detailed logging for monitoring and debugging
+- **Signal Handling**: Graceful shutdown and service management
+- **No Dependencies**: Works on any Linux system with TLP installed
+
+## How It Works
+
+1. **TLP Auto Mode** (`tlp start`): When 1-minute load average > 0.15, TLP automatically manages power based on AC/battery status
+2. **TLP Battery Mode** (`tlp bat`): When 1-minute load average ≤ 0.15, forces battery-saving settings regardless of power source
+
+The system switches modes immediately based on the most recent 1-minute load average reading, providing responsive power management without artificial delays.
+
+## Hardcoded Settings
+
+- **Load Threshold**: 0.15 (15% of one CPU core)
+- **Check Interval**: 60 seconds (1 minute)
+- **Decision Logic**: Direct comparison with most recent 1-minute load average
+- **Log File**: `/var/log/ddotlp.log`
 
 ## Requirements
 
@@ -146,7 +160,7 @@ Available settings:
 1. **Activity Monitoring**: The service monitors CPU usage by reading `/proc/stat` to detect system activity
 2. **Idle Detection**: When CPU usage stays below the configured threshold for the specified timeout period, the system is considered idle
 3. **TLP Management**:
-   - **Active State**: Executes `sudo tlp start` for performance mode when CPU usage is above threshold
+   - **Active State**: Executes `sudo tlp start` for auto mode when CPU usage is above threshold
    - **Idle State**: Executes `sudo tlp bat` for battery saving mode when CPU usage is low
 4. **State Transitions**: Only switches modes when the state actually changes to avoid unnecessary TLP calls
 
@@ -179,8 +193,8 @@ sudo tail -f /var/log/ddotlp.log
 ### Tuning CPU Threshold
 
 The default CPU threshold is 15%. You may need to adjust this based on your system:
-- **Lower values (5-10%)**: More sensitive, switches to performance mode with light activity
-- **Higher values (20-30%)**: Less sensitive, requires more CPU activity to stay in performance mode
+- **Lower values (5-10%)**: More sensitive, switches to auto mode with light activity
+- **Higher values (20-30%)**: Less sensitive, requires more CPU activity to stay in auto mode
 
 ### Debug Mode
 

@@ -1,6 +1,5 @@
 #include "daemon.h"
 #include "logger.h"
-#include "config.h"
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -47,13 +46,13 @@ bool Daemon::daemonize() {
 
     // Second child continues as daemon
     // Write PID file BEFORE closing file descriptors
-    std::ofstream pidFile(Config::PID_FILE);
+    std::ofstream pidFile("/run/ddotlp.pid");
     if (pidFile.is_open()) {
         pidFile << getpid() << std::endl;
         pidFile.close();
-        Logger::info("PID file written: " + std::string(Config::PID_FILE) + " with PID: " + std::to_string(getpid()));
+        Logger::info("PID file written: /run/ddotlp.pid with PID: " + std::to_string(getpid()));
     } else {
-        Logger::error("Failed to write PID file: " + std::string(Config::PID_FILE));
+        Logger::error("Failed to write PID file: /run/ddotlp.pid");
         return false;
     }
 
@@ -103,8 +102,7 @@ void Daemon::signalHandler(int signal) {
             s_running = false;
             break;
         case SIGHUP:
-            Logger::info("Received SIGHUP, reloading configuration");
-            // TODO: Implement configuration reload
+            Logger::info("Received SIGHUP (configuration reload not supported - using hardcoded settings)");
             break;
         default:
             Logger::warning("Received unknown signal: " + std::to_string(signal));

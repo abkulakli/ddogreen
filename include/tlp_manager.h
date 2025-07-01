@@ -7,10 +7,10 @@ public:
     TLPManager();
     ~TLPManager();
 
-    // Set TLP to performance mode (for active usage)
-    bool setPerformanceMode();
+    // Set TLP to auto mode (for active usage - tlp start)
+    bool setAutoMode();
 
-    // Set TLP to battery saving mode (for idle state)
+    // Set TLP to battery saving mode (for idle state - tlp bat)
     bool setBatteryMode();
 
     // Get current TLP status

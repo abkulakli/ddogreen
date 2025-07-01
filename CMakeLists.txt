@@ -27,11 +27,3 @@ add_executable(ddotlp ${SOURCES})
 # Installation
 install(TARGETS ddotlp DESTINATION /usr/local/bin)
 install(FILES systemd/ddotlp.service DESTINATION /etc/systemd/system)
-install(FILES config/ddotlp.conf DESTINATION /etc/ddotlp RENAME ddotlp.conf)
-install(FILES config/ddotlp-logrotate DESTINATION /etc/logrotate.d RENAME ddotlp)
-
-# Create config directory during installation
-install(DIRECTORY DESTINATION /etc/ddotlp)
-
-# Set permissions for the binary (needs to run as root for TLP commands)
-install(CODE "execute_process(COMMAND chmod +s /usr/local/bin/ddotlp)")
