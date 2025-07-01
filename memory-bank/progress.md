@@ -2,8 +2,8 @@
 
 ## Project Status: COMPLETE ✅
 
-**Version**: 1.0.0  
-**Last Updated**: June 30, 2025  
+**Version**: 1.0.0
+**Last Updated**: June 30, 2025
 **Current State**: Production-ready, fully functional implementation
 
 ## Completed Features
@@ -210,7 +210,7 @@
 
 The project successfully delivers on all core requirements:
 - ✅ Automatic TLP power management based on system activity
-- ✅ Universal Linux compatibility without GUI dependencies  
+- ✅ Universal Linux compatibility without GUI dependencies
 - ✅ Proper system service integration with systemd
 - ✅ Comprehensive logging and monitoring capabilities
 - ✅ Easy installation and configuration

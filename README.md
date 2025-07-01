@@ -2,6 +2,8 @@
 
 A Linux service that automatically manages TLP power settings based on system activity. It switches between performance mode when the system is active (high CPU usage) and battery saving mode when the system is idle (low CPU usage).
 
+**Developed by ddosoft (www.ddosoft.com)**
+
 ## Features
 
 - **Automatic TLP Management**: Switches between `tlp start` (performance) and `tlp bat` (battery) modes

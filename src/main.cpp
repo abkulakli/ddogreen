@@ -1,3 +1,15 @@
+/*
+ * ddotlp - Dynamic TLP Power Management Daemon
+ *
+ * Automatically manages TLP power settings based on system activity
+ *
+ * Copyright (c) 2025 ddosoft (www.ddosoft.com)
+ *
+ * This program automatically switches between TLP performance and battery
+ * modes based on CPU usage monitoring, providing intelligent power management
+ * for Linux systems.
+ */
+
 #include "activity_monitor.h"
 #include "tlp_manager.h"
 #include "daemon.h"
@@ -21,7 +33,8 @@ void printUsage(const char* programName) {
 
 void printVersion() {
     std::cout << "ddotlp version 1.0.0\n"
-              << "Dynamic TLP power management daemon\n";
+              << "Dynamic TLP power management daemon\n"
+              << "Copyright (c) 2025 ddosoft (www.ddosoft.com)\n";
 }
 
 int main(int argc, char* argv[]) {

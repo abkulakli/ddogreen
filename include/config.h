@@ -8,7 +8,7 @@ namespace Config {
     constexpr const char* LOG_FILE = "/var/log/ddotlp.log";
 
     // PID file path
-    constexpr const char* PID_FILE = "/var/run/ddotlp.pid";
+    constexpr const char* PID_FILE = "/run/ddotlp.pid";
 
     // Config file path
     constexpr const char* CONFIG_FILE = "/etc/ddotlp/ddotlp.conf";

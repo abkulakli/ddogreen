@@ -100,13 +100,13 @@ class ActivityMonitor {
 
 ### 1. CPU-Based Activity Detection
 **Decision**: Use `/proc/stat` CPU usage instead of X11 events
-**Rationale**: 
+**Rationale**:
 - Universal compatibility (works without GUI)
 - More representative of actual system activity
 - No external dependencies
 - Works on servers and containers
 
-**Trade-offs**: 
+**Trade-offs**:
 - May not detect user presence without CPU activity
 - Requires tuning of CPU threshold for different systems
 
@@ -117,7 +117,7 @@ class ActivityMonitor {
 - CPU usage calculation requires time intervals
 - Simpler implementation than complex event systems
 
-**Trade-offs**: 
+**Trade-offs**:
 - Not instantaneous response to activity changes
 - Constant low-level CPU usage for monitoring
 
@@ -128,7 +128,7 @@ class ActivityMonitor {
 - Need to capture output for logging
 - Ensures mode changes complete before continuing
 
-**Trade-offs**: 
+**Trade-offs**:
 - Brief blocking during mode switches
 - Simpler error handling and state management
 
@@ -139,7 +139,7 @@ class ActivityMonitor {
 - Improved debugging capability
 - Minimal performance overhead
 
-**Benefits**: 
+**Benefits**:
 - Clear sequence of rapid events
 - Better troubleshooting of timing issues
 

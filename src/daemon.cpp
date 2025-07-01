@@ -46,6 +46,17 @@ bool Daemon::daemonize() {
     }
 
     // Second child continues as daemon
+    // Write PID file BEFORE closing file descriptors
+    std::ofstream pidFile(Config::PID_FILE);
+    if (pidFile.is_open()) {
+        pidFile << getpid() << std::endl;
+        pidFile.close();
+        Logger::info("PID file written: " + std::string(Config::PID_FILE) + " with PID: " + std::to_string(getpid()));
+    } else {
+        Logger::error("Failed to write PID file: " + std::string(Config::PID_FILE));
+        return false;
+    }
+
     // Change working directory to root
     if (chdir("/") < 0) {
         Logger::error("chdir to / failed");
@@ -70,13 +81,6 @@ bool Daemon::daemonize() {
         if (fd > 2) {
             close(fd);
         }
-    }
-
-    // Write PID file
-    std::ofstream pidFile(Config::PID_FILE);
-    if (pidFile.is_open()) {
-        pidFile << getpid() << std::endl;
-        pidFile.close();
     }
 
     Logger::info("Daemon started with PID: " + std::to_string(getpid()));

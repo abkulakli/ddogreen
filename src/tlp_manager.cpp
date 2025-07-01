@@ -23,7 +23,7 @@ bool TLPManager::setPerformanceMode() {
     }
 
     Logger::info("Switching to performance mode (tlp start)");
-    std::string output = executeCommandWithOutput("sudo " + std::string(Config::TLP_START_COMMAND) + " 2>&1");
+    std::string output = executeCommandWithOutput(std::string(Config::TLP_START_COMMAND) + " 2>&1");
 
     if (!output.empty()) {
         std::string cleanedOutput = cleanTLPOutput(output);
@@ -49,7 +49,7 @@ bool TLPManager::setBatteryMode() {
     }
 
     Logger::info("Switching to battery mode (tlp bat)");
-    std::string output = executeCommandWithOutput("sudo " + std::string(Config::TLP_BAT_COMMAND) + " 2>&1");
+    std::string output = executeCommandWithOutput(std::string(Config::TLP_BAT_COMMAND) + " 2>&1");
 
     if (!output.empty()) {
         std::string cleanedOutput = cleanTLPOutput(output);
@@ -70,7 +70,7 @@ bool TLPManager::setBatteryMode() {
 }
 
 std::string TLPManager::getCurrentMode() {
-    std::string output = executeCommandWithOutput("sudo " + std::string(Config::TLP_STATUS_COMMAND));
+    std::string output = executeCommandWithOutput(std::string(Config::TLP_STATUS_COMMAND));
 
     // Parse the output to determine current mode
     if (output.find("TLP_DEFAULT_MODE=AC") != std::string::npos ||
