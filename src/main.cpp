@@ -101,10 +101,10 @@ int main(int argc, char* argv[]) {
     // Set up activity callback
     activityMonitor.setActivityCallback([&tlpManager](bool isActive) {
         if (isActive) {
-            // System is active, switch to TLP AC mode (tlp ac) for maximum performance
-            tlpManager.setACMode();
+            // System is active (1-min load > 15%), switch to TLP auto mode (tlp start)
+            tlpManager.setAutoMode();
         } else {
-            // System is idle, switch to TLP battery mode (tlp bat)
+            // System is idle (5-min load <= 15%), switch to TLP battery mode (tlp bat)
             tlpManager.setBatteryMode();
         }
     });

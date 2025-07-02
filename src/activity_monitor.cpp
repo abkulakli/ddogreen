@@ -31,16 +31,28 @@ bool ActivityMonitor::start() {
 
     // Perform initial load check to set correct mode immediately
     if (m_callback) {
-        double loadAverage = getOneMinuteLoadAverage();
+        auto loadAverages = getLoadAverages();
+        double load1min = loadAverages.first;
+        double load5min = loadAverages.second;
         double absoluteThreshold = m_loadThreshold * m_coreCount;
-        m_isActive = (loadAverage > absoluteThreshold);
         
-        double loadPercentage = (loadAverage / m_coreCount) * 100;
+        // Apply dual-threshold logic: 1-min > 15% = AC, 5-min < 15% = BAT
+        if (load1min > absoluteThreshold) {
+            m_isActive = true;
+        } else if (load5min <= absoluteThreshold) {
+            m_isActive = false;
+        }
+        // If 1-min <= 15% AND 5-min > 15%, maintain current state (no change)
+        
+        double load1minPercentage = (load1min / m_coreCount) * 100;
+        double load5minPercentage = (load5min / m_coreCount) * 100;
+        Logger::info("Initial state: 1-min load: " + std::to_string(load1min) +
+                    " (" + std::to_string(load1minPercentage) + "% avg per core), " +
+                    "5-min load: " + std::to_string(load5min) +
+                    " (" + std::to_string(load5minPercentage) + "% avg per core)");
         Logger::info(m_isActive ?
-            "Initial state: System active (load: " + std::to_string(loadAverage) +
-            " = " + std::to_string(loadPercentage) + "% avg per core) - switching to TLP AC mode" :
-            "Initial state: System idle (load: " + std::to_string(loadAverage) +
-            " = " + std::to_string(loadPercentage) + "% avg per core) - switching to TLP battery mode");
+            "System active - switching to TLP AC mode" :
+            "System idle - switching to TLP battery mode");
         m_callback(m_isActive);
     }
 
@@ -48,7 +60,7 @@ bool ActivityMonitor::start() {
     std::thread monitorThread(&ActivityMonitor::monitorLoop, this);
     monitorThread.detach();
 
-    Logger::info("Activity monitor started (1-minute load average monitoring)");
+    Logger::info("Activity monitor started (dual-threshold load monitoring: 1-min > 15% = AC, 5-min < 15% = BAT)");
     return true;
 }
 
@@ -72,25 +84,25 @@ bool ActivityMonitor::isActive() const {
     return m_isActive;
 }
 
-double ActivityMonitor::getOneMinuteLoadAverage() {
+std::pair<double, double> ActivityMonitor::getLoadAverages() {
     std::ifstream file("/proc/loadavg");
     if (!file.is_open()) {
         Logger::error("Could not open /proc/loadavg");
-        return 0.0;
+        return {0.0, 0.0};
     }
 
     std::string line;
     if (!std::getline(file, line)) {
         Logger::error("Could not read from /proc/loadavg");
-        return 0.0;
+        return {0.0, 0.0};
     }
 
-    // Parse the first value (1-minute load average)
+    // Parse the first two values (1-minute and 5-minute load averages)
     std::istringstream iss(line);
-    double loadAverage;
-    iss >> loadAverage;
+    double load1min, load5min;
+    iss >> load1min >> load5min;
 
-    return loadAverage;
+    return {load1min, load5min};
 }
 
 int ActivityMonitor::getCpuCoreCount() {
@@ -122,34 +134,50 @@ void ActivityMonitor::monitorLoop() {
     while (m_running) {
         auto now = std::chrono::steady_clock::now();
 
-        // Check load average every 60 seconds for minimal resource usage
-        if (std::chrono::duration_cast<std::chrono::seconds>(now - m_lastLoadCheckTime).count() >= 60) {
-            double loadAverage = getOneMinuteLoadAverage();
+        // Check load averages every 30 seconds as requested
+        if (std::chrono::duration_cast<std::chrono::seconds>(now - m_lastLoadCheckTime).count() >= 30) {
+            auto loadAverages = getLoadAverages();
+            double load1min = loadAverages.first;
+            double load5min = loadAverages.second;
             m_lastLoadCheckTime = now;
 
             // Calculate the actual threshold based on core count
             double absoluteThreshold = m_loadThreshold * m_coreCount;
 
-            Logger::debug("1-minute load average: " + std::to_string(loadAverage) +
+            Logger::debug("Load averages - 1-min: " + std::to_string(load1min) +
+                         ", 5-min: " + std::to_string(load5min) +
                          " (threshold: " + std::to_string(absoluteThreshold) +
                          " = " + std::to_string(m_loadThreshold * 100) + "% of " + std::to_string(m_coreCount) + " cores)");
 
-            // Determine activity state: compare load average to absolute threshold
+            // Determine activity state using dual-threshold logic
             bool wasActive = m_isActive;
-            m_isActive = (loadAverage > absoluteThreshold);
+            bool shouldSwitchToActive = (load1min > absoluteThreshold);
+            bool shouldSwitchToIdle = (load5min <= absoluteThreshold);
+
+            // Apply switching logic
+            if (shouldSwitchToActive) {
+                m_isActive = true;
+            } else if (shouldSwitchToIdle) {
+                m_isActive = false;
+            }
+            // If neither condition is met (1-min <= 15% AND 5-min > 15%), maintain current state
 
             // If activity state changed, notify callback
             if (wasActive != m_isActive && m_callback) {
-                double loadPercentage = (loadAverage / m_coreCount) * 100;
-                Logger::info(m_isActive ?
-                    "System became active (load: " + std::to_string(loadAverage) +
-                    " = " + std::to_string(loadPercentage) + "% avg per core) - switching to TLP AC mode" :
-                    "System became idle (load: " + std::to_string(loadAverage) +
-                    " = " + std::to_string(loadPercentage) + "% avg per core) - switching to TLP battery mode");
+                double load1minPercentage = (load1min / m_coreCount) * 100;
+                double load5minPercentage = (load5min / m_coreCount) * 100;
+                
+                if (m_isActive) {
+                    Logger::info("System became active (1-min load: " + std::to_string(load1min) +
+                                " = " + std::to_string(load1minPercentage) + "% avg per core > 15%) - switching to TLP AC mode");
+                } else {
+                    Logger::info("System became idle (5-min load: " + std::to_string(load5min) +
+                                " = " + std::to_string(load5minPercentage) + "% avg per core <= 15%) - switching to TLP battery mode");
+                }
                 m_callback(m_isActive);
             }
         }
 
-        std::this_thread::sleep_for(std::chrono::seconds(60));
+        std::this_thread::sleep_for(std::chrono::seconds(30));
     }
 }
