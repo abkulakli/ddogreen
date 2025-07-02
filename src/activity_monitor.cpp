@@ -29,6 +29,21 @@ bool ActivityMonitor::start() {
     m_running = true;
     m_lastLoadCheckTime = std::chrono::steady_clock::now();
 
+    // Perform initial load check to set correct mode immediately
+    if (m_callback) {
+        double loadAverage = getOneMinuteLoadAverage();
+        double absoluteThreshold = m_loadThreshold * m_coreCount;
+        m_isActive = (loadAverage > absoluteThreshold);
+        
+        double loadPercentage = (loadAverage / m_coreCount) * 100;
+        Logger::info(m_isActive ?
+            "Initial state: System active (load: " + std::to_string(loadAverage) +
+            " = " + std::to_string(loadPercentage) + "% avg per core) - switching to TLP AC mode" :
+            "Initial state: System idle (load: " + std::to_string(loadAverage) +
+            " = " + std::to_string(loadPercentage) + "% avg per core) - switching to TLP battery mode");
+        m_callback(m_isActive);
+    }
+
     // Start monitoring in a separate thread
     std::thread monitorThread(&ActivityMonitor::monitorLoop, this);
     monitorThread.detach();
@@ -95,7 +110,6 @@ int ActivityMonitor::getCpuCoreCount() {
     }
 
     if (coreCount > 0) {
-        Logger::info("CPU cores detected via /proc/cpuinfo: " + std::to_string(coreCount));
         return coreCount;
     }
 
@@ -129,7 +143,7 @@ void ActivityMonitor::monitorLoop() {
                 double loadPercentage = (loadAverage / m_coreCount) * 100;
                 Logger::info(m_isActive ?
                     "System became active (load: " + std::to_string(loadAverage) +
-                    " = " + std::to_string(loadPercentage) + "% avg per core) - switching to TLP auto mode" :
+                    " = " + std::to_string(loadPercentage) + "% avg per core) - switching to TLP AC mode" :
                     "System became idle (load: " + std::to_string(loadAverage) +
                     " = " + std::to_string(loadPercentage) + "% avg per core) - switching to TLP battery mode");
                 m_callback(m_isActive);

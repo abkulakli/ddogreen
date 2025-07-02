@@ -27,7 +27,7 @@ void printUsage(const char* programName) {
               << "  -h, --help        Show this help message\n"
               << "  -v, --version     Show version information\n"
               << "\n"
-              << "Automatically switches between TLP auto and battery modes based on system load.\n";
+              << "Automatically switches between TLP AC and battery modes based on system load.\n";
 }
 
 void printVersion() {
@@ -69,12 +69,6 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    // Initialize logger first
-    Logger::init();
-
-    // Use hardcoded default values for simplicity
-    const double loadThreshold = 0.15; // 15% load average (0.15 load)
-
     // Check if running as root
     if (geteuid() != 0) {
         std::cerr << "This program must be run as root to execute TLP commands." << std::endl;
@@ -104,14 +98,11 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // Set hardcoded values
-    activityMonitor.setLoadThreshold(loadThreshold);
-
     // Set up activity callback
     activityMonitor.setActivityCallback([&tlpManager](bool isActive) {
         if (isActive) {
-            // System is active, switch to TLP auto mode (tlp start)
-            tlpManager.setAutoMode();
+            // System is active, switch to TLP AC mode (tlp ac) for maximum performance
+            tlpManager.setACMode();
         } else {
             // System is idle, switch to TLP battery mode (tlp bat)
             tlpManager.setBatteryMode();

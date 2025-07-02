@@ -8,9 +8,7 @@
 #include <array>
 
 TLPManager::TLPManager() : m_currentMode("unknown") {
-    if (!isTLPAvailable()) {
-        Logger::warning("TLP is not available on this system");
-    }
+    // TLP availability will be checked by the caller
 }
 
 TLPManager::~TLPManager() {
@@ -38,6 +36,32 @@ bool TLPManager::setAutoMode() {
         return true;
     } else {
         Logger::error("Failed to switch to auto mode");
+        return false;
+    }
+}
+
+bool TLPManager::setACMode() {
+    if (m_currentMode == "ac") {
+        return true;  // Already in AC mode
+    }
+
+    Logger::info("Switching to AC mode (tlp ac)");
+    std::string output = executeCommandWithOutput("tlp ac 2>&1");
+
+    if (!output.empty()) {
+        std::string cleanedOutput = cleanTLPOutput(output);
+        if (!cleanedOutput.empty()) {
+            Logger::info("TLP output: " + cleanedOutput);
+        }
+    }
+
+    // Check if command was successful (TLP doesn't always return proper exit codes)
+    if (output.find("Error") == std::string::npos && output.find("error") == std::string::npos) {
+        m_currentMode = "ac";
+        Logger::info("Successfully switched to AC mode");
+        return true;
+    } else {
+        Logger::error("Failed to switch to AC mode");
         return false;
     }
 }
