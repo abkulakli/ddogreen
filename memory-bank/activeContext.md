@@ -1,9 +1,35 @@
 # Active Context - ddotlp
 
 ## Current Work Focus
-**Project Status**: COMPLETE - Fully simplified and production-ready
+**Project Status**: UPDATED - Implemented dual-threshold load monitoring
 **Last Updated**: July 2, 2025
-**Current Priority**: All development complete, project ready for deployment
+**Current Priority**: Enhanced load monitoring with 30-second checks and dual-threshold logic
+
+## Latest Update: Dual-Threshold Load Monitoring ✅
+
+### New Load Monitoring Algorithm
+- **Check Interval**: Changed from 60 seconds to 30 seconds for more responsive monitoring
+- **Dual-Threshold Logic**: 
+  - **1-minute load > 15%** → Switch to TLP AC mode (`tlp ac`)
+  - **5-minute load ≤ 15%** → Switch to TLP battery mode (`tlp bat`)
+  - **Overlap zone** (1-min ≤ 15% AND 5-min > 15%) → Maintain current state
+- **Load Average Source**: Reads both 1-minute and 5-minute values from `/proc/loadavg`
+- **Immediate Response**: Mode switches immediately when thresholds are met
+
+### Implementation Details
+- **Load Average Parsing**: Modified to read both 1-min and 5-min from `/proc/loadavg`
+- **TLP Mode Selection**: Uses `setACMode()` and `setBatteryMode()` (not auto mode)
+- **Dynamic Threshold**: Calculates absolute load threshold as 15% × core count
+- **Enhanced Logging**: Shows both 1-min and 5-min load averages with percentages
+- **State Machine**: Intelligent switching logic prevents mode flapping
+
+### Logging Format
+```
+[2025-07-02 20:45:30.123] [INFO] Initial state: 1-min load: 1.8 (22.5% avg per core), 5-min load: 0.9 (11.2% avg per core)
+[2025-07-02 20:45:30.124] [INFO] System active - switching to TLP AC mode
+[2025-07-02 20:45:30.125] [INFO] Activity monitor started (dual-threshold load monitoring: 1-min > 15% = AC, 5-min < 15% = BAT)
+[2025-07-02 20:46:00.456] [INFO] System became idle (5-min load: 1.1 = 13.7% avg per core <= 15%) - switching to TLP battery mode
+```
 
 ## Recent Major Refactoring (Latest)
 
@@ -110,3 +136,11 @@
 - **Documentation**: ✅ Updated to reflect simplified design
 - **Deployment**: ✅ Single binary with systemd service integration
 - **Testing**: ✅ Verified load average monitoring and TLP integration
+
+### Code Cleanup ✅ (Latest)
+- **Removed Unused Method**: Deleted `setAutoMode()` from TLPManager (header and implementation)
+- **Updated Comments**: Fixed header comment to reflect load monitoring (not CPU usage)
+- **Optimized Main Loop**: Changed sleep from 1 second to 30 seconds for efficiency
+- **Mode Consistency**: Updated getCurrentMode() to use "ac" instead of "auto" internally
+- **File Cleanup**: Removed empty `test_parsing.cpp` and `main.cpp.backup` files
+- **Clean Build**: All changes compile successfully with no warnings

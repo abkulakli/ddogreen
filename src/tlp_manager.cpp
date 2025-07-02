@@ -14,32 +14,6 @@ TLPManager::TLPManager() : m_currentMode("unknown") {
 TLPManager::~TLPManager() {
 }
 
-bool TLPManager::setAutoMode() {
-    if (m_currentMode == "auto") {
-        return true;  // Already in auto mode
-    }
-
-    Logger::info("Switching to auto mode (tlp start)");
-    std::string output = executeCommandWithOutput("tlp start 2>&1");
-
-    if (!output.empty()) {
-        std::string cleanedOutput = cleanTLPOutput(output);
-        if (!cleanedOutput.empty()) {
-            Logger::info("TLP output: " + cleanedOutput);
-        }
-    }
-
-    // Check if command was successful (TLP doesn't always return proper exit codes)
-    if (output.find("Error") == std::string::npos && output.find("error") == std::string::npos) {
-        m_currentMode = "auto";
-        Logger::info("Successfully switched to auto mode");
-        return true;
-    } else {
-        Logger::error("Failed to switch to auto mode");
-        return false;
-    }
-}
-
 bool TLPManager::setACMode() {
     if (m_currentMode == "ac") {
         return true;  // Already in AC mode
@@ -119,7 +93,7 @@ std::string TLPManager::getCurrentMode() {
                     std::string mode = modeValue.substr(start, end - start);
 
                     if (mode == "AC") {
-                        m_currentMode = "auto";
+                        m_currentMode = "ac";
                     } else if (mode == "battery") {
                         m_currentMode = "battery";
                     }
@@ -131,7 +105,7 @@ std::string TLPManager::getCurrentMode() {
     // Fallback: check for older TLP_DEFAULT_MODE format
     if (m_currentMode == "unknown") {
         if (output.find("TLP_DEFAULT_MODE=AC") != std::string::npos) {
-            m_currentMode = "auto";
+            m_currentMode = "ac";
         } else if (output.find("TLP_DEFAULT_MODE=BAT") != std::string::npos) {
             m_currentMode = "battery";
         }

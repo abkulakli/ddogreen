@@ -1,13 +1,13 @@
 /*
  * ddotlp - Dynamic TLP Power Management Daemon
  *
- * Automatically manages TLP power settings based on system activity
+ * Automatically manages TLP power settings based on system load monitoring
  *
  * Copyright (c) 2025 ddosoft (www.ddosoft.com)
  *
- * This program automatically switches between TLP performance and battery
- * modes based on CPU usage monitoring, providing intelligent power management
- * for Linux systems.
+ * This program automatically switches between TLP AC and battery modes
+ * based on 1-minute and 5-minute load average monitoring, providing
+ * intelligent power management for Linux systems.
  */
 
 #include "activity_monitor.h"
@@ -101,8 +101,8 @@ int main(int argc, char* argv[]) {
     // Set up activity callback
     activityMonitor.setActivityCallback([&tlpManager](bool isActive) {
         if (isActive) {
-            // System is active (1-min load > 15%), switch to TLP auto mode (tlp start)
-            tlpManager.setAutoMode();
+            // System is active (1-min load > 15%), switch to TLP AC mode (tlp ac)
+            tlpManager.setACMode();
         } else {
             // System is idle (5-min load <= 15%), switch to TLP battery mode (tlp bat)
             tlpManager.setBatteryMode();
@@ -117,9 +117,9 @@ int main(int argc, char* argv[]) {
 
     Logger::info("ddotlp service started successfully");
 
-    // Main loop
+    // Main loop - just keep the process alive while monitoring runs in background
     while (Daemon::shouldRun()) {
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::seconds(30));
     }
 
     // Cleanup

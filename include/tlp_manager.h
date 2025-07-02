@@ -7,9 +7,6 @@ public:
     TLPManager();
     ~TLPManager();
 
-    // Set TLP to auto mode (for active usage - tlp start)
-    bool setAutoMode();
-
     // Set TLP to AC mode (for maximum performance - tlp ac)
     bool setACMode();
 
