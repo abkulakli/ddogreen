@@ -9,8 +9,12 @@
 ActivityMonitor::ActivityMonitor()
     : m_isActive(false)
     , m_running(false)
-    , m_loadThreshold(0.15)  // 15% load average threshold
+    , m_loadThreshold(0.15)  // 15% load per core threshold
+    , m_coreCount(getCpuCoreCount())
     , m_callback(nullptr) {
+    Logger::info("Detected " + std::to_string(m_coreCount) + " CPU core(s)");
+    Logger::info("Load threshold: " + std::to_string(m_loadThreshold) + " (" + std::to_string(m_loadThreshold * 100) + "% per core)");
+    Logger::info("Absolute load threshold: " + std::to_string(m_loadThreshold * m_coreCount));
 }
 
 ActivityMonitor::~ActivityMonitor() {
@@ -44,7 +48,9 @@ void ActivityMonitor::setActivityCallback(ActivityCallback callback) {
 
 void ActivityMonitor::setLoadThreshold(double threshold) {
     m_loadThreshold = threshold;
-    Logger::info("Load threshold set to " + std::to_string(threshold) + " (1-minute load average)");
+    double absoluteThreshold = threshold * m_coreCount;
+    Logger::info("Load threshold set to " + std::to_string(threshold) + " (" + std::to_string(threshold * 100) + "% per core)");
+    Logger::info("Absolute load threshold: " + std::to_string(absoluteThreshold) + " (for " + std::to_string(m_coreCount) + " cores)");
 }
 
 bool ActivityMonitor::isActive() const {
@@ -72,6 +78,32 @@ double ActivityMonitor::getOneMinuteLoadAverage() {
     return loadAverage;
 }
 
+int ActivityMonitor::getCpuCoreCount() {
+    // Read /proc/cpuinfo to count processor entries
+    std::ifstream cpuinfo("/proc/cpuinfo");
+    if (!cpuinfo.is_open()) {
+        Logger::warning("Could not open /proc/cpuinfo, defaulting to 1 core");
+        return 1;
+    }
+
+    int coreCount = 0;
+    std::string line;
+    while (std::getline(cpuinfo, line)) {
+        if (line.find("processor") == 0) {
+            coreCount++;
+        }
+    }
+
+    if (coreCount > 0) {
+        Logger::info("CPU cores detected via /proc/cpuinfo: " + std::to_string(coreCount));
+        return coreCount;
+    }
+
+    // Final fallback if no processors found in /proc/cpuinfo
+    Logger::warning("No processors found in /proc/cpuinfo, defaulting to 1 core");
+    return 1;
+}
+
 void ActivityMonitor::monitorLoop() {
     while (m_running) {
         auto now = std::chrono::steady_clock::now();
@@ -81,16 +113,25 @@ void ActivityMonitor::monitorLoop() {
             double loadAverage = getOneMinuteLoadAverage();
             m_lastLoadCheckTime = now;
 
-            Logger::debug("1-minute load average: " + std::to_string(loadAverage) + " (threshold: " + std::to_string(m_loadThreshold) + ")");
+            // Calculate the actual threshold based on core count
+            double absoluteThreshold = m_loadThreshold * m_coreCount;
 
-            // Determine activity state directly from current load average
+            Logger::debug("1-minute load average: " + std::to_string(loadAverage) +
+                         " (threshold: " + std::to_string(absoluteThreshold) +
+                         " = " + std::to_string(m_loadThreshold * 100) + "% of " + std::to_string(m_coreCount) + " cores)");
+
+            // Determine activity state: compare load average to absolute threshold
             bool wasActive = m_isActive;
-            m_isActive = (loadAverage > m_loadThreshold);
+            m_isActive = (loadAverage > absoluteThreshold);
 
             // If activity state changed, notify callback
             if (wasActive != m_isActive && m_callback) {
-                Logger::info(m_isActive ? "System became active (load: " + std::to_string(loadAverage) + ") - switching to TLP auto mode" :
-                                        "System became idle (load: " + std::to_string(loadAverage) + ") - switching to TLP battery mode");
+                double loadPercentage = (loadAverage / m_coreCount) * 100;
+                Logger::info(m_isActive ?
+                    "System became active (load: " + std::to_string(loadAverage) +
+                    " = " + std::to_string(loadPercentage) + "% avg per core) - switching to TLP auto mode" :
+                    "System became idle (load: " + std::to_string(loadAverage) +
+                    " = " + std::to_string(loadPercentage) + "% avg per core) - switching to TLP battery mode");
                 m_callback(m_isActive);
             }
         }

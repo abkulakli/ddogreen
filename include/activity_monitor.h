@@ -29,11 +29,13 @@ public:
 
 private:
     double getOneMinuteLoadAverage();  // Simple load average from /proc/loadavg
+    int getCpuCoreCount();  // Get CPU core count using /proc/cpuinfo
     void monitorLoop();
 
     bool m_isActive;
     bool m_running;
-    double m_loadThreshold;
+    double m_loadThreshold;  // Threshold as percentage (0.15 = 15%)
+    int m_coreCount;  // Number of CPU cores
     ActivityCallback m_callback;
 
     std::chrono::steady_clock::time_point m_lastLoadCheckTime;

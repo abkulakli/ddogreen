@@ -1,5 +1,27 @@
 /*
- * ddotlp - Dynamic TLP Power Management Daemon
+ * ddotlp - Dynamicvoid printUvoid printUsage(const char* programName) {
+    std::cout << "Usage: " << programName << " [OPTIONS]\n"
+              << "Options:\n"
+              << "  -d, --daemon      Run as daemon\n"
+              << "  -h, --help        Show this help message\n"
+              << "  -v, --version     Show version information\n"
+              << "\n"
+              << "Hardcoded settings:\n"
+              << "  - Load threshold: 15% per CPU core (auto-detected from /proc/cpuinfo)\n"
+              << "  - Check interval: 60 seconds (1 minute)\n"
+              << "  - Decision based on: Most recent 1-minute load average vs core count\n";
+}har* programName) {
+    std::cout << "Usage: " << programName << " [OPTIONS]\n"
+              << "Options:\n"
+              << "  -d, --daemon      Run as daemon\n"
+              << "  -h, --help        Show this help message\n"
+              << "  -v, --version     Show version information\n"
+              << "\n"
+              << "Hardcoded settings:\n"
+              << "  - Load threshold: 15% per CPU core (auto-detected via /proc/cpuinfo)\n"
+              << "  - Check interval: 60 seconds (1 minute)\n"
+              << "  - Decision based on: Most recent 1-minute load average vs core count\n";
+}anagement Daemon
  *
  * Automatically manages TLP power settings based on system activity
  *
@@ -27,7 +49,10 @@ void printUsage(const char* programName) {
               << "  -h, --help        Show this help message\n"
               << "  -v, --version     Show version information\n"
               << "\n"
-              << "Automatically switches between TLP auto and battery modes based on system load.\n";
+              << "Hardcoded settings:\n"
+              << "  - Load threshold: 15%\n"
+              << "  - Check interval: 1 minute\n"
+              << "  - Decision based on: 1-minute load average\n";
 }
 
 void printVersion() {

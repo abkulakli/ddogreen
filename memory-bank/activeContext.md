@@ -2,7 +2,7 @@
 
 ## Current Work Focus
 **Project Status**: COMPLETE - Fully simplified and production-ready
-**Last Updated**: January 15, 2025
+**Last Updated**: July 2, 2025
 **Current Priority**: All development complete, project ready for deployment
 
 ## Recent Major Refactoring (Latest)
@@ -36,28 +36,41 @@
 - **Signal Handling**: Updated SIGHUP handling to reflect no-config design
 - **Main Simplification**: Removed all config-related command-line options and parsing
 
+### Final User-Facing Text Simplification ✅ (Latest Update)
+- **Help Output**: Simplified help text to remove developer jargon like "Hardcoded settings"
+- **Single Sentence Summary**: Help now shows "Automatically switches between TLP auto and battery modes based on system load"
+- **README Cleanup**: Changed "hardcoded sensible defaults" to "works out of the box with sensible defaults"
+- **Settings Section**: Renamed "Hardcoded Settings" to simply "Settings" in documentation
+- **User-Friendly Language**: All user-facing text now uses clear, non-technical language
+
 ## Current Implementation Details
 
-### Activity Monitoring Approach
+### Implementation Details
 - **Load Average Source**: Reads 1-minute load average directly from `/proc/loadavg`
+- **Core Count Detection**: Reads `/proc/cpuinfo` to count processor entries (no external commands)
+- **Dynamic Threshold**: Calculates absolute load threshold as 15% × core count
+- **Decision Logic**: Load average > (0.15 × cores) = active; load average ≤ (0.15 × cores) = idle
 - **Check Frequency**: Every 60 seconds for minimal system impact
-- **Decision Logic**: Direct comparison - if load > 0.15, system is active; if load ≤ 0.15, system is idle
 - **Immediate Response**: Mode switches immediately based on current load average (no idle timeout)
-- **No Configuration**: Load threshold (0.15) hardcoded for reliability and simplicity
+- **No External Dependencies**: Uses only `/proc` filesystem, completely self-contained
 
 ### Logging Format
 ```
-[2025-01-15 14:23:45.123] [INFO] 1-minute load average: 0.23 (threshold: 0.15)
-[2025-01-15 14:23:45.124] [INFO] System became active (load: 0.23) - switching to TLP auto mode
-[2025-01-15 14:23:45.125] [INFO] Switching to auto mode (tlp start)
+[2025-01-15 14:23:45.123] [INFO] Detected 8 CPU core(s)
+[2025-01-15 14:23:45.124] [INFO] Load threshold: 0.15 (15% per core)
+[2025-01-15 14:23:45.125] [INFO] Absolute load threshold: 1.2 (for 8 cores)
+[2025-01-15 14:23:45.126] [INFO] 1-minute load average: 1.8 (threshold: 1.2 = 15% of 8 cores)
+[2025-01-15 14:23:45.127] [INFO] System became active (load: 1.8 = 22.5% avg per core) - switching to TLP auto mode
+[2025-01-15 14:23:45.128] [INFO] Switching to auto mode (tlp start)
 [2025-01-15 14:23:45.456] [INFO] TLP output: TLP started in AC mode (auto).
 [2025-01-15 14:23:45.457] [INFO] Successfully switched to auto mode
 ```
 
-### Hardcoded Settings (No Configuration)
-- `LOAD_THRESHOLD`: 0.15 (15% of one CPU core)
+### Settings
+- `LOAD_THRESHOLD_PERCENT`: 0.15 (15% per CPU core)
 - `CHECK_INTERVAL`: 60 seconds (1 minute)
 - `LOG_FILE`: `/var/log/ddotlp.log`
+- `CORE_COUNT`: Auto-detected using `nproc` command
 
 ## Project Status: COMPLETE ✅
 

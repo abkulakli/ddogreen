@@ -1,4 +1,9 @@
-# ddotlp - Dynamic TLP Power Management
+# ddotlp - Dynami## How It Works
+
+1. **TLP Auto Mode** (`tlp start`): When system load > 15%, TLP automatically manages power based on AC/battery status
+2. **TLP Battery Mode** (`tlp bat`): When system load ≤ 15%, forces battery-saving settings regardless of power source
+
+The system automatically detects your CPU core count and scales the 15% threshold accordingly.Power Management
 
 A simple Linux service that automatically manages TLP power settings based on system load average. It switches between TLP auto mode when the system is active (high load) and TLP battery mode when the system is idle (low load).
 
@@ -8,7 +13,7 @@ A simple Linux service that automatically manages TLP power settings based on sy
 
 - **Automatic TLP Management**: Switches between `tlp start` (auto mode) and `tlp bat` (battery mode)
 - **Load Average Detection**: Uses 1-minute load average from `/proc/loadavg` for stable activity detection
-- **Ultra Simple**: No configuration files - hardcoded sensible defaults
+- **Ultra Simple**: No configuration files - works out of the box with sensible defaults
 - **Minimal Resource Usage**: Checks load average once per minute
 - **Systemd Integration**: Runs as a proper Linux system service
 - **Comprehensive Logging**: Detailed logging for monitoring and debugging
@@ -17,25 +22,25 @@ A simple Linux service that automatically manages TLP power settings based on sy
 
 ## How It Works
 
-1. **TLP Auto Mode** (`tlp start`): When 1-minute load average > 0.15, TLP automatically manages power based on AC/battery status
-2. **TLP Battery Mode** (`tlp bat`): When 1-minute load average ≤ 0.15, forces battery-saving settings regardless of power source
+1. **TLP Auto Mode** (`tlp start`): When 1-minute load average > 15% of total CPU capacity, TLP automatically manages power based on AC/battery status
+2. **TLP Battery Mode** (`tlp bat`): When 1-minute load average ≤ 15% of total CPU capacity, forces battery-saving settings regardless of power source
 
-The system switches modes immediately based on the most recent 1-minute load average reading, providing responsive power management without artificial delays.
+The system automatically detects CPU core count by reading `/proc/cpuinfo` and calculates the appropriate load threshold. For example, on a 4-core system, the threshold is 0.6 (4 × 0.15), and on an 8-core system, it's 1.2 (8 × 0.15).
 
-## Hardcoded Settings
+## Settings
 
-- **Load Threshold**: 0.15 (15% of one CPU core)
-- **Check Interval**: 60 seconds (1 minute)
-- **Decision Logic**: Direct comparison with most recent 1-minute load average
-- **Log File**: `/var/log/ddotlp.log`
+- **Load threshold**: 15% (automatically scaled for system's CPU core count)
+- **Check interval**: 1 minute
+- **Decision logic**: Based on 1-minute load average
+- **Log file**: `/var/log/ddotlp.log`
 
 ## Requirements
 
-- Linux system
+- Linux system with `/proc` filesystem
 - TLP (ThinkPad power management tool)
 - CMake 3.16 or higher
 - C++17 compatible compiler
-- Access to `/proc/stat` for CPU monitoring
+- Access to `/proc/loadavg` and `/proc/cpuinfo` for system monitoring
 
 ## Installation
 
@@ -44,13 +49,15 @@ The system switches modes immediately based on the most recent 1-minute load ave
 Install required packages on Ubuntu/Debian:
 ```bash
 sudo apt update
-sudo apt install build-essential cmake tlp
+sudo apt install build-essential cmake tlp coreutils
 ```
 
 Install required packages on Fedora/RHEL:
 ```bash
-sudo dnf install gcc-c++ cmake tlp
+sudo dnf install gcc-c++ cmake tlp coreutils
 ```
+
+**Note**: `coreutils` is typically pre-installed on all Linux distributions, but the daemon will automatically fall back to reading `/proc/cpuinfo` if `nproc` is not available.
 
 ### Build and Install
 
