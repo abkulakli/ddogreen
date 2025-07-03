@@ -28,7 +28,7 @@ public:
     bool isActive() const;
 
 private:
-    std::pair<double, double> getLoadAverages();  // Get 1-min and 5-min load averages from /proc/loadavg
+    std::tuple<double, double, double> getLoadAverages();  // Get 1-min, 5-min, and 15-min load averages from /proc/loadavg
     int getCpuCoreCount();  // Get CPU core count using /proc/cpuinfo
     void monitorLoop();
 

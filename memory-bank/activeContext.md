@@ -1,34 +1,35 @@
 # Active Context - ddotlp
 
 ## Current Work Focus
-**Project Status**: UPDATED - Implemented dual-threshold load monitoring
-**Last Updated**: July 2, 2025
-**Current Priority**: Enhanced load monitoring with 30-second checks and dual-threshold logic
+**Project Status**: UPDATED - Enhanced triple-threshold load monitoring
+**Last Updated**: July 3, 2025
+**Current Priority**: Enhanced load monitoring with 30-second checks and triple-threshold logic
 
-## Latest Update: Dual-Threshold Load Monitoring ✅
+## Latest Update: Triple-Threshold Load Monitoring ✅
 
-### New Load Monitoring Algorithm
-- **Check Interval**: Changed from 60 seconds to 30 seconds for more responsive monitoring
-- **Dual-Threshold Logic**: 
+### Enhanced Load Monitoring Algorithm
+- **Check Interval**: 30 seconds for responsive monitoring
+- **Triple-Threshold Logic**: 
   - **1-minute load > 15%** → Switch to TLP AC mode (`tlp ac`)
-  - **5-minute load ≤ 15%** → Switch to TLP battery mode (`tlp bat`)
-  - **Overlap zone** (1-min ≤ 15% AND 5-min > 15%) → Maintain current state
-- **Load Average Source**: Reads both 1-minute and 5-minute values from `/proc/loadavg`
-- **Immediate Response**: Mode switches immediately when thresholds are met
+  - **Both 5-minute AND 15-minute load ≤ 15%** → Switch to TLP battery mode (`tlp bat`)
+  - **Overlap zone** (1-min ≤ 15% AND either 5-min > 15% OR 15-min > 15%) → Maintain current state
+- **Load Average Source**: Reads 1-minute, 5-minute, and 15-minute values from `/proc/loadavg`
+- **Conservative Battery Switch**: Requires both medium-term (5-min) and long-term (15-min) low load
 
 ### Implementation Details
-- **Load Average Parsing**: Modified to read both 1-min and 5-min from `/proc/loadavg`
+- **Load Average Parsing**: Modified to read 1-min, 5-min, and 15-min from `/proc/loadavg`
 - **TLP Mode Selection**: Uses `setACMode()` and `setBatteryMode()` (not auto mode)
 - **Dynamic Threshold**: Calculates absolute load threshold as 15% × core count
-- **Enhanced Logging**: Shows both 1-min and 5-min load averages with percentages
+- **Enhanced Logging**: Shows 1-min, 5-min, and 15-min load averages with percentages
 - **State Machine**: Intelligent switching logic prevents mode flapping
+- **Conservative Approach**: Battery mode only when system is idle across multiple time scales
 
 ### Logging Format
 ```
-[2025-07-02 20:45:30.123] [INFO] Initial state: 1-min load: 1.8 (22.5% avg per core), 5-min load: 0.9 (11.2% avg per core)
-[2025-07-02 20:45:30.124] [INFO] System active - switching to TLP AC mode
-[2025-07-02 20:45:30.125] [INFO] Activity monitor started (dual-threshold load monitoring: 1-min > 15% = AC, 5-min < 15% = BAT)
-[2025-07-02 20:46:00.456] [INFO] System became idle (5-min load: 1.1 = 13.7% avg per core <= 15%) - switching to TLP battery mode
+[2025-07-03 20:45:30.123] [INFO] Initial state: 1-min load: 1.8 (22.5% avg per core), 5-min load: 0.9 (11.2% avg per core), 15-min load: 0.7 (8.8% avg per core)
+[2025-07-03 20:45:30.124] [INFO] System active - switching to TLP AC mode
+[2025-07-03 20:45:30.125] [INFO] Activity monitor started (dual-threshold load monitoring: 1-min > 15% = AC, both 5-min AND 15-min <= 15% = BAT)
+[2025-07-03 20:46:00.456] [INFO] System became idle (5-min load: 1.1 = 13.7% avg per core <= 15% AND 15-min load: 0.8 = 10.0% avg per core <= 15%) - switching to TLP battery mode
 ```
 
 ## Recent Major Refactoring (Latest)
