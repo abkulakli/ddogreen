@@ -38,7 +38,7 @@ bool ActivityMonitor::start() {
         double load15min = std::get<2>(loadAverages);
         double absoluteThreshold = m_loadThreshold * m_coreCount;
         
-        // Apply dual-threshold logic: 1-min > 15% = AC, both 5-min AND 15-min < 15% = BAT
+        // Apply threshold logic: 1-min > 15% = AC, both 5-min AND 15-min <= 15% = BAT
         if (load1min > absoluteThreshold) {
             m_isActive = true;
         } else if (load5min <= absoluteThreshold && load15min <= absoluteThreshold) {
@@ -65,7 +65,7 @@ bool ActivityMonitor::start() {
     std::thread monitorThread(&ActivityMonitor::monitorLoop, this);
     monitorThread.detach();
 
-    Logger::info("Activity monitor started (dual-threshold load monitoring: 1-min > 15% = AC, both 5-min AND 15-min <= 15% = BAT)");
+    Logger::info("Activity monitor started (1-min > 15% = AC mode, both 5-min AND 15-min <= 15% = battery mode)");
     return true;
 }
 
@@ -156,7 +156,7 @@ void ActivityMonitor::monitorLoop() {
                          " (threshold: " + std::to_string(absoluteThreshold) +
                          " = " + std::to_string(m_loadThreshold * 100) + "% of " + std::to_string(m_coreCount) + " cores)");
 
-            // Determine activity state using dual-threshold logic
+            // Determine activity state using threshold logic
             bool wasActive = m_isActive;
             bool shouldSwitchToActive = (load1min > absoluteThreshold);
             bool shouldSwitchToIdle = (load5min <= absoluteThreshold && load15min <= absoluteThreshold);

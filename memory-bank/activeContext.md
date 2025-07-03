@@ -1,15 +1,15 @@
 # Active Context - ddotlp
 
 ## Current Work Focus
-**Project Status**: UPDATED - Enhanced triple-threshold load monitoring
+**Project Status**: UPDATED - Enhanced load monitoring with multiple thresholds
 **Last Updated**: July 3, 2025
-**Current Priority**: Enhanced load monitoring with 30-second checks and triple-threshold logic
+**Current Priority**: Enhanced load monitoring with 30-second checks and multiple load average thresholds
 
-## Latest Update: Triple-Threshold Load Monitoring ✅
+## Latest Update: Enhanced Load Monitoring ✅
 
 ### Enhanced Load Monitoring Algorithm
 - **Check Interval**: 30 seconds for responsive monitoring
-- **Triple-Threshold Logic**: 
+- **Threshold Logic**: 
   - **1-minute load > 15%** → Switch to TLP AC mode (`tlp ac`)
   - **Both 5-minute AND 15-minute load ≤ 15%** → Switch to TLP battery mode (`tlp bat`)
   - **Overlap zone** (1-min ≤ 15% AND either 5-min > 15% OR 15-min > 15%) → Maintain current state
@@ -28,7 +28,7 @@
 ```
 [2025-07-03 20:45:30.123] [INFO] Initial state: 1-min load: 1.8 (22.5% avg per core), 5-min load: 0.9 (11.2% avg per core), 15-min load: 0.7 (8.8% avg per core)
 [2025-07-03 20:45:30.124] [INFO] System active - switching to TLP AC mode
-[2025-07-03 20:45:30.125] [INFO] Activity monitor started (dual-threshold load monitoring: 1-min > 15% = AC, both 5-min AND 15-min <= 15% = BAT)
+[2025-07-03 20:45:30.125] [INFO] Activity monitor started (1-min > 15% = AC mode, both 5-min AND 15-min <= 15% = battery mode)
 [2025-07-03 20:46:00.456] [INFO] System became idle (5-min load: 1.1 = 13.7% avg per core <= 15% AND 15-min load: 0.8 = 10.0% avg per core <= 15%) - switching to TLP battery mode
 ```
 
