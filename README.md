@@ -24,8 +24,8 @@ A simple service that automatically saves energy by switching your Linux laptop 
 
 ddotlp watches how busy your computer is and automatically switches power modes:
 
-- **High Performance Mode**: When you're actively working (system load > 15%)
-- **Power Saving Mode**: When your laptop is mostly idle (system load ≤ 15%)
+- **High Performance Mode**: When you're actively working (system load > 10%)
+- **Power Saving Mode**: When your laptop is mostly idle (system load ≤ 10%)
 
 ## Installation
 

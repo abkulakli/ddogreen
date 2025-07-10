@@ -30,9 +30,9 @@ ddotlp provides an automated, intelligent solution that:
 ```
 System Boot → Service Starts → Monitor CPU Usage → Detect Activity Patterns
      ↓
-Active CPU Usage (>15%) → Auto Mode (tlp start)
+Active CPU Usage (>10%) → Auto Mode (tlp start)
      ↓
-Idle CPU Usage (<15% for 5+ min) → Battery Mode (tlp bat)
+Idle CPU Usage (<10% for 5+ min) → Battery Mode (tlp bat)
      ↓
 Activity Resumes → Auto Mode → Continue Monitoring
 ```

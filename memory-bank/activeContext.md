@@ -10,16 +10,16 @@
 ### Enhanced Load Monitoring Algorithm
 - **Check Interval**: 30 seconds for responsive monitoring
 - **Threshold Logic**: 
-  - **1-minute load > 15%** → Switch to TLP AC mode (`tlp ac`)
-  - **Both 5-minute AND 15-minute load ≤ 15%** → Switch to TLP battery mode (`tlp bat`)
-  - **Overlap zone** (1-min ≤ 15% AND either 5-min > 15% OR 15-min > 15%) → Maintain current state
+  - **1-minute load > 10%** → Switch to TLP AC mode (`tlp ac`)
+  - **Both 5-minute AND 15-minute load ≤ 10%** → Switch to TLP battery mode (`tlp bat`)
+  - **Overlap zone** (1-min ≤ 10% AND either 5-min > 10% OR 15-min > 10%) → Maintain current state
 - **Load Average Source**: Reads 1-minute, 5-minute, and 15-minute values from `/proc/loadavg`
 - **Conservative Battery Switch**: Requires both medium-term (5-min) and long-term (15-min) low load
 
 ### Implementation Details
 - **Load Average Parsing**: Modified to read 1-min, 5-min, and 15-min from `/proc/loadavg`
 - **TLP Mode Selection**: Uses `setACMode()` and `setBatteryMode()` (not auto mode)
-- **Dynamic Threshold**: Calculates absolute load threshold as 15% × core count
+- **Dynamic Threshold**: Calculates absolute load threshold as 10% × core count
 - **Enhanced Logging**: Shows 1-min, 5-min, and 15-min load averages with percentages
 - **State Machine**: Intelligent switching logic prevents mode flapping
 - **Conservative Approach**: Battery mode only when system is idle across multiple time scales
@@ -28,8 +28,8 @@
 ```
 [2025-07-03 20:45:30.123] [INFO] Initial state: 1-min load: 1.8 (22.5% avg per core), 5-min load: 0.9 (11.2% avg per core), 15-min load: 0.7 (8.8% avg per core)
 [2025-07-03 20:45:30.124] [INFO] System active - switching to TLP AC mode
-[2025-07-03 20:45:30.125] [INFO] Activity monitor started (1-min > 15% = AC mode, both 5-min AND 15-min <= 15% = battery mode)
-[2025-07-03 20:46:00.456] [INFO] System became idle (5-min load: 1.1 = 13.7% avg per core <= 15% AND 15-min load: 0.8 = 10.0% avg per core <= 15%) - switching to TLP battery mode
+[2025-07-03 20:45:30.125] [INFO] Activity monitor started (1-min > 10% = AC mode, both 5-min AND 15-min <= 10% = battery mode)
+[2025-07-03 20:46:00.456] [INFO] System became idle (5-min load: 1.1 = 13.7% avg per core <= 10% AND 15-min load: 0.8 = 10.0% avg per core <= 10%) - switching to TLP battery mode
 ```
 
 ## Recent Major Refactoring (Latest)
@@ -42,7 +42,7 @@
 - **Config-Free Design**: No configuration files, no command-line parameters except --daemon, --help, --version
 
 ### Implementation Details
-- **Load Threshold**: Hardcoded to 0.15 (15% of one CPU core)
+- **Load Threshold**: Hardcoded to 0.10 (10% of one CPU core)
 - **Idle Timeout**: Hardcoded to 300 seconds (5 minutes)
 - **Check Interval**: Hardcoded to 60 seconds (1 minute)
 - **Log File**: Hardcoded to `/var/log/ddotlp.log`
@@ -75,8 +75,8 @@
 ### Implementation Details
 - **Load Average Source**: Reads 1-minute load average directly from `/proc/loadavg`
 - **Core Count Detection**: Reads `/proc/cpuinfo` to count processor entries (no external commands)
-- **Dynamic Threshold**: Calculates absolute load threshold as 15% × core count
-- **Decision Logic**: Load average > (0.15 × cores) = active; load average ≤ (0.15 × cores) = idle
+- **Dynamic Threshold**: Calculates absolute load threshold as 10% × core count
+- **Decision Logic**: Load average > (0.10 × cores) = active; load average ≤ (0.10 × cores) = idle
 - **Check Frequency**: Every 60 seconds for minimal system impact
 - **Immediate Response**: Mode switches immediately based on current load average (no idle timeout)
 - **No External Dependencies**: Uses only `/proc` filesystem, completely self-contained
@@ -84,9 +84,9 @@
 ### Logging Format
 ```
 [2025-01-15 14:23:45.123] [INFO] Detected 8 CPU core(s)
-[2025-01-15 14:23:45.124] [INFO] Load threshold: 0.15 (15% per core)
-[2025-01-15 14:23:45.125] [INFO] Absolute load threshold: 1.2 (for 8 cores)
-[2025-01-15 14:23:45.126] [INFO] 1-minute load average: 1.8 (threshold: 1.2 = 15% of 8 cores)
+[2025-01-15 14:23:45.124] [INFO] Load threshold: 0.10 (10% per core)
+[2025-01-15 14:23:45.125] [INFO] Absolute load threshold: 0.8 (for 8 cores)
+[2025-01-15 14:23:45.126] [INFO] 1-minute load average: 1.8 (threshold: 0.8 = 10% of 8 cores)
 [2025-01-15 14:23:45.127] [INFO] System became active (load: 1.8 = 22.5% avg per core) - switching to TLP auto mode
 [2025-01-15 14:23:45.128] [INFO] Switching to auto mode (tlp start)
 [2025-01-15 14:23:45.456] [INFO] TLP output: TLP started in AC mode (auto).
@@ -94,7 +94,7 @@
 ```
 
 ### Settings
-- `LOAD_THRESHOLD_PERCENT`: 0.15 (15% per CPU core)
+- `LOAD_THRESHOLD_PERCENT`: 0.10 (10% per CPU core)
 - `CHECK_INTERVAL`: 60 seconds (1 minute)
 - `LOG_FILE`: `/var/log/ddotlp.log`
 - `CORE_COUNT`: Auto-detected using `nproc` command

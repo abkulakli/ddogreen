@@ -21,7 +21,7 @@ public:
     // Set callback for activity changes
     void setActivityCallback(ActivityCallback callback);
 
-    // Set load average threshold for activity detection (default: 0.15)
+    // Set load average threshold for activity detection (default: 0.10)
     void setLoadThreshold(double threshold);
 
     // Check if system is currently active
@@ -34,7 +34,7 @@ private:
 
     bool m_isActive;
     bool m_running;
-    double m_loadThreshold;  // Threshold as percentage (0.15 = 15%)
+    double m_loadThreshold;  // Threshold as percentage (0.10 = 10%)
     int m_coreCount;  // Number of CPU cores
     ActivityCallback m_callback;
 

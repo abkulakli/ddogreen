@@ -10,7 +10,7 @@
 ActivityMonitor::ActivityMonitor()
     : m_isActive(false)
     , m_running(false)
-    , m_loadThreshold(0.15)  // 15% load per core threshold
+    , m_loadThreshold(0.10)  // 10% load per core threshold
     , m_coreCount(getCpuCoreCount())
     , m_callback(nullptr) {
     Logger::info("Detected " + std::to_string(m_coreCount) + " CPU core(s)");
@@ -38,13 +38,13 @@ bool ActivityMonitor::start() {
         double load15min = std::get<2>(loadAverages);
         double absoluteThreshold = m_loadThreshold * m_coreCount;
         
-        // Apply threshold logic: 1-min > 15% = AC, both 5-min AND 15-min <= 15% = BAT
+        // Apply threshold logic: 1-min > 10% = AC, both 5-min AND 15-min <= 10% = BAT
         if (load1min > absoluteThreshold) {
             m_isActive = true;
         } else if (load5min <= absoluteThreshold && load15min <= absoluteThreshold) {
             m_isActive = false;
         }
-        // If 1-min <= 15% AND (5-min > 15% OR 15-min > 15%), maintain current state (no change)
+        // If 1-min <= 10% AND (5-min > 10% OR 15-min > 10%), maintain current state (no change)
         
         double load1minPercentage = (load1min / m_coreCount) * 100;
         double load5minPercentage = (load5min / m_coreCount) * 100;
@@ -65,7 +65,7 @@ bool ActivityMonitor::start() {
     std::thread monitorThread(&ActivityMonitor::monitorLoop, this);
     monitorThread.detach();
 
-    Logger::info("Activity monitor started (1-min > 15% = AC mode, both 5-min AND 15-min <= 15% = battery mode)");
+    Logger::info("Activity monitor started (1-min > 10% = AC mode, both 5-min AND 15-min <= 10% = battery mode)");
     return true;
 }
 
@@ -167,7 +167,7 @@ void ActivityMonitor::monitorLoop() {
             } else if (shouldSwitchToIdle) {
                 m_isActive = false;
             }
-            // If neither condition is met (1-min <= 15% AND (5-min > 15% OR 15-min > 15%)), maintain current state
+            // If neither condition is met (1-min <= 10% AND (5-min > 10% OR 15-min > 10%)), maintain current state
 
             // If activity state changed, notify callback
             if (wasActive != m_isActive && m_callback) {
@@ -177,11 +177,11 @@ void ActivityMonitor::monitorLoop() {
                 
                 if (m_isActive) {
                     Logger::info("System became active (1-min load: " + std::to_string(load1min) +
-                                " = " + std::to_string(load1minPercentage) + "% avg per core > 15%) - switching to TLP AC mode");
+                                " = " + std::to_string(load1minPercentage) + "% avg per core > 10%) - switching to TLP AC mode");
                 } else {
                     Logger::info("System became idle (5-min load: " + std::to_string(load5min) +
-                                " = " + std::to_string(load5minPercentage) + "% avg per core <= 15% AND 15-min load: " + std::to_string(load15min) +
-                                " = " + std::to_string(load15minPercentage) + "% avg per core <= 15%) - switching to TLP battery mode");
+                                " = " + std::to_string(load5minPercentage) + "% avg per core <= 10% AND 15-min load: " + std::to_string(load15min) +
+                                " = " + std::to_string(load15minPercentage) + "% avg per core <= 10%) - switching to TLP battery mode");
                 }
                 m_callback(m_isActive);
             }
