@@ -1,4 +1,4 @@
-# Progress - ddotlp
+# Progress - ddops
 
 ## Project Status: ENHANCED - CROSS-PLATFORM READY ✅
 
@@ -40,7 +40,7 @@
 - **Millisecond Timestamps**: Precise logging format `[YYYY-MM-DD HH:MM:SS.mmm] [LEVEL] message`
 - **TLP Output Capture**: Captures and logs all TLP command output
 - **Correct Terminology**: All logs use proper "auto mode" and "battery mode" terminology
-- **Hardcoded Log Path**: Logs to `/var/log/ddotlp.log` with no configuration required
+- **Hardcoded Log Path**: Logs to `/var/log/ddops.log` with no configuration required
 
 ### ✅ Build System
 - **CMake Integration**: Modern CMake build system (3.16+)
@@ -109,7 +109,7 @@
 ```cpp
 const double loadThreshold = 0.15; // 15% load average (0.15 load)
 const int checkInterval = 60;      // 1 minute between checks
-const string logFile = "/var/log/ddotlp.log";
+const string logFile = "/var/log/ddops.log";
 ```
 
 ### Monitoring Logic (Simplified)
@@ -282,7 +282,7 @@ const string logFile = "/var/log/ddotlp.log";
 
 ## Final Status
 
-**ddotlp v1.0.0 is COMPLETE and PRODUCTION-READY**
+**ddops v1.0.0 is COMPLETE and PRODUCTION-READY**
 
 The project successfully delivers on all core requirements:
 - ✅ Automatic TLP power management based on system activity

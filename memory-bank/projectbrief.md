@@ -1,7 +1,7 @@
-# Project Brief - ddotlp
+# Project Brief - ddops
 
 ## Project Overview
-**ddotlp** (Dynamic DOT TLP) is an ultra-minimal Linux system service that automatically manages TLP (ThinkPad-Linux-Power) power settings based on 1-minute load average monitoring.
+**ddops** (Dynamic Device Optimization Power Switcher) is an ultra-minimal Linux system service that automatically manages TLP (ThinkPad-Linux-Power) power settings based on 1-minute load average monitoring.
 
 ## Core Objective
 Create the simplest possible power management daemon that:
@@ -44,7 +44,7 @@ Create the simplest possible power management daemon that:
 - **Load Threshold**: 0.15 (15% of one CPU core)
 - **Idle Timeout**: 300 seconds (5 minutes)
 - **Check Interval**: 60 seconds (1 minute)
-- **Log File**: `/var/log/ddotlp.log`
+- **Log File**: `/var/log/ddops.log`
 
 ## Target Users
 - Linux laptop users wanting zero-maintenance automatic power management

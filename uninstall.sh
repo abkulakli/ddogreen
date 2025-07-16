@@ -27,7 +27,7 @@ fi
 # Remove files
 echo "Removing files..."
 rm -f /usr/local/bin/ddops
-rm -rf /etc/ddotlp
+rm -rf /etc/ddops
 rm -f /var/log/ddops.log
 rm -f /var/run/ddops.pid
 

@@ -90,7 +90,7 @@ sudo apt install tlp
 
 # Clone and build
 git clone <repository>
-cd ddotlp
+cd ddops
 ./build.sh
 ```
 
@@ -106,15 +106,15 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -O2")
 
 ### Systemd Service Integration
 ```ini
-# /etc/systemd/system/ddotlp.service
+# /etc/systemd/system/ddops.service
 [Unit]
 Description=Dynamic TLP Power Management Daemon
 After=multi-user.target
 
 [Service]
 Type=forking
-ExecStart=/usr/local/bin/ddotlp --daemon
-PIDFile=/var/run/ddotlp.pid
+ExecStart=/usr/local/bin/ddops --daemon
+PIDFile=/var/run/ddops.pid
 Restart=always
 User=root
 ```
@@ -127,17 +127,17 @@ User=root
 
 ### File System Layout
 ```
-/usr/local/bin/ddotlp              # Main executable
-/etc/systemd/system/ddotlp.service # Service definition
-/etc/ddotlp/ddotlp.conf           # Configuration file
-/etc/logrotate.d/ddotlp           # Log rotation config
-/var/log/ddotlp.log               # Main log file
-/var/run/ddotlp.pid               # Process ID file
+/usr/local/bin/ddops              # Main executable
+/etc/systemd/system/ddops.service # Service definition
+/etc/ddops/ddops.conf             # Configuration file
+/etc/logrotate.d/ddops            # Log rotation config
+/var/log/ddops.log                # Main log file
+/var/run/ddops.pid                # Process ID file
 ```
 
 ### Configuration Management
 - **Format**: Key-value pairs (shell-style)
-- **Location**: `/etc/ddotlp/ddotlp.conf`
+- **Location**: `/etc/ddops/ddops.conf`
 - **Parsing**: Simple string parsing (no external config libraries)
 - **Validation**: Runtime validation with error logging
 
@@ -147,7 +147,7 @@ User=root
 ```cmake
 # Project definition
 cmake_minimum_required(VERSION 3.16)
-project(ddotlp VERSION 1.0.0)
+project(ddops VERSION 1.0.0)
 
 # Compiler settings
 set(CMAKE_CXX_STANDARD 17)
@@ -158,8 +158,8 @@ set(SOURCES src/main.cpp src/activity_monitor.cpp ...)
 include_directories(include)
 
 # Installation rules
-install(TARGETS ddotlp DESTINATION /usr/local/bin)
-install(FILES systemd/ddotlp.service DESTINATION /etc/systemd/system)
+install(TARGETS ddops DESTINATION /usr/local/bin)
+install(FILES systemd/ddops.service DESTINATION /etc/systemd/system)
 ```
 
 ### Build Scripts
@@ -192,11 +192,11 @@ src/
 ### Configuration Files
 ```
 config/
-├── ddotlp.conf          # Runtime configuration
-└── ddotlp-logrotate     # Log rotation settings
+├── ddops.conf          # Runtime configuration
+└── ddops-logrotate     # Log rotation settings
 
 systemd/
-└── ddotlp.service       # Service definition
+└── ddops.service       # Service definition
 ```
 
 ## Technical Constraints
@@ -243,11 +243,11 @@ systemd/
 - **Format**: Structured logs with millisecond timestamps
 - **Levels**: DEBUG, INFO, WARNING, ERROR
 - **Rotation**: Daily rotation, 30-day retention
-- **Location**: `/var/log/ddotlp.log`
+- **Location**: `/var/log/ddops.log`
 
 ### System Integration
-- **Systemd Status**: `systemctl status ddotlp`
-- **Journal Logs**: `journalctl -u ddotlp -f`
+- **Systemd Status**: `systemctl status ddops`
+- **Journal Logs**: `journalctl -u ddops -f`
 - **Process Monitoring**: Standard process monitoring tools
 - **Health Checks**: Service restart on failure
 

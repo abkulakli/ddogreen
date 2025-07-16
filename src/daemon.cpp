@@ -46,13 +46,13 @@ bool Daemon::daemonize() {
 
     // Second child continues as daemon
     // Write PID file BEFORE closing file descriptors
-    std::ofstream pidFile("/run/ddotlp.pid");
+    std::ofstream pidFile("/run/ddops.pid");
     if (pidFile.is_open()) {
         pidFile << getpid() << std::endl;
         pidFile.close();
-        Logger::info("PID file written: /run/ddotlp.pid with PID: " + std::to_string(getpid()));
+        Logger::info("PID file written: /run/ddops.pid with PID: " + std::to_string(getpid()));
     } else {
-        Logger::error("Failed to write PID file: /run/ddotlp.pid");
+        Logger::error("Failed to write PID file: /run/ddops.pid");
         return false;
     }
 

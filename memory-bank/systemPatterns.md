@@ -5,7 +5,7 @@
 ### High-Level Design
 ```
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   ActivityMonitor   │────│   Main Daemon    │────│   TLPManager    │
+│   ActivityMonitor   │────│   Main Daemon    │────│  PowerManager   │
 │  (CPU Monitoring)   │    │  (Coordination)  │    │ (Power Control) │
 └─────────────────┘    └──────────────────┘    └─────────────────┘
          │                        │                        │
@@ -46,8 +46,11 @@
 - **Callback Pattern**: Notifies main daemon of state changes
 - **Threading**: Runs monitoring loop in separate thread
 
-#### TLPManager
-- **Purpose**: Interface with TLP power management system
+#### PowerManager (Platform Abstraction)
+- **Purpose**: Cross-platform power management interface
+- **Implementation**: Platform-specific power control (Linux: TLP, Windows: powercfg)
+- **Methods**: `setPerformanceMode()`, `setPowerSavingMode()`, `getCurrentMode()`
+- **Abstraction**: Hides platform-specific details from application code
 - **Command Execution**: Executes `tlp start` and `tlp bat` commands
 - **Output Capture**: Captures and processes TLP command output
 - **State Tracking**: Maintains current power mode state
@@ -91,13 +94,13 @@ public:
 // Compile-time platform selection
 #if defined(__linux__)
     return createLinuxPowerManager();
-#elif defined(_WIN32) || defined(_WIN64)  
+#elif defined(_WIN32) || defined(_WIN64)
     return createWindowsPowerManager();
 #endif
 ```
 
 **Rationale**: Cross-platform support without runtime overhead or unused code
-**Benefits**: 
+**Benefits**:
 - Only target platform code compiled and linked
 - No runtime platform detection overhead
 - Optimal binary size and performance
@@ -106,13 +109,15 @@ public:
 ### 2. Observer Pattern (Activity Monitoring)
 ```cpp
 // ActivityMonitor notifies daemon of state changes
-activityMonitor.setActivityCallback([&tlpManager](bool isActive) {
+```cpp
+activityMonitor.setActivityCallback([&powerManager](bool isActive) {
     if (isActive) {
-        tlpManager.setPerformanceMode();
+        powerManager->setPerformanceMode();     // High performance when active
     } else {
-        tlpManager.setBatteryMode();
+        powerManager->setPowerSavingMode();     // Power saving when idle
     }
 });
+```
 ```
 
 **Rationale**: Decouples activity detection from power management actions

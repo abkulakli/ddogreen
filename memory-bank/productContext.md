@@ -1,4 +1,4 @@
-# Product Context - ddotlp
+# Product Context - ddops
 
 ## Why This Project Exists
 
@@ -11,7 +11,7 @@ Modern laptops, especially ThinkPads, benefit greatly from intelligent power man
 4. **Inconsistent Behavior**: Manual switching leads to forgotten mode changes and poor battery life
 
 ### Solution Approach
-ddotlp provides an automated, intelligent solution that:
+ddops provides an automated, intelligent solution that:
 - **Learns from Usage**: Monitors actual CPU activity patterns
 - **Universal Compatibility**: Works on any Linux system (desktop, server, headless)
 - **Zero Configuration**: Works out-of-the-box with sensible defaults

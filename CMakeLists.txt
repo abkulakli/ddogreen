@@ -13,7 +13,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -O2")
 set(SOURCES
     src/main.cpp
     src/activity_monitor.cpp
-    src/tlp_manager.cpp
     src/daemon.cpp
     src/logger.cpp
     src/platform/platform_factory.cpp

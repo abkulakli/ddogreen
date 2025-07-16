@@ -1,5 +1,9 @@
 /*
- * ddotlp - Dynamic TLP Power Management Daemon
+ * ddops - Dynamic Device Optimizatiovoid printVersion() {
+    std::cout << "ddops version 1.0.0\n"
+              << "Dynamic Device Optimization Power Switcher\n"
+              << "Copyright (c) 2025 ddosoft (www.ddosoft.com)\n";
+}er Switcher
  *
  * Automatically manages TLP power settings based on system load monitoring
  *
@@ -11,7 +15,6 @@
  */
 
 #include "activity_monitor.h"
-#include "tlp_manager.h"
 #include "daemon.h"
 #include "logger.h"
 #include "platform/platform_factory.h"
@@ -40,8 +43,8 @@ void printUsage(const char* programName) {
 }
 
 void printVersion() {
-    std::cout << "ddotlp version 1.0.0\n"
-              << "Dynamic TLP power management daemon\n"
+    std::cout << "ddops version 1.0.0\n"
+              << "Dynamic Device Optimization Power Switcher\n"
               << "Copyright (c) 2025 ddosoft (www.ddosoft.com)\n";
 }
 
@@ -176,22 +179,22 @@ int main(int argc, char* argv[]) {
 
     // Initialize components
     ActivityMonitor activityMonitor;
-    TLPManager tlpManager;
+    auto powerManager = PlatformFactory::createPowerManager();
 
-    // Check if TLP is available
-    if (!tlpManager.isTLPAvailable()) {
-        Logger::error("TLP is not installed or not available");
+    // Check if power management is available
+    if (!powerManager->isAvailable()) {
+        Logger::error("Power management (TLP) is not installed or not available");
         return 1;
     }
 
     // Set up activity callback
-    activityMonitor.setActivityCallback([&tlpManager](bool isActive) {
+    activityMonitor.setActivityCallback([&powerManager](bool isActive) {
         if (isActive) {
-            // System is active (1-min load > 15%), switch to TLP AC mode (tlp ac)
-            tlpManager.setACMode();
+            // System is active (1-min load > 10%), switch to performance mode
+            powerManager->setPerformanceMode();
         } else {
-            // System is idle (5-min load <= 15%), switch to TLP battery mode (tlp bat)
-            tlpManager.setBatteryMode();
+            // System is idle (both 5-min AND 15-min load <= 10%), switch to power saving mode
+            powerManager->setPowerSavingMode();
         }
     });
 
@@ -201,7 +204,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    Logger::info("ddotlp service started successfully");
+    Logger::info("ddops service started successfully");
 
     // Main loop - just keep the process alive while monitoring runs in background
     while (Daemon::shouldRun()) {
@@ -209,12 +212,12 @@ int main(int argc, char* argv[]) {
     }
 
     // Cleanup
-    Logger::info("Shutting down ddotlp service");
+    Logger::info("Shutting down ddops service");
     activityMonitor.stop();
 
     // Remove PID file
     if (runAsDaemon) {
-        unlink("/run/ddotlp.pid");
+        unlink("/run/ddops.pid");
     }
 
     return 0;

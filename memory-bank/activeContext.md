@@ -1,15 +1,73 @@
 # Active Context - ddops
 
 ## Current Work Focus
-**Project Status**: UPDATED - Console Logging for Non-Daemon Mode Implemented  
+**Project Status**: UPDATED - Console Logging for Non-Daemon Mode Implemented
 **Last Updated**: July 17, 2025
 **Current Priority**: Complete executable with enhanced logging and service management
 
-## Latest Update: Documentation Consolidation ✅
+## Latest Update: Codebase Cleanup ✅
+
+### Removed Obsolete Components
+- **Tests Directory**: Removed entire `tests/` directory and all test files
+- **TLPManager Files**: Removed obsolete `tlp_manager.cpp` and `tlp_manager.h` files
+- **Clean Architecture**: Now using pure platform abstraction without legacy components
+- **Simplified Build**: No test dependencies or obsolete file compilation
+
+### Clean Codebase Structure
+```
+src/
+├── main.cpp                    # Application entry point
+├── activity_monitor.cpp        # CPU load monitoring
+├── daemon.cpp                  # Daemon functionality
+├── logger.cpp                  # Logging system
+└── platform/                  # Platform abstraction layer
+    ├── platform_factory.cpp   # Platform detection & factory
+    └── linux/                 # Linux-specific implementations
+        ├── linux_power_manager.cpp
+        ├── linux_service_manager.cpp
+        └── linux_system_monitor.cpp
+```
+
+### Benefits of Cleanup
+- **Reduced Complexity**: No test maintenance overhead
+- **Faster Builds**: No test compilation
+- **Cleaner Dependencies**: No GTest or test framework requirements
+- **Pure Platform Abstraction**: Only the modern architecture remains
+- **Production Ready**: Focus on deployment rather than testing infrastructure
+
+### Migrated to Platform Abstraction Layer
+- **Removed Direct TLP Dependency**: Main.cpp no longer directly uses TLPManager class
+- **Uses Platform Factory**: Now properly uses `PlatformFactory::createPowerManager()`
+- **Cross-Platform Ready**: Application code is now platform-agnostic
+- **Cleaner Architecture**: Separation between application logic and platform-specific implementations
+- **Consistent Interface**: Uses `setPerformanceMode()` and `setPowerSavingMode()` instead of TLP-specific methods
+
+### Architecture Migration
+**Old Architecture:**
+```cpp
+// Direct TLP dependency
+TLPManager tlpManager;
+tlpManager.setACMode();
+tlpManager.setBatteryMode();
+```
+
+**New Architecture:**
+```cpp
+// Platform abstraction
+auto powerManager = PlatformFactory::createPowerManager();
+powerManager->setPerformanceMode();     // Maps to tlp ac on Linux
+powerManager->setPowerSavingMode();     // Maps to tlp bat on Linux
+```
+
+### Benefits of Platform Abstraction
+- **Future Windows Support**: Ready for Windows implementation
+- **Testability**: Can easily mock power management for testing
+- **Maintainability**: Platform-specific code isolated in separate modules
+- **API Consistency**: Same interface regardless of underlying power management system
 
 ### Unified Documentation Strategy
 - **README.md**: Primary user-facing documentation with complete usage guide
-- **Memory Bank**: Development context and technical implementation details  
+- **Memory Bank**: Development context and technical implementation details
 - **Removed USAGE.md**: Redundant file eliminated, all usage info moved to README.md
 - **GitHub-First Approach**: README.md is what users see first, contains everything needed
 
@@ -43,7 +101,7 @@
 ## Latest Update: Service Management Integration ✅
 
 ### Built-in Service Installation/Uninstallation
-- **Command-Line Options**: 
+- **Command-Line Options**:
   - `-i, --install`: Install system service
   - `-u, --uninstall`: Uninstall system service
 - **Platform Integration**: Uses existing IServiceManager interface through PlatformFactory
@@ -94,7 +152,7 @@ Service Management:
 
 ### Platform Capabilities
 1. **Get CPU Load**: `systemMonitor->getLoadAverages()` - cross-platform load monitoring
-2. **Switch Mode**: `powerManager->setPerformanceMode()` / `setPowerSavingMode()` - unified power management  
+2. **Switch Mode**: `powerManager->setPerformanceMode()` / `setPowerSavingMode()` - unified power management
 3. **Install/Uninstall Service**: `serviceManager->installService()` / `uninstallService()` - service management
 
 ### Implementation Benefits
@@ -106,7 +164,7 @@ Service Management:
 
 ### Enhanced Load Monitoring Algorithm
 - **Check Interval**: 30 seconds for responsive monitoring
-- **Threshold Logic**: 
+- **Threshold Logic**:
   - **1-minute load > 10%** → Switch to TLP AC mode (`tlp ac`)
   - **Both 5-minute AND 15-minute load ≤ 10%** → Switch to TLP battery mode (`tlp bat`)
   - **Overlap zone** (1-min ≤ 10% AND either 5-min > 10% OR 15-min > 10%) → Maintain current state
@@ -142,7 +200,7 @@ Service Management:
 - **Load Threshold**: Hardcoded to 0.10 (10% of one CPU core)
 - **Idle Timeout**: Hardcoded to 300 seconds (5 minutes)
 - **Check Interval**: Hardcoded to 60 seconds (1 minute)
-- **Log File**: Hardcoded to `/var/log/ddotlp.log`
+- **Log File**: Hardcoded to `/var/log/ddops.log`
 - **No Sampling**: Direct load average reading with no averaging or circular buffers
 
 ### Terminology Corrections ✅
@@ -193,7 +251,7 @@ Service Management:
 ### Settings
 - `LOAD_THRESHOLD_PERCENT`: 0.10 (10% per CPU core)
 - `CHECK_INTERVAL`: 60 seconds (1 minute)
-- `LOG_FILE`: `/var/log/ddotlp.log`
+- `LOG_FILE`: `/var/log/ddops.log`
 - `CORE_COUNT`: Auto-detected using `nproc` command
 
 ## Project Status: COMPLETE ✅

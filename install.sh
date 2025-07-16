@@ -58,7 +58,7 @@ touch /var/log/ddops.log
 chmod 644 /var/log/ddops.log
 
 # Create config directory
-mkdir -p /etc/ddotlp
+mkdir -p /etc/ddops
 
 echo "Installation completed successfully!"
 echo

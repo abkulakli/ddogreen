@@ -1,6 +1,6 @@
 [Unit]
 Description=Dynamic Device Optimization Power Switcher
-Documentation=https://github.com/yourusername/ddops
+Documentation=https://github.com/abkulakli/ddops
 Documentation=https://www.ddosoft.com
 After=multi-user.target
 
