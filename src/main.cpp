@@ -78,16 +78,33 @@ int installService() {
         return 1;
     }
 
+    std::cout << "Setting up directories and permissions..." << std::endl;
+    
+    // Create log directory and file
+    if (system("mkdir -p /var/log") != 0) {
+        std::cerr << "Warning: Failed to create /var/log directory" << std::endl;
+    }
+    if (system("touch /var/log/ddops.log") != 0) {
+        std::cerr << "Warning: Failed to create log file" << std::endl;
+    }
+    if (system("chmod 644 /var/log/ddops.log") != 0) {
+        std::cerr << "Warning: Failed to set log file permissions" << std::endl;
+    }
+    
+    // Create config directory
+    if (system("mkdir -p /etc/ddops") != 0) {
+        std::cerr << "Warning: Failed to create config directory" << std::endl;
+    }
+
     std::string serviceName = "ddops";
     std::string description = "Dynamic Device Optimization Power Switcher - Automatic TLP power management";
 
+    std::cout << "Installing system service..." << std::endl;
     if (serviceManager->installService(serviceName, executablePath, description)) {
-        std::cout << "Service installed successfully!" << std::endl;
-        std::cout << "To enable and start the service:" << std::endl;
-        std::cout << "  sudo systemctl enable " << serviceName << std::endl;
-        std::cout << "  sudo systemctl start " << serviceName << std::endl;
-        std::cout << "To check status:" << std::endl;
-        std::cout << "  sudo systemctl status " << serviceName << std::endl;
+        std::cout << "Service installed, enabled, and started successfully!" << std::endl;
+        std::cout << "ddops is now running and will auto-start on boot." << std::endl;
+        std::cout << "To view logs:" << std::endl;
+        std::cout << "  sudo journalctl -u " << serviceName << " -f" << std::endl;
         return 0;
     } else {
         std::cerr << "Failed to install service" << std::endl;
@@ -110,7 +127,21 @@ int uninstallService() {
 
     std::string serviceName = "ddops";
 
+    std::cout << "Uninstalling system service..." << std::endl;
     if (serviceManager->uninstallService(serviceName)) {
+        std::cout << "Cleaning up files..." << std::endl;
+        
+        // Clean up log and config files
+        if (system("rm -f /var/log/ddops.log") != 0) {
+            std::cerr << "Warning: Failed to remove log file" << std::endl;
+        }
+        if (system("rm -f /var/run/ddops.pid") != 0) {
+            std::cerr << "Warning: Failed to remove PID file" << std::endl;
+        }
+        if (system("rm -rf /etc/ddops") != 0) {
+            std::cerr << "Warning: Failed to remove config directory" << std::endl;
+        }
+        
         std::cout << "Service uninstalled successfully!" << std::endl;
         return 0;
     } else {

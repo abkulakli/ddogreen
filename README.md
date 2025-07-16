@@ -46,22 +46,8 @@ sudo dnf install gcc-c++ cmake tlp
 git clone <repository-url>
 cd ddops
 ./build.sh
-sudo ./install.sh
-```
-
-**Or install manually:**
-```bash
-./build.sh
 sudo make install -C build
-sudo ddops --install    # Install system service
-sudo systemctl enable ddops
-sudo systemctl start ddops
-```
-
-### 3. Start the Service
-```bash
-sudo systemctl enable ddops
-sudo systemctl start ddops
+sudo ddops --install    # Install and start system service
 ```
 
 That's it! ddops is now running and will automatically manage your power settings.
@@ -161,12 +147,6 @@ Check the detailed logs in `/var/log/ddops.log` for error messages.
 
 ## Uninstall
 
-**Using the script:**
-```bash
-sudo ./uninstall.sh
-```
-
-**Or manually:**
 ```bash
 sudo ddops --uninstall
 sudo rm -f /usr/local/bin/ddops

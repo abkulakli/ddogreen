@@ -59,8 +59,18 @@ public:
             Logger::error("Failed to reload systemd daemon");
             return false;
         }
+
+        // Enable the service for auto-start on boot
+        if (!enableService(serviceName)) {
+            Logger::warning("Service installed but failed to enable auto-start");
+        }
+
+        // Start the service immediately
+        if (!startService(serviceName)) {
+            Logger::warning("Service installed and enabled but failed to start");
+        }
         
-        Logger::info("Successfully installed service: " + serviceName);
+        Logger::info("Successfully installed, enabled, and started service: " + serviceName);
         return true;
     }
 
