@@ -1,4 +1,4 @@
-# System Patterns - ddotlp
+# System Patterns - ddops
 
 ## Architecture Overview
 
@@ -14,6 +14,27 @@
     │/proc/stat│              │ Logger  │              │   TLP   │
     │         │              │         │              │Commands │
     └─────────┘              └─────────┘              └─────────┘
+```
+
+### Cross-Platform Architecture (New)
+```
+┌─────────────────────────────────────────┐
+│           Application Layer             │
+│        (main.cpp, activity_monitor)     │
+└─────────────────────────────────────────┘
+                     │
+┌─────────────────────────────────────────┐
+│         Platform Abstraction            │
+│  IPowerManager | IServiceManager |      │
+│  ISystemMonitor | PlatformFactory       │
+└─────────────────────────────────────────┘
+                     │
+         Compile-time Selection
+┌──────────────────┬──────────────────────┐
+│   Linux Platform │   Windows Platform   │
+│   (when building │   (when building     │
+│    on Linux)     │    on Windows)       │
+└──────────────────┴──────────────────────┘
 ```
 
 ### Component Responsibilities
@@ -32,6 +53,14 @@
 - **State Tracking**: Maintains current power mode state
 - **Error Handling**: Robust command failure handling
 
+#### Platform Abstraction Layer (New)
+- **Purpose**: Provides cross-platform support for power management, system monitoring, and service management
+- **Generic Interfaces**: IPowerManager, ISystemMonitor, IServiceManager - only headers exposed
+- **Platform Implementations**: Source files only in `src/platform/[platform]/`
+- **Compile-Time Selection**: Uses preprocessor directives to include only target platform code
+- **Zero Runtime Overhead**: All platform decisions made at compile time
+- **Binary Optimization**: Linux binaries contain zero Windows code and vice versa
+
 #### Logger
 - **Purpose**: Centralized logging with precise timestamps
 - **Format**: `[YYYY-MM-DD HH:MM:SS.mmm] [LEVEL] message`
@@ -48,7 +77,33 @@
 
 ## Key Design Patterns
 
-### 1. Observer Pattern (Activity Monitoring)
+### 1. Platform Abstraction Pattern (New)
+```cpp
+// Generic interface exposed to application
+class IPowerManager {
+public:
+    virtual bool setPerformanceMode() = 0;
+    virtual bool setPowerSavingMode() = 0;
+    virtual std::string getCurrentMode() = 0;
+    virtual bool isAvailable() = 0;
+};
+
+// Compile-time platform selection
+#if defined(__linux__)
+    return createLinuxPowerManager();
+#elif defined(_WIN32) || defined(_WIN64)  
+    return createWindowsPowerManager();
+#endif
+```
+
+**Rationale**: Cross-platform support without runtime overhead or unused code
+**Benefits**: 
+- Only target platform code compiled and linked
+- No runtime platform detection overhead
+- Optimal binary size and performance
+- Clean separation between generic interfaces and platform implementations
+
+### 2. Observer Pattern (Activity Monitoring)
 ```cpp
 // ActivityMonitor notifies daemon of state changes
 activityMonitor.setActivityCallback([&tlpManager](bool isActive) {
@@ -74,6 +129,18 @@ bool TLPManager::setPerformanceMode() {
 
 **Rationale**: Encapsulates TLP command execution with proper error handling
 **Benefits**: Consistent command execution, output capture, and error handling
+
+### 4. Factory Pattern (Platform Creation)
+```cpp
+// Platform-agnostic creation
+auto powerManager = PlatformFactory::createPowerManager();
+auto systemMonitor = PlatformFactory::createSystemMonitor();
+
+// Compile-time selection ensures only target platform code is included
+```
+
+**Rationale**: Single creation point for platform objects with compile-time optimization
+**Benefits**: Clean object creation, compile-time platform selection, no unused code
 
 ### 3. State Machine (Power Mode Management)
 ```

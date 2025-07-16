@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Installation script for ddotlp
+# Installation script for ddops
 
 set -e
 
-echo "Installing ddotlp - Dynamic TLP Power Management Service"
+echo "Installing ddops - Dynamic Device Optimization Power Switcher"
 
 # Check if running as root
 if [[ $EUID -ne 0 ]]; then
@@ -35,7 +35,7 @@ if command -v dnf &> /dev/null; then
 fi
 
 # Build the project
-echo "Building ddotlp..."
+echo "Building ddops..."
 if [ ! -d "build" ]; then
     mkdir build
 fi
@@ -45,13 +45,13 @@ cmake ..
 make -j$(nproc)
 
 # Install
-echo "Installing ddotlp..."
+echo "Installing ddops..."
 make install
 
 # Create log directory
 mkdir -p /var/log
-touch /var/log/ddotlp.log
-chmod 644 /var/log/ddotlp.log
+touch /var/log/ddops.log
+chmod 644 /var/log/ddops.log
 
 # Create config directory
 mkdir -p /etc/ddotlp

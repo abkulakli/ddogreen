@@ -13,21 +13,22 @@ Create the simplest possible power management daemon that:
 ## Project Type
 - **Language**: C++ (C++17 standard)
 - **Build System**: CMake 3.16+
-- **Target Platform**: Linux systems (Ubuntu, Debian, Fedora, RHEL)
-- **Architecture**: Ultra-minimal system daemon/service
-- **Dependencies**: None (only standard C++ and Linux system calls)
+- **Target Platform**: Linux primary, Windows support via platform abstraction
+- **Architecture**: Cross-platform system daemon/service with compile-time optimization
+- **Dependencies**: None (only standard C++ and platform-specific system calls)
 
 ## Key Requirements
 
 ### Functional Requirements
-1. **Load Average Monitoring**: Read 1-minute load average from `/proc/loadavg` every 60 seconds
-2. **Power Management**: Execute `tlp start` (auto mode) and `tlp bat` (battery mode)
-3. **Hardcoded Configuration**: All settings built into binary for maximum reliability
-4. **Service Integration**: Full systemd integration with minimal resource usage
-5. **Accurate Logging**: Logs using correct TLP terminology ("auto mode" and "battery mode")
+1. **Load Average Monitoring**: Cross-platform load monitoring (Linux: /proc/loadavg, Windows: Performance Counters)
+2. **Power Management**: Platform-specific power control (Linux: TLP, Windows: powercfg)
+3. **Service Management**: Platform-specific service control (Linux: systemd, Windows: SC)
+4. **Hardcoded Configuration**: All settings built into binary for maximum reliability
+5. **Cross-Platform Support**: Generic interfaces with platform-specific implementations
 
 ### Technical Requirements
 1. **Zero Configuration**: No configuration files, minimal command-line options
+2. **Compile-Time Platform Selection**: Only target platform code included in binaries
 2. **Minimal Dependencies**: Only standard C++ libraries and Linux system calls
 3. **Root Privileges**: Must run as root to execute TLP commands
 4. **Signal Handling**: Proper shutdown handling (no configuration reload)

@@ -5,7 +5,7 @@
 #include <iomanip>
 #include <sstream>
 
-std::string Logger::m_logFile = "/var/log/ddotlp.log";
+std::string Logger::m_logFile = "/var/log/ddops.log";
 
 void Logger::init(const std::string& logFile) {
     m_logFile = logFile;

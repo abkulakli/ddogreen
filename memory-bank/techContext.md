@@ -1,13 +1,21 @@
-# Tech Context - ddotlp
+# Tech Context - ddops
 
 ## Technology Stack
 
 ### Core Technologies
 - **Language**: C++17 (Modern C++ features, standard library only)
 - **Build System**: CMake 3.16+ (Modern CMake practices)
-- **Target OS**: Linux (Ubuntu, Debian, Fedora, RHEL, CentOS)
-- **Service Framework**: systemd (Native Linux service integration)
+- **Target OS**: Linux primary, Windows support via platform abstraction
+- **Architecture**: Cross-platform with compile-time platform selection
+- **Service Framework**: systemd (Linux), Windows Service Manager (Windows)
 - **Logging**: Custom implementation with logrotate integration
+
+### Platform Abstraction
+- **Design**: Generic interfaces with platform-specific implementations
+- **Compilation**: Compile-time platform selection using preprocessor directives
+- **Linux Support**: TLP integration, /proc filesystem, systemd services
+- **Windows Support**: Mock implementations (powercfg, Performance Counters, sc.exe)
+- **Binary Optimization**: Only target platform code included
 
 ### Dependencies
 
@@ -32,6 +40,38 @@ sudo dnf install gcc-c++ cmake
 - ❌ Scripting languages (Python, Shell beyond basic scripts)
 
 ## Development Environment Setup
+
+### Platform-Specific Build Configuration
+
+#### Linux Build
+```bash
+# Automatic platform detection in CMakeLists.txt
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    list(APPEND SOURCES
+        src/platform/linux/linux_power_manager.cpp
+        src/platform/linux/linux_service_manager.cpp
+        src/platform/linux/linux_system_monitor.cpp
+    )
+endif()
+```
+
+#### Windows Build (Mock)
+```bash
+# Windows platform source files
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    list(APPEND SOURCES
+        src/platform/windows/windows_power_manager.cpp
+        src/platform/windows/windows_service_manager.cpp
+        src/platform/windows/windows_system_monitor.cpp
+    )
+```
+
+#### Platform Testing
+```bash
+# Standard build process
+./build.sh                  # Build for current platform
+# Platform abstraction automatically detected and compiled
+```
 
 ### Minimum Requirements
 - **GCC**: 7.0+ (C++17 support)

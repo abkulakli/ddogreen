@@ -1,0 +1,235 @@
+#include "platform/iservice_manager.h"
+#include "logger.h"
+#include <cstdlib>
+#include <fstream>
+#include <memory>
+#include <array>
+#include <string>
+
+/**
+ * Linux-specific service manager implementation
+ * Uses systemd for service management
+ */
+class LinuxServiceManager : public IServiceManager {
+public:
+    LinuxServiceManager() = default;
+    virtual ~LinuxServiceManager() = default;
+
+    /**
+     * Install systemd service
+     * @param serviceName name of the service (e.g., "ddops")
+     * @param executablePath full path to executable
+     * @param description service description
+     * @return true if successful
+     */
+    bool installService(const std::string& serviceName, 
+                       const std::string& executablePath,
+                       const std::string& description) override {
+        
+        std::string serviceFile = "/etc/systemd/system/" + serviceName + ".service";
+        
+        // Create systemd service file content
+        std::string serviceContent = 
+            "[Unit]\n"
+            "Description=" + description + "\n"
+            "After=multi-user.target\n"
+            "\n"
+            "[Service]\n"
+            "Type=forking\n"
+            "ExecStart=" + executablePath + " --daemon\n"
+            "PIDFile=/var/run/" + serviceName + ".pid\n"
+            "Restart=always\n"
+            "User=root\n"
+            "\n"
+            "[Install]\n"
+            "WantedBy=multi-user.target\n";
+        
+        // Write service file
+        std::ofstream file(serviceFile);
+        if (!file.is_open()) {
+            Logger::error("Failed to create service file: " + serviceFile);
+            return false;
+        }
+        
+        file << serviceContent;
+        file.close();
+        
+        // Reload systemd daemon
+        if (!executeCommand("systemctl daemon-reload")) {
+            Logger::error("Failed to reload systemd daemon");
+            return false;
+        }
+        
+        Logger::info("Successfully installed service: " + serviceName);
+        return true;
+    }
+
+    /**
+     * Uninstall systemd service
+     * @param serviceName name of the service to uninstall
+     * @return true if successful
+     */
+    bool uninstallService(const std::string& serviceName) override {
+        // Stop and disable service first
+        stopService(serviceName);
+        disableService(serviceName);
+        
+        std::string serviceFile = "/etc/systemd/system/" + serviceName + ".service";
+        
+        // Remove service file
+        if (std::remove(serviceFile.c_str()) != 0) {
+            Logger::warning("Could not remove service file: " + serviceFile);
+        }
+        
+        // Reload systemd daemon
+        executeCommand("systemctl daemon-reload");
+        
+        Logger::info("Successfully uninstalled service: " + serviceName);
+        return true;
+    }
+
+    /**
+     * Start systemd service
+     * @param serviceName name of the service to start
+     * @return true if successful
+     */
+    bool startService(const std::string& serviceName) override {
+        std::string command = "systemctl start " + serviceName;
+        bool result = executeCommand(command);
+        
+        if (result) {
+            Logger::info("Started service: " + serviceName);
+        } else {
+            Logger::error("Failed to start service: " + serviceName);
+        }
+        
+        return result;
+    }
+
+    /**
+     * Stop systemd service
+     * @param serviceName name of the service to stop
+     * @return true if successful
+     */
+    bool stopService(const std::string& serviceName) override {
+        std::string command = "systemctl stop " + serviceName;
+        bool result = executeCommand(command);
+        
+        if (result) {
+            Logger::info("Stopped service: " + serviceName);
+        } else {
+            Logger::error("Failed to stop service: " + serviceName);
+        }
+        
+        return result;
+    }
+
+    /**
+     * Enable systemd service for automatic startup
+     * @param serviceName name of the service to enable
+     * @return true if successful
+     */
+    bool enableService(const std::string& serviceName) override {
+        std::string command = "systemctl enable " + serviceName;
+        bool result = executeCommand(command);
+        
+        if (result) {
+            Logger::info("Enabled service: " + serviceName);
+        } else {
+            Logger::error("Failed to enable service: " + serviceName);
+        }
+        
+        return result;
+    }
+
+    /**
+     * Disable systemd service from starting automatically
+     * @param serviceName name of the service to disable
+     * @return true if successful
+     */
+    bool disableService(const std::string& serviceName) override {
+        std::string command = "systemctl disable " + serviceName;
+        bool result = executeCommand(command);
+        
+        if (result) {
+            Logger::info("Disabled service: " + serviceName);
+        } else {
+            Logger::error("Failed to disable service: " + serviceName);
+        }
+        
+        return result;
+    }
+
+    /**
+     * Check if service management is available on this platform
+     * @return true if service management is supported
+     */
+    bool isAvailable() override {
+        return executeCommand("which systemctl > /dev/null 2>&1");
+    }
+
+    /**
+     * Get service status
+     * @param serviceName name of the service
+     * @return status string ("running", "stopped", "unknown")
+     */
+    std::string getServiceStatus(const std::string& serviceName) override {
+        std::string command = "systemctl is-active " + serviceName;
+        std::string output = executeCommandWithOutput(command);
+        
+        // Remove trailing newline
+        if (!output.empty() && output.back() == '\n') {
+            output.pop_back();
+        }
+        
+        if (output == "active") {
+            return "running";
+        } else if (output == "inactive" || output == "failed") {
+            return "stopped";
+        } else {
+            return "unknown";
+        }
+    }
+
+private:
+    /**
+     * Execute a command and return success status
+     * @param command command to execute
+     * @return true if command succeeded
+     */
+    bool executeCommand(const std::string& command) {
+        Logger::debug("Executing command: " + command);
+        int result = std::system(command.c_str());
+        return (result == 0);
+    }
+
+    /**
+     * Execute a command and return its output
+     * @param command command to execute
+     * @return command output as string
+     */
+    std::string executeCommandWithOutput(const std::string& command) {
+        Logger::debug("Executing command with output: " + command);
+
+        std::array<char, 128> buffer;
+        std::string result;
+
+        FILE* pipe = popen(command.c_str(), "r");
+        if (!pipe) {
+            Logger::error("Failed to execute command: " + command);
+            return "";
+        }
+
+        while (fgets(buffer.data(), buffer.size(), pipe) != nullptr) {
+            result += buffer.data();
+        }
+
+        pclose(pipe);
+        return result;
+    }
+};
+
+// Factory function for creating Linux service manager
+std::unique_ptr<IServiceManager> createLinuxServiceManager() {
+    return std::make_unique<LinuxServiceManager>();
+}

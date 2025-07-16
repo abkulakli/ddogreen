@@ -15,15 +15,9 @@ Makefile
 *~
 
 # Compiled binaries
-ddotlp
 *.o
 *.so
 *.a
-
-# Test files (temporary)
-test_*
-*_test
-*_test.cpp
 
 # Log files
 *.log

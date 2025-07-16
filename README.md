@@ -1,10 +1,10 @@
-# ddotlp - Smart Power Management for Linux
+# ddops – Dynamic Device Optimization Power Switcher
 
-A simple service that automatically saves energy by switching your Linux laptop between high-performance and power-saving modes based on how busy your system is.
+A smart cross-platform service that automatically optimizes your device's power settings by switching between high-performance and power-saving modes based on system load and usage patterns.
 
 **Developed by ddosoft (www.ddosoft.com)**
 
-## Why Use ddotlp?
+## Why Use ddops?
 
 ### Longer Battery Life
 - **20-30% more battery time** with no effort from you
@@ -22,7 +22,7 @@ A simple service that automatically saves energy by switching your Linux laptop 
 
 ## How It Works
 
-ddotlp watches how busy your computer is and automatically switches power modes:
+ddops watches how busy your computer is and automatically switches power modes:
 
 - **High Performance Mode**: When you're actively working (system load > 10%)
 - **Power Saving Mode**: When your laptop is mostly idle (system load ≤ 10%)
@@ -44,29 +44,29 @@ sudo dnf install gcc-c++ cmake tlp
 ### 2. Build and Install
 ```bash
 git clone <repository-url>
-cd ddotlp
+cd ddops
 ./build.sh
 sudo ./install.sh
 ```
 
 ### 3. Start the Service
 ```bash
-sudo systemctl enable ddotlp
-sudo systemctl start ddotlp
+sudo systemctl enable ddops
+sudo systemctl start ddops
 ```
 
-That's it! ddotlp is now running and will automatically manage your power settings.
+That's it! ddops is now running and will automatically manage your power settings.
 
 ## Check if It's Working
 
 ### Service Status
 ```bash
-sudo systemctl status ddotlp
+sudo systemctl status ddops
 ```
 
 ### See What It's Doing
 ```bash
-sudo tail -f /var/log/ddotlp.log
+sudo tail -f /var/log/ddops.log
 ```
 
 You'll see messages like:
@@ -95,14 +95,14 @@ sudo tlp-stat -s
 
 **Service won't start?**
 - Make sure TLP is installed: `which tlp`
-- Check service status: `sudo systemctl status ddotlp`
+- Check service status: `sudo systemctl status ddops`
 
 **Not switching modes?**
-- Check the logs: `sudo tail /var/log/ddotlp.log`
+- Check the logs: `sudo tail /var/log/ddops.log`
 - Verify TLP is working: `sudo tlp-stat`
 
 **Need help?**
-Check the detailed logs in `/var/log/ddotlp.log` for error messages.
+Check the detailed logs in `/var/log/ddops.log` for error messages.
 
 ## Uninstall
 
@@ -121,4 +121,4 @@ sudo ./uninstall.sh
 
 **Make your Linux laptop more sustainable with zero effort!**
 
-*Every laptop running ddotlp helps reduce global energy consumption.*
+*Every laptop running ddops helps reduce global energy consumption.*

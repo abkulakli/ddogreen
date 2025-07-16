@@ -1,10 +1,20 @@
 #!/bin/bash
 
-# Uninstallation script for ddotlp
+# # Stop and disable service
+systemctl stop ddops 2>/dev/null || true
+systemctl disable ddops 2>/dev/null || true
+
+# Remove files
+echo "Removing files..."
+rm -f /usr/local/bin/ddops
+rm -f /etc/systemd/system/ddops.service
+rm -rf /etc/ddops
+rm -f /var/log/ddops.log
+rm -f /var/run/ddops.pidion script for ddops
 
 set -e
 
-echo "Uninstalling ddotlp - Dynamic TLP Power Management Service"
+echo "Uninstalling ddops - Dynamic Device Optimization Power Switcher"
 
 # Check if running as root
 if [[ $EUID -ne 0 ]]; then
@@ -14,16 +24,16 @@ fi
 
 # Stop and disable service
 echo "Stopping and disabling service..."
-systemctl stop ddotlp 2>/dev/null || true
-systemctl disable ddotlp 2>/dev/null || true
+systemctl stop ddops 2>/dev/null || true
+systemctl disable ddops 2>/dev/null || true
 
 # Remove files
 echo "Removing files..."
-rm -f /usr/local/bin/ddotlp
-rm -f /etc/systemd/system/ddotlp.service
-rm -rf /etc/ddotlp
-rm -f /var/log/ddotlp.log
-rm -f /var/run/ddotlp.pid
+rm -f /usr/local/bin/ddops
+rm -f /etc/systemd/system/ddops.service
+rm -rf /etc/ddops
+rm -f /var/log/ddops.log
+rm -f /var/run/ddops.pid
 
 # Reload systemd
 systemctl daemon-reload

@@ -5,7 +5,7 @@
  *
  * Copyright (c) 2025 ddosoft (www.ddosoft.com)
  *
- * This program automatically switches between TLP AC and battery modes
+ * This program automatically switches between performance and power-saving modes
  * based on 1-minute and 5-minute load average monitoring, providing
  * intelligent power management for Linux systems.
  */
@@ -27,7 +27,7 @@ void printUsage(const char* programName) {
               << "  -h, --help        Show this help message\n"
               << "  -v, --version     Show version information\n"
               << "\n"
-              << "Automatically switches between TLP AC and battery modes based on system load.\n";
+              << "Automatically switches between performance and power-saving modes based on system load.\n";
 }
 
 void printVersion() {
@@ -76,7 +76,7 @@ int main(int argc, char* argv[]) {
     }
 
     // Initialize logger with default log file
-    Logger::init("/var/log/ddotlp.log");
+    Logger::init("/var/log/ddops.log");
 
     if (runAsDaemon) {
         if (!Daemon::daemonize()) {

@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Build script for ddotlp using CMake
+# Build script for ddops using CMake
 
 set -e
 
-echo "Building ddotlp - CPU-based TLP power management daemon"
+echo "Building ddops - Dynamic Device Optimization Power Switcher"
 
 # Check if CMake is available
 if ! command -v cmake &> /dev/null; then
@@ -36,10 +36,10 @@ make -j$(nproc)
 
 echo ""
 echo "Build completed successfully!"
-echo "Executable: build/ddotlp"
+echo "Executable: build/ddops"
 echo ""
 echo "To install system-wide:"
 echo "  sudo make install"
 echo ""
 echo "To test the binary:"
-echo "  sudo ./ddotlp --help"
+echo "  sudo ./ddops --help"
