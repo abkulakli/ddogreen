@@ -14,18 +14,27 @@
 #include "tlp_manager.h"
 #include "daemon.h"
 #include "logger.h"
+#include "platform/platform_factory.h"
 #include <iostream>
 #include <thread>
 #include <chrono>
 #include <unistd.h>
 #include <getopt.h>
+#include <libgen.h>
+#include <linux/limits.h>
 
 void printUsage(const char* programName) {
     std::cout << "Usage: " << programName << " [OPTIONS]\n"
               << "Options:\n"
-              << "  -d, --daemon      Run as daemon\n"
-              << "  -h, --help        Show this help message\n"
-              << "  -v, --version     Show version information\n"
+              << "  -d, --daemon           Run as daemon\n"
+              << "  -h, --help             Show this help message\n"
+              << "  -v, --version          Show version information\n"
+              << "  -i, --install          Install system service\n"
+              << "  -u, --uninstall        Uninstall system service\n"
+              << "\n"
+              << "Service Management:\n"
+              << "  Install:   sudo " << programName << " --install (or -i)\n"
+              << "  Uninstall: sudo " << programName << " --uninstall (or -u)\n"
               << "\n"
               << "Automatically switches between performance and power-saving modes based on system load.\n";
 }
@@ -36,21 +45,94 @@ void printVersion() {
               << "Copyright (c) 2025 ddosoft (www.ddosoft.com)\n";
 }
 
+std::string getExecutablePath() {
+    char path[PATH_MAX];
+    ssize_t count = readlink("/proc/self/exe", path, PATH_MAX);
+    if (count != -1) {
+        path[count] = '\0';
+        return std::string(path);
+    }
+    return "";
+}
+
+int installService() {
+    // Check if running as root
+    if (geteuid() != 0) {
+        std::cerr << "Service installation requires root privileges. Please run with sudo." << std::endl;
+        return 1;
+    }
+
+    // Get the full path to this executable
+    std::string executablePath = getExecutablePath();
+    if (executablePath.empty()) {
+        std::cerr << "Failed to determine executable path" << std::endl;
+        return 1;
+    }
+
+    auto serviceManager = PlatformFactory::createServiceManager();
+    if (!serviceManager->isAvailable()) {
+        std::cerr << "Service management is not available on this platform" << std::endl;
+        return 1;
+    }
+
+    std::string serviceName = "ddops";
+    std::string description = "Dynamic Device Optimization Power Switcher - Automatic TLP power management";
+
+    if (serviceManager->installService(serviceName, executablePath, description)) {
+        std::cout << "Service installed successfully!" << std::endl;
+        std::cout << "To enable and start the service:" << std::endl;
+        std::cout << "  sudo systemctl enable " << serviceName << std::endl;
+        std::cout << "  sudo systemctl start " << serviceName << std::endl;
+        std::cout << "To check status:" << std::endl;
+        std::cout << "  sudo systemctl status " << serviceName << std::endl;
+        return 0;
+    } else {
+        std::cerr << "Failed to install service" << std::endl;
+        return 1;
+    }
+}
+
+int uninstallService() {
+    // Check if running as root
+    if (geteuid() != 0) {
+        std::cerr << "Service uninstallation requires root privileges. Please run with sudo." << std::endl;
+        return 1;
+    }
+
+    auto serviceManager = PlatformFactory::createServiceManager();
+    if (!serviceManager->isAvailable()) {
+        std::cerr << "Service management is not available on this platform" << std::endl;
+        return 1;
+    }
+
+    std::string serviceName = "ddops";
+
+    if (serviceManager->uninstallService(serviceName)) {
+        std::cout << "Service uninstalled successfully!" << std::endl;
+        return 0;
+    } else {
+        std::cerr << "Failed to uninstall service" << std::endl;
+        return 1;
+    }
+}
+
 int main(int argc, char* argv[]) {
     bool runAsDaemon = false;
 
     // Parse command line arguments (simplified)
     static struct option long_options[] = {
-        {"daemon",   no_argument, 0, 'd'},
-        {"help",     no_argument, 0, 'h'},
-        {"version",  no_argument, 0, 'v'},
+        {"daemon",      no_argument, 0, 'd'},
+        {"help",        no_argument, 0, 'h'},
+        {"version",     no_argument, 0, 'v'},
+        {"install",     no_argument, 0, 'i'},
+        {"uninstall",   no_argument, 0, 'u'},
         {0, 0, 0, 0}
     };
 
     int option_index = 0;
     int c;
 
-    while ((c = getopt_long(argc, argv, "dhv", long_options, &option_index)) != -1) {
+    while ((c = getopt_long(argc, argv, "dhviu", long_options, &option_index)) != -1) {
         switch (c) {
             case 'd':
                 runAsDaemon = true;
@@ -61,6 +143,10 @@ int main(int argc, char* argv[]) {
             case 'v':
                 printVersion();
                 return 0;
+            case 'i':  // --install
+                return installService();
+            case 'u':  // --uninstall
+                return uninstallService();
             case '?':
                 printUsage(argv[0]);
                 return 1;
@@ -75,8 +161,8 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // Initialize logger with default log file
-    Logger::init("/var/log/ddops.log");
+    // Initialize logger with console output when not running as daemon
+    Logger::init("/var/log/ddops.log", !runAsDaemon);
 
     if (runAsDaemon) {
         if (!Daemon::daemonize()) {

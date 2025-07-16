@@ -6,9 +6,11 @@
 #include <sstream>
 
 std::string Logger::m_logFile = "/var/log/ddops.log";
+bool Logger::m_consoleOutput = false;
 
-void Logger::init(const std::string& logFile) {
+void Logger::init(const std::string& logFile, bool consoleOutput) {
     m_logFile = logFile;
+    m_consoleOutput = consoleOutput;
     log(LogLevel::INFO, "Logger initialized");
 }
 
@@ -24,16 +26,22 @@ void Logger::log(LogLevel level, const std::string& message) {
 
     std::string logEntry = "[" + ss.str() + "] [" + levelToString(level) + "] " + message;
 
-    // Write to log file
-    std::ofstream logFileStream(m_logFile, std::ios::app);
-    if (logFileStream.is_open()) {
-        logFileStream << logEntry << std::endl;
-        logFileStream.close();
+    // Write to log file (only when not in console mode or for daemon mode)
+    if (!m_consoleOutput) {
+        std::ofstream logFileStream(m_logFile, std::ios::app);
+        if (logFileStream.is_open()) {
+            logFileStream << logEntry << std::endl;
+            logFileStream.close();
+        }
     }
 
-    // Also write to stderr for debugging (when not daemonized)
-    if (level == LogLevel::ERROR || level == LogLevel::WARNING) {
-        std::cerr << logEntry << std::endl;
+    // Write to console when console output is enabled or for errors/warnings
+    if (m_consoleOutput || level == LogLevel::ERROR || level == LogLevel::WARNING) {
+        if (level == LogLevel::ERROR || level == LogLevel::WARNING) {
+            std::cerr << logEntry << std::endl;
+        } else {
+            std::cout << logEntry << std::endl;
+        }
     }
 }
 

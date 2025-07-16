@@ -48,6 +48,10 @@ make -j$(nproc)
 echo "Installing ddops..."
 make install
 
+# Install the service using the built-in service management
+echo "Installing system service..."
+/usr/local/bin/ddops --install
+
 # Create log directory
 mkdir -p /var/log
 touch /var/log/ddops.log
@@ -56,17 +60,14 @@ chmod 644 /var/log/ddops.log
 # Create config directory
 mkdir -p /etc/ddotlp
 
-# Reload systemd
-systemctl daemon-reload
-
 echo "Installation completed successfully!"
 echo
 echo "To start the service:"
-echo "  sudo systemctl enable ddotlp"
-echo "  sudo systemctl start ddotlp"
+echo "  sudo systemctl enable ddops"
+echo "  sudo systemctl start ddops"
 echo
 echo "To check status:"
-echo "  sudo systemctl status ddotlp"
+echo "  sudo systemctl status ddops"
 echo
 echo "To view logs:"
-echo "  sudo journalctl -u ddotlp -f"
+echo "  sudo journalctl -u ddops -f"

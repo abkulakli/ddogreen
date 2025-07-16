@@ -49,6 +49,15 @@ cd ddops
 sudo ./install.sh
 ```
 
+**Or install manually:**
+```bash
+./build.sh
+sudo make install -C build
+sudo ddops --install    # Install system service
+sudo systemctl enable ddops
+sudo systemctl start ddops
+```
+
 ### 3. Start the Service
 ```bash
 sudo systemctl enable ddops
@@ -56,6 +65,52 @@ sudo systemctl start ddops
 ```
 
 That's it! ddops is now running and will automatically manage your power settings.
+
+## Command Line Options
+
+ddops supports several command-line options for different use cases:
+
+```bash
+Usage: ddops [OPTIONS]
+Options:
+  -d, --daemon           Run as daemon
+  -h, --help             Show this help message
+  -v, --version          Show version information
+  -i, --install          Install system service
+  -u, --uninstall        Uninstall system service
+```
+
+### Service Management
+```bash
+# Install the service
+sudo ddops --install
+
+# Uninstall the service  
+sudo ddops --uninstall
+
+# Run interactively (see live activity)
+sudo ddops
+
+# Run as daemon (silent operation)
+sudo ddops --daemon
+```
+
+### Interactive vs Daemon Mode
+
+**Interactive Mode** (for testing and monitoring):
+```bash
+sudo ddops
+```
+- Shows real-time activity on console
+- Perfect for seeing how ddops responds to system load
+- All log messages displayed with timestamps
+
+**Daemon Mode** (for production):
+```bash
+sudo ddops -d
+```
+- Silent operation, logs to file only
+- Suitable for systemd service deployment
 
 ## Check if It's Working
 
@@ -106,8 +161,15 @@ Check the detailed logs in `/var/log/ddops.log` for error messages.
 
 ## Uninstall
 
+**Using the script:**
 ```bash
 sudo ./uninstall.sh
+```
+
+**Or manually:**
+```bash
+sudo ddops --uninstall
+sudo rm -f /usr/local/bin/ddops
 ```
 
 ## Technical Details

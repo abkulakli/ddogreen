@@ -1,9 +1,87 @@
 # Active Context - ddops
 
 ## Current Work Focus
-**Project Status**: UPDATED - Platform Abstraction Layer Implemented
-**Last Updated**: July 16, 2025
-**Current Priority**: Cross-platform support with compile-time optimization
+**Project Status**: UPDATED - Console Logging for Non-Daemon Mode Implemented  
+**Last Updated**: July 17, 2025
+**Current Priority**: Complete executable with enhanced logging and service management
+
+## Latest Update: Documentation Consolidation ✅
+
+### Unified Documentation Strategy
+- **README.md**: Primary user-facing documentation with complete usage guide
+- **Memory Bank**: Development context and technical implementation details  
+- **Removed USAGE.md**: Redundant file eliminated, all usage info moved to README.md
+- **GitHub-First Approach**: README.md is what users see first, contains everything needed
+
+### Enhanced README.md Content
+- **Command-line options**: Complete reference for all flags (-d, -h, -v, -i, -u)
+- **Service management**: Built-in install/uninstall commands documented
+- **Interactive vs Daemon modes**: Clear explanation of both logging approaches
+- **Installation methods**: Both script-based and manual installation paths
+- **Real-world benefits**: Energy savings, cost reduction, environmental impact
+
+### Console Logging for Non-Daemon Mode
+- **Dual Logging Mode**: Automatic selection between console and file logging
+- **Non-Daemon Mode**: All log messages (DEBUG, INFO, WARNING, ERROR) printed to console
+- **Daemon Mode**: All messages logged to file (`/var/log/ddops.log`), only errors/warnings to stderr
+- **Smart Initialization**: Logger automatically detects daemon mode and configures output accordingly
+- **Real-Time Monitoring**: When running interactively, users can see live activity monitoring and TLP switching
+
+### Logging Behavior
+1. **Interactive Mode** (`ddops` without `-d`):
+   - All logs displayed on console with timestamps
+   - Real-time visibility of load monitoring and TLP mode changes
+   - Perfect for testing and debugging
+   - Example: `[2025-07-17 01:21:30.728] [INFO] System idle - switching to TLP battery mode`
+
+2. **Daemon Mode** (`ddops -d`):
+   - Silent console operation
+   - All logs written to `/var/log/ddops.log`
+   - Errors and warnings still shown on stderr for critical issues
+   - Suitable for production service deployment
+
+## Latest Update: Service Management Integration ✅
+
+### Built-in Service Installation/Uninstallation
+- **Command-Line Options**: 
+  - `-i, --install`: Install system service
+  - `-u, --uninstall`: Uninstall system service
+- **Platform Integration**: Uses existing IServiceManager interface through PlatformFactory
+- **Root Privilege Checking**: Proper validation for service management operations
+- **User-Friendly Output**: Clear instructions for enabling and starting services
+- **Executable Path Detection**: Automatic detection of current executable path for service installation
+
+### Service Management Features
+1. **Install Service**: `sudo ddops --install` or `sudo ddops -i`
+   - Creates systemd service file in `/etc/systemd/system/ddops.service`
+   - Configures proper daemon mode execution with `--daemon` flag
+   - Sets up PID file management and automatic restart
+   - Reloads systemd daemon
+   - Provides clear next steps for user
+
+2. **Uninstall Service**: `sudo ddops --uninstall` or `sudo ddops -u`
+   - Stops and disables service if running
+   - Removes systemd service file
+   - Reloads systemd daemon
+   - Clean removal with proper cleanup
+
+3. **Security**: Both operations require root privileges with clear error messages
+4. **Error Handling**: Comprehensive validation and user feedback
+
+### Enhanced Usage Information
+```
+Usage: ddops [OPTIONS]
+Options:
+  -d, --daemon           Run as daemon
+  -h, --help             Show this help message
+  -v, --version          Show version information
+  -i, --install          Install system service
+  -u, --uninstall        Uninstall system service
+
+Service Management:
+  Install:   sudo ddops --install (or -i)
+  Uninstall: sudo ddops --uninstall (or -u)
+```
 
 ## Latest Update: Platform Abstraction Layer ✅
 

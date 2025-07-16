@@ -1,16 +1,6 @@
 #!/bin/bash
 
-# # Stop and disable service
-systemctl stop ddops 2>/dev/null || true
-systemctl disable ddops 2>/dev/null || true
-
-# Remove files
-echo "Removing files..."
-rm -f /usr/local/bin/ddops
-rm -f /etc/systemd/system/ddops.service
-rm -rf /etc/ddops
-rm -f /var/log/ddops.log
-rm -f /var/run/ddops.pidion script for ddops
+# Uninstallation script for ddops
 
 set -e
 
@@ -22,20 +12,23 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
-# Stop and disable service
-echo "Stopping and disabling service..."
-systemctl stop ddops 2>/dev/null || true
-systemctl disable ddops 2>/dev/null || true
+# Uninstall service using the built-in service management
+echo "Uninstalling system service..."
+if [ -f /usr/local/bin/ddops ]; then
+    /usr/local/bin/ddops --uninstall
+else
+    echo "ddops executable not found, manually cleaning up service..."
+    systemctl stop ddops 2>/dev/null || true
+    systemctl disable ddops 2>/dev/null || true
+    rm -f /etc/systemd/system/ddops.service
+    systemctl daemon-reload
+fi
 
 # Remove files
 echo "Removing files..."
 rm -f /usr/local/bin/ddops
-rm -f /etc/systemd/system/ddops.service
-rm -rf /etc/ddops
+rm -rf /etc/ddotlp
 rm -f /var/log/ddops.log
 rm -f /var/run/ddops.pid
-
-# Reload systemd
-systemctl daemon-reload
 
 echo "Uninstallation completed successfully!"
