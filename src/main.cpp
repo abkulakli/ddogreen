@@ -66,11 +66,14 @@ int installService() {
     }
 
     // Get the full path to this executable
-    std::string executablePath = getExecutablePath();
-    if (executablePath.empty()) {
+    std::string currentExecutablePath = getExecutablePath();
+    if (currentExecutablePath.empty()) {
         std::cerr << "Failed to determine executable path" << std::endl;
         return 1;
     }
+
+    // Define the target installation path
+    std::string targetExecutablePath = "/usr/local/bin/ddops";
 
     auto serviceManager = PlatformFactory::createServiceManager();
     if (!serviceManager->isAvailable()) {
@@ -79,6 +82,19 @@ int installService() {
     }
 
     std::cout << "Setting up directories and permissions..." << std::endl;
+    
+    // Copy executable to system location
+    std::cout << "Installing executable to " << targetExecutablePath << "..." << std::endl;
+    std::string copyCommand = "cp \"" + currentExecutablePath + "\" \"" + targetExecutablePath + "\"";
+    if (system(copyCommand.c_str()) != 0) {
+        std::cerr << "Failed to copy executable to " << targetExecutablePath << std::endl;
+        return 1;
+    }
+    
+    // Set proper permissions
+    if (system(("chmod 755 \"" + targetExecutablePath + "\"").c_str()) != 0) {
+        std::cerr << "Warning: Failed to set executable permissions" << std::endl;
+    }
     
     // Create log directory and file
     if (system("mkdir -p /var/log") != 0) {
@@ -100,7 +116,7 @@ int installService() {
     std::string description = "Dynamic Device Optimization Power Switcher - Automatic TLP power management";
 
     std::cout << "Installing system service..." << std::endl;
-    if (serviceManager->installService(serviceName, executablePath, description)) {
+    if (serviceManager->installService(serviceName, targetExecutablePath, description)) {
         std::cout << "Service installed, enabled, and started successfully!" << std::endl;
         std::cout << "ddops is now running and will auto-start on boot." << std::endl;
         std::cout << "To view logs:" << std::endl;
@@ -131,11 +147,16 @@ int uninstallService() {
     if (serviceManager->uninstallService(serviceName)) {
         std::cout << "Cleaning up files..." << std::endl;
         
+        // Remove installed executable
+        if (system("rm -f /usr/local/bin/ddops") != 0) {
+            std::cerr << "Warning: Failed to remove installed executable" << std::endl;
+        }
+        
         // Clean up log and config files
         if (system("rm -f /var/log/ddops.log") != 0) {
             std::cerr << "Warning: Failed to remove log file" << std::endl;
         }
-        if (system("rm -f /var/run/ddops.pid") != 0) {
+        if (system("rm -f /run/ddops.pid") != 0) {
             std::cerr << "Warning: Failed to remove PID file" << std::endl;
         }
         if (system("rm -rf /etc/ddops") != 0) {

@@ -28,18 +28,35 @@ public:
         
         std::string serviceFile = "/etc/systemd/system/" + serviceName + ".service";
         
-        // Create systemd service file content
+        // Create systemd service file content with security settings
         std::string serviceContent = 
             "[Unit]\n"
             "Description=" + description + "\n"
+            "Documentation=https://github.com/abkulakli/ddops\n"
+            "Documentation=https://www.ddosoft.com\n"
             "After=multi-user.target\n"
             "\n"
             "[Service]\n"
             "Type=forking\n"
             "ExecStart=" + executablePath + " --daemon\n"
-            "PIDFile=/var/run/" + serviceName + ".pid\n"
+            "ExecReload=/bin/kill -HUP $MAINPID\n"
+            "PIDFile=/run/" + serviceName + ".pid\n"
             "Restart=always\n"
+            "RestartSec=10\n"
             "User=root\n"
+            "Group=root\n"
+            "TimeoutStartSec=30\n"
+            "RemainAfterExit=no\n"
+            "\n"
+            "# Security settings\n"
+            "NoNewPrivileges=yes\n"
+            "ProtectSystem=strict\n"
+            "ProtectHome=yes\n"
+            "ReadWritePaths=/var/log /run /tmp /proc\n"
+            "PrivateTmp=yes\n"
+            "ProtectKernelTunables=yes\n"
+            "ProtectKernelModules=yes\n"
+            "ProtectControlGroups=yes\n"
             "\n"
             "[Install]\n"
             "WantedBy=multi-user.target\n";

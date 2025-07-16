@@ -49,4 +49,3 @@ add_executable(ddops ${SOURCES})
 
 # Installation
 install(TARGETS ddops DESTINATION /usr/local/bin)
-install(FILES systemd/ddops.service DESTINATION /etc/systemd/system)
