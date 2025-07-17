@@ -9,6 +9,7 @@
 #include <cstdlib>
 #include <vector>
 #include <queue>
+#include <algorithm>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -111,7 +112,7 @@ private:
         }
         
         // Add CPU usage counter
-        status = PdhAddCounter(m_cpuQuery, L"\\Processor(_Total)\\% Processor Time", 0, &m_cpuCounter);
+        status = PdhAddCounterW(m_cpuQuery, L"\\Processor(_Total)\\% Processor Time", 0, &m_cpuCounter);
         if (status != ERROR_SUCCESS) {
             Logger::error("Failed to add CPU counter: " + std::to_string(status));
             PdhCloseQuery(m_cpuQuery);
@@ -204,7 +205,7 @@ private:
         }
         
         // Calculate average over the requested period
-        const size_t numSamples = std::min(samples, values.size());
+        const size_t numSamples = (std::min)(samples, values.size());
         const size_t startIndex = values.size() - numSamples;
         
         double sum = 0.0;

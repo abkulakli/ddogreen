@@ -1,16 +1,28 @@
 #include "daemon.h"
 #include "logger.h"
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <signal.h>
-#include <fcntl.h>
 #include <iostream>
 #include <fstream>
+
+#ifdef _WIN32
+    #include <windows.h>
+    #include <io.h>
+#else
+    #include <unistd.h>
+    #include <sys/types.h>
+    #include <sys/stat.h>
+    #include <signal.h>
+    #include <fcntl.h>
+#endif
 
 volatile bool Daemon::s_running = true;
 
 bool Daemon::daemonize() {
+#ifdef _WIN32
+    // On Windows, we don't need to fork/daemonize in the traditional Unix sense
+    // The service framework handles this for us
+    Logger::info("Running on Windows - service mode");
+    return true;
+#else
     // Fork the first time
     pid_t pid = fork();
 
@@ -105,16 +117,35 @@ bool Daemon::daemonize() {
 
     Logger::info("Daemon started with PID: " + std::to_string(getpid()));
     return true;
+#endif
 }
 
 void Daemon::setupSignalHandlers() {
+#ifdef _WIN32
+    // On Windows, we use SetConsoleCtrlHandler for handling termination
+    SetConsoleCtrlHandler([](DWORD dwCtrlType) -> BOOL {
+        switch (dwCtrlType) {
+            case CTRL_C_EVENT:
+            case CTRL_BREAK_EVENT:
+            case CTRL_CLOSE_EVENT:
+            case CTRL_SHUTDOWN_EVENT:
+                Logger::info("Received Windows termination signal");
+                s_running = false;
+                return TRUE;
+            default:
+                return FALSE;
+        }
+    }, TRUE);
+#else
     signal(SIGTERM, signalHandler);
     signal(SIGINT, signalHandler);
     signal(SIGHUP, signalHandler);
     signal(SIGQUIT, signalHandler);
+#endif
 }
 
 void Daemon::signalHandler(int signal) {
+#ifndef _WIN32
     switch (signal) {
         case SIGTERM:
         case SIGINT:
@@ -129,6 +160,7 @@ void Daemon::signalHandler(int signal) {
             Logger::warning("Received unknown signal: " + std::to_string(signal));
             break;
     }
+#endif
 }
 
 bool Daemon::shouldRun() {

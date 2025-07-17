@@ -6,8 +6,16 @@ project(ddogreen VERSION 1.0.0
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Compiler flags
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -O2")
+# Compiler-specific flags
+if(MSVC)
+    # Microsoft Visual C++ flags
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /O2")
+    # Disable specific warnings that are too verbose
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4996")  # Disable deprecation warnings
+else()
+    # GCC/Clang flags
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -O2")
+endif()
 
 # Source files
 set(SOURCES

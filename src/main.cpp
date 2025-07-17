@@ -17,10 +17,18 @@
 #include <iostream>
 #include <thread>
 #include <chrono>
-#include <unistd.h>
-#include <getopt.h>
-#include <libgen.h>
-#include <linux/limits.h>
+
+#ifdef _WIN32
+    #include <io.h>
+    #include <direct.h>
+    #include <windows.h>
+    #define PATH_MAX 260
+#else
+    #include <unistd.h>
+    #include <getopt.h>
+    #include <libgen.h>
+    #include <linux/limits.h>
+#endif
 
 void printUsage(const char* programName) {
     std::cout << "Usage: " << programName << " [OPTIONS]\n"
@@ -38,6 +46,26 @@ void printUsage(const char* programName) {
               << "Automatically switches between performance and power-saving modes based on system load.\n";
 }
 
+#ifdef _WIN32
+bool isRunningAsAdmin() {
+    BOOL isAdmin = FALSE;
+    PSID administratorsGroup = NULL;
+    
+    // Allocate and initialize a SID of the administrators group.
+    SID_IDENTIFIER_AUTHORITY ntAuthority = SECURITY_NT_AUTHORITY;
+    if (AllocateAndInitializeSid(&ntAuthority, 2, SECURITY_BUILTIN_DOMAIN_RID,
+                                DOMAIN_ALIAS_RID_ADMINS, 0, 0, 0, 0, 0, 0, &administratorsGroup)) {
+        // Determine whether the SID of administrators group is enabled in the primary access token of the process.
+        if (!CheckTokenMembership(NULL, administratorsGroup, &isAdmin)) {
+            isAdmin = FALSE;
+        }
+        FreeSid(administratorsGroup);
+    }
+    
+    return isAdmin == TRUE;
+}
+#endif
+
 void printVersion() {
     std::cout << "ddogreen version 1.0.0\n"
               << "Intelligent Green Power Management for Sustainable Computing\n"
@@ -45,6 +73,14 @@ void printVersion() {
 }
 
 std::string getExecutablePath() {
+#ifdef _WIN32
+    char path[PATH_MAX];
+    DWORD result = GetModuleFileNameA(NULL, path, PATH_MAX);
+    if (result == 0 || result == PATH_MAX) {
+        return "";
+    }
+    return std::string(path);
+#else
     char path[PATH_MAX];
     ssize_t count = readlink("/proc/self/exe", path, PATH_MAX);
     if (count != -1) {
@@ -52,14 +88,22 @@ std::string getExecutablePath() {
         return std::string(path);
     }
     return "";
+#endif
 }
 
 int installService() {
-    // Check if running as root
+    // Check if running as administrator/root
+#ifdef _WIN32
+    if (!isRunningAsAdmin()) {
+        std::cerr << "Service installation requires administrator privileges. Please run as administrator." << std::endl;
+        return 1;
+    }
+#else
     if (geteuid() != 0) {
         std::cerr << "Service installation requires root privileges. Please run with sudo." << std::endl;
         return 1;
     }
+#endif
 
     // Get the full path to this executable
     std::string currentExecutablePath = getExecutablePath();
@@ -125,11 +169,18 @@ int installService() {
 }
 
 int uninstallService() {
-    // Check if running as root
+    // Check if running as administrator/root
+#ifdef _WIN32
+    if (!isRunningAsAdmin()) {
+        std::cerr << "Service uninstallation requires administrator privileges. Please run as administrator." << std::endl;
+        return 1;
+    }
+#else
     if (geteuid() != 0) {
         std::cerr << "Service uninstallation requires root privileges. Please run with sudo." << std::endl;
         return 1;
     }
+#endif
 
     auto serviceManager = PlatformFactory::createServiceManager();
     if (!serviceManager->isAvailable()) {
@@ -170,7 +221,30 @@ int uninstallService() {
 int main(int argc, char* argv[]) {
     bool runAsDaemon = false;
 
-    // Parse command line arguments (simplified)
+    // Parse command line arguments
+#ifdef _WIN32
+    // Simple Windows command line parsing
+    for (int i = 1; i < argc; i++) {
+        std::string arg = argv[i];
+        if (arg == "-d" || arg == "--daemon") {
+            runAsDaemon = true;
+        } else if (arg == "-h" || arg == "--help") {
+            printUsage(argv[0]);
+            return 0;
+        } else if (arg == "-v" || arg == "--version") {
+            printVersion();
+            return 0;
+        } else if (arg == "-i" || arg == "--install") {
+            return installService();
+        } else if (arg == "-u" || arg == "--uninstall") {
+            return uninstallService();
+        } else {
+            std::cerr << "Unknown option: " << arg << std::endl;
+            printUsage(argv[0]);
+            return 1;
+        }
+    }
+#else
     static struct option long_options[] = {
         {"daemon",      no_argument, 0, 'd'},
         {"help",        no_argument, 0, 'h'},
@@ -205,12 +279,20 @@ int main(int argc, char* argv[]) {
                 break;
         }
     }
+#endif
 
-    // Check if running as root
+    // Check if running as administrator/root
+#ifdef _WIN32
+    if (!isRunningAsAdmin()) {
+        std::cerr << "This program must be run as administrator to manage power settings." << std::endl;
+        return 1;
+    }
+#else
     if (geteuid() != 0) {
         std::cerr << "This program must be run as root to execute TLP commands." << std::endl;
         return 1;
     }
+#endif
 
     // Initialize logger with console output when not running as daemon
     Logger::init("/var/log/ddogreen.log", !runAsDaemon);
