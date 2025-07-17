@@ -47,5 +47,11 @@ include_directories(include)
 # Create executable
 add_executable(ddogreen ${SOURCES})
 
+# Platform-specific libraries
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    # Link Windows-specific libraries for Performance Counters
+    target_link_libraries(ddogreen pdh)
+endif()
+
 # Installation
 install(TARGETS ddogreen DESTINATION /usr/local/bin)

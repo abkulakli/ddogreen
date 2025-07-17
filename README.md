@@ -2,6 +2,8 @@
 
 A smart sustainability-focused service that automatically optimizes your PC and laptop power consumption by intelligently switching between high-performance and power-saving modes based on actual system usage patterns.
 
+**Cross-Platform Support**: Works on Linux (with TLP) and Windows (with Power Plans)
+
 **Developed by DDOSoft Sustainability Solutions (www.ddosoft.com)**
 
 ## Why Use ddogreen?
@@ -25,11 +27,17 @@ A smart sustainability-focused service that automatically optimizes your PC and 
 ddogreen watches how busy your computer is and automatically switches power modes:
 
 - **High Performance Mode**: When you're actively working (system load > 10%)
+  - **Linux**: TLP AC mode (`tlp ac`)
+  - **Windows**: High Performance power plan
 - **Power Saving Mode**: When your laptop is mostly idle (system load ≤ 10%)
+  - **Linux**: TLP battery mode (`tlp bat`)
+  - **Windows**: Power Saver power plan
 
 ## Installation
 
-### 1. Install Requirements
+### Linux Installation
+
+#### 1. Install Requirements
 Ubuntu/Debian:
 ```bash
 sudo apt update
@@ -41,7 +49,7 @@ Fedora/RHEL:
 sudo dnf install gcc-c++ cmake tlp
 ```
 
-### 2. Build and Install
+#### 2. Build and Install
 ```bash
 git clone <repository-url>
 cd ddogreen
@@ -50,16 +58,39 @@ sudo make install -C build
 sudo ddogreen --install    # Install and start system service
 ```
 
+### Windows Installation
+
+#### 1. Install Requirements
+- **Visual Studio** or **MinGW-w64** with C++17 support
+- **CMake** (3.16 or later)
+- **Git** for cloning the repository
+
+#### 2. Build and Install
+```cmd
+git clone <repository-url>
+cd ddogreen
+mkdir build
+cd build
+cmake ..
+cmake --build . --config Release
+```
+
+#### 3. Install as Windows Service
+```cmd
+# Run as Administrator
+ddogreen.exe --install    # Install and start Windows service
+```
+
 That's it! ddogreen is now running and will automatically manage your power settings.
 
 ## Command Line Options
 
-ddogreen supports several command-line options for different use cases:
+ddogreen supports several command-line options for different use cases on both Linux and Windows:
 
 ```bash
 Usage: ddogreen [OPTIONS]
 Options:
-  -d, --daemon           Run as daemon
+  -d, --daemon           Run as daemon/service
   -h, --help             Show this help message
   -v, --version          Show version information
   -i, --install          Install system service
@@ -67,6 +98,8 @@ Options:
 ```
 
 ### Service Management
+
+#### Linux (systemd)
 ```bash
 # Install the service
 sudo ddogreen --install
@@ -81,33 +114,64 @@ sudo ddogreen
 sudo ddogreen --daemon
 ```
 
+#### Windows (Service Control Manager)
+```cmd
+# Install the service (run as Administrator)
+ddogreen.exe --install
+
+# Uninstall the service (run as Administrator)
+ddogreen.exe --uninstall
+
+# Run interactively (see live activity)
+ddogreen.exe
+
+# Run as service (silent operation)
+ddogreen.exe --daemon
+```
+
 ### Interactive vs Daemon Mode
 
 **Interactive Mode** (for testing and monitoring):
-```bash
-sudo ddogreen
-```
+- **Linux**: `sudo ddogreen`
+- **Windows**: `ddogreen.exe`
 - Shows real-time activity on console
 - Perfect for seeing how ddogreen responds to system load
 - All log messages displayed with timestamps
 
-**Daemon Mode** (for production):
-```bash
-sudo ddogreen -d
-```
+**Daemon/Service Mode** (for production):
+- **Linux**: `sudo ddogreen -d`
+- **Windows**: `ddogreen.exe -d`
 - Silent operation, logs to file only
-- Suitable for systemd service deployment
+- Suitable for systemd/Windows service deployment
 
 ## Check if It's Working
 
 ### Service Status
+
+#### Linux
 ```bash
 sudo systemctl status ddogreen
 ```
 
+#### Windows
+```cmd
+sc query ddogreen
+# or
+services.msc  # Look for "ddogreen" service
+```
+
 ### See What It's Doing
+
+#### Linux
 ```bash
 sudo tail -f /var/log/ddogreen.log
+```
+
+#### Windows
+```cmd
+type C:\Windows\System32\ddogreen.log
+# or monitor with:
+Get-Content C:\Windows\System32\ddogreen.log -Wait
 ```
 
 You'll see messages like:
@@ -117,8 +181,15 @@ You'll see messages like:
 ```
 
 ### Check Your Current Power Mode
+
+#### Linux
 ```bash
 sudo tlp-stat -s
+```
+
+#### Windows
+```cmd
+powercfg /getactivescheme
 ```
 
 ## Your Energy Impact
@@ -134,6 +205,8 @@ sudo tlp-stat -s
 
 ## Troubleshooting
 
+### Linux
+
 **Service won't start?**
 - Make sure TLP is installed: `which tlp`
 - Check service status: `sudo systemctl status ddogreen`
@@ -142,25 +215,82 @@ sudo tlp-stat -s
 - Check the logs: `sudo tail /var/log/ddogreen.log`
 - Verify TLP is working: `sudo tlp-stat`
 
+### Windows
+
+**Service won't start?**
+- Make sure you ran the install command as Administrator
+- Check service status: `sc query ddogreen`
+- Verify power plans are available: `powercfg /list`
+
+**Not switching modes?**
+- Check the logs: `type C:\Windows\System32\ddogreen.log`
+- Verify power plans: `powercfg /getactivescheme`
+- Ensure power plans are enabled: `powercfg /list`
+
 **Need help?**
-Check the detailed logs in `/var/log/ddogreen.log` for error messages.
+Check the detailed logs for error messages:
+- **Linux**: `/var/log/ddogreen.log`
+- **Windows**: `C:\Windows\System32\ddogreen.log`
 
 ## Uninstall
 
+### Linux
 ```bash
 sudo ddogreen --uninstall
 sudo rm -f /usr/local/bin/ddogreen
 ```
 
+### Windows
+```cmd
+# Run as Administrator
+ddogreen.exe --uninstall
+del C:\path\to\ddogreen.exe
+```
+
 ## Technical Details
 
+### Cross-Platform Architecture
 - **No configuration needed** - works automatically with smart defaults
 - **Minimal resource usage** - checks system load once per minute
-- **Works everywhere** - any Linux system with TLP
-- **Safe** - only changes TLP power modes, nothing else
+- **Platform abstraction** - same core logic, platform-specific implementations
+- **Safe** - only changes power modes, nothing else
+
+### Power Management
+- **Linux**: Uses TLP (ThinkPad-Linux-Power) for power management
+  - High Performance: `tlp ac` (AC adapter mode)
+  - Power Saving: `tlp bat` (battery mode)
+- **Windows**: Uses built-in Power Plans via `powercfg`
+  - High Performance: High Performance power plan
+  - Power Saving: Power Saver power plan
+
+### System Monitoring
+- **Linux**: Reads load averages from `/proc/loadavg`
+- **Windows**: Uses Performance Counters to calculate load averages
+- **Threshold**: 10% CPU load per core determines mode switching
+- **Check Interval**: Every 60 seconds for minimal system impact
+
+### Service Management
+- **Linux**: Integrates with systemd for service management
+- **Windows**: Uses Service Control Manager (SCM) for Windows services
+- **Installation**: Automatic service installation and configuration
+- **Logging**: Platform-appropriate log file locations
 
 ---
 
-**Make your Linux laptop more sustainable with zero effort!**
+**Make your laptop more sustainable with zero effort - on Linux and Windows!**
 
 *Every laptop running ddogreen helps reduce global energy consumption.*
+
+## Platform Support
+
+- ✅ **Linux** - Full support with TLP integration
+- ✅ **Windows** - Full support with Power Plans integration  
+- 🚧 **macOS** - Architecture ready, implementation pending
+
+## Same Rules, Every Platform
+
+ddogreen uses the same intelligent logic across all platforms:
+- **10% CPU load threshold** for performance/power-saving switching
+- **60-second monitoring interval** for minimal system impact
+- **Automatic service/daemon management** for production deployment
+- **Cross-platform logging and monitoring** capabilities
