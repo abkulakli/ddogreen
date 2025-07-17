@@ -17,7 +17,7 @@ public:
 
     /**
      * Install launchd service
-     * @param serviceName name of the service (e.g., "ddops")
+     * @param serviceName name of the service (e.g., "ddogreen")
      * @param executablePath full path to executable
      * @param description service description
      * @return true if successful

@@ -1,4 +1,4 @@
-# Tech Context - ddops
+# Tech Context - ddogreen
 
 ## Technology Stack
 
@@ -90,7 +90,7 @@ sudo apt install tlp
 
 # Clone and build
 git clone <repository>
-cd ddops
+cd ddogreen
 ./build.sh
 ```
 
@@ -106,15 +106,15 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -O2")
 
 ### Systemd Service Integration
 ```ini
-# /etc/systemd/system/ddops.service
+# /etc/systemd/system/ddogreen.service
 [Unit]
 Description=Dynamic TLP Power Management Daemon
 After=multi-user.target
 
 [Service]
 Type=forking
-ExecStart=/usr/local/bin/ddops --daemon
-PIDFile=/var/run/ddops.pid
+ExecStart=/usr/local/bin/ddogreen --daemon
+PIDFile=/var/run/ddogreen.pid
 Restart=always
 User=root
 ```
@@ -127,17 +127,17 @@ User=root
 
 ### File System Layout
 ```
-/usr/local/bin/ddops              # Main executable
-/etc/systemd/system/ddops.service # Service definition
-/etc/ddops/ddops.conf             # Configuration file
-/etc/logrotate.d/ddops            # Log rotation config
-/var/log/ddops.log                # Main log file
-/var/run/ddops.pid                # Process ID file
+/usr/local/bin/ddogreen              # Main executable
+/etc/systemd/system/ddogreen.service # Service definition
+/etc/ddogreen/ddogreen.conf             # Configuration file
+/etc/logrotate.d/ddogreen            # Log rotation config
+/var/log/ddogreen.log                # Main log file
+/var/run/ddogreen.pid                # Process ID file
 ```
 
 ### Configuration Management
 - **Format**: Key-value pairs (shell-style)
-- **Location**: `/etc/ddops/ddops.conf`
+- **Location**: `/etc/ddogreen/ddogreen.conf`
 - **Parsing**: Simple string parsing (no external config libraries)
 - **Validation**: Runtime validation with error logging
 
@@ -147,7 +147,7 @@ User=root
 ```cmake
 # Project definition
 cmake_minimum_required(VERSION 3.16)
-project(ddops VERSION 1.0.0)
+project(ddogreen VERSION 1.0.0)
 
 # Compiler settings
 set(CMAKE_CXX_STANDARD 17)
@@ -158,8 +158,8 @@ set(SOURCES src/main.cpp src/activity_monitor.cpp ...)
 include_directories(include)
 
 # Installation rules
-install(TARGETS ddops DESTINATION /usr/local/bin)
-install(FILES systemd/ddops.service DESTINATION /etc/systemd/system)
+install(TARGETS ddogreen DESTINATION /usr/local/bin)
+install(FILES systemd/ddogreen.service DESTINATION /etc/systemd/system)
 ```
 
 ### Build Scripts
@@ -192,11 +192,11 @@ src/
 ### Configuration Files
 ```
 config/
-├── ddops.conf          # Runtime configuration
-└── ddops-logrotate     # Log rotation settings
+├── ddogreen.conf          # Runtime configuration
+└── ddogreen-logrotate     # Log rotation settings
 
 systemd/
-└── ddops.service       # Service definition
+└── ddogreen.service       # Service definition
 ```
 
 ## Technical Constraints
@@ -243,11 +243,11 @@ systemd/
 - **Format**: Structured logs with millisecond timestamps
 - **Levels**: DEBUG, INFO, WARNING, ERROR
 - **Rotation**: Daily rotation, 30-day retention
-- **Location**: `/var/log/ddops.log`
+- **Location**: `/var/log/ddogreen.log`
 
 ### System Integration
-- **Systemd Status**: `systemctl status ddops`
-- **Journal Logs**: `journalctl -u ddops -f`
+- **Systemd Status**: `systemctl status ddogreen`
+- **Journal Logs**: `journalctl -u ddogreen -f`
 - **Process Monitoring**: Standard process monitoring tools
 - **Health Checks**: Service restart on failure
 

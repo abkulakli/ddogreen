@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Build script for ddops using CMake
+# Build script for ddogreen using CMake
 
 set -e
 
-echo "Building ddops - Dynamic Device Optimization Power Switcher"
+echo "Building ddogreen - Intelligent Green Power Management"
 
 # Check if CMake is available
 if ! command -v cmake &> /dev/null; then
@@ -36,10 +36,10 @@ make -j$(nproc)
 
 echo ""
 echo "Build completed successfully!"
-echo "Executable: build/ddops"
+echo "Executable: build/ddogreen"
 echo ""
 echo "To install system-wide:"
 echo "  sudo make install"
 echo ""
 echo "To test the binary:"
-echo "  sudo ./ddops --help"
+echo "  sudo ./ddogreen --help"

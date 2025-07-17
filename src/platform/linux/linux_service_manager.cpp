@@ -17,7 +17,7 @@ public:
 
     /**
      * Install systemd service
-     * @param serviceName name of the service (e.g., "ddops")
+     * @param serviceName name of the service (e.g., "ddogreen")
      * @param executablePath full path to executable
      * @param description service description
      * @return true if successful
@@ -32,7 +32,7 @@ public:
         std::string serviceContent = 
             "[Unit]\n"
             "Description=" + description + "\n"
-            "Documentation=https://github.com/abkulakli/ddops\n"
+            "Documentation=https://github.com/abkulakli/ddogreen\n"
             "Documentation=https://www.ddosoft.com\n"
             "After=multi-user.target\n"
             "\n"

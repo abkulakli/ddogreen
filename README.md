@@ -1,10 +1,10 @@
-# ddops – Dynamic Device Optimization Power Switcher
+# ddogreen – Intelligent Green Power Management
 
-A smart cross-platform service that automatically optimizes your device's power settings by switching between high-performance and power-saving modes based on system load and usage patterns.
+A smart sustainability-focused service that automatically optimizes your PC and laptop power consumption by intelligently switching between high-performance and power-saving modes based on actual system usage patterns.
 
-**Developed by ddosoft (www.ddosoft.com)**
+**Developed by DDOSoft Sustainability Solutions (www.ddosoft.com)**
 
-## Why Use ddops?
+## Why Use ddogreen?
 
 ### Longer Battery Life
 - **20-30% more battery time** with no effort from you
@@ -22,7 +22,7 @@ A smart cross-platform service that automatically optimizes your device's power 
 
 ## How It Works
 
-ddops watches how busy your computer is and automatically switches power modes:
+ddogreen watches how busy your computer is and automatically switches power modes:
 
 - **High Performance Mode**: When you're actively working (system load > 10%)
 - **Power Saving Mode**: When your laptop is mostly idle (system load ≤ 10%)
@@ -44,20 +44,20 @@ sudo dnf install gcc-c++ cmake tlp
 ### 2. Build and Install
 ```bash
 git clone <repository-url>
-cd ddops
+cd ddogreen
 ./build.sh
 sudo make install -C build
-sudo ddops --install    # Install and start system service
+sudo ddogreen --install    # Install and start system service
 ```
 
-That's it! ddops is now running and will automatically manage your power settings.
+That's it! ddogreen is now running and will automatically manage your power settings.
 
 ## Command Line Options
 
-ddops supports several command-line options for different use cases:
+ddogreen supports several command-line options for different use cases:
 
 ```bash
-Usage: ddops [OPTIONS]
+Usage: ddogreen [OPTIONS]
 Options:
   -d, --daemon           Run as daemon
   -h, --help             Show this help message
@@ -69,31 +69,31 @@ Options:
 ### Service Management
 ```bash
 # Install the service
-sudo ddops --install
+sudo ddogreen --install
 
 # Uninstall the service  
-sudo ddops --uninstall
+sudo ddogreen --uninstall
 
 # Run interactively (see live activity)
-sudo ddops
+sudo ddogreen
 
 # Run as daemon (silent operation)
-sudo ddops --daemon
+sudo ddogreen --daemon
 ```
 
 ### Interactive vs Daemon Mode
 
 **Interactive Mode** (for testing and monitoring):
 ```bash
-sudo ddops
+sudo ddogreen
 ```
 - Shows real-time activity on console
-- Perfect for seeing how ddops responds to system load
+- Perfect for seeing how ddogreen responds to system load
 - All log messages displayed with timestamps
 
 **Daemon Mode** (for production):
 ```bash
-sudo ddops -d
+sudo ddogreen -d
 ```
 - Silent operation, logs to file only
 - Suitable for systemd service deployment
@@ -102,12 +102,12 @@ sudo ddops -d
 
 ### Service Status
 ```bash
-sudo systemctl status ddops
+sudo systemctl status ddogreen
 ```
 
 ### See What It's Doing
 ```bash
-sudo tail -f /var/log/ddops.log
+sudo tail -f /var/log/ddogreen.log
 ```
 
 You'll see messages like:
@@ -136,20 +136,20 @@ sudo tlp-stat -s
 
 **Service won't start?**
 - Make sure TLP is installed: `which tlp`
-- Check service status: `sudo systemctl status ddops`
+- Check service status: `sudo systemctl status ddogreen`
 
 **Not switching modes?**
-- Check the logs: `sudo tail /var/log/ddops.log`
+- Check the logs: `sudo tail /var/log/ddogreen.log`
 - Verify TLP is working: `sudo tlp-stat`
 
 **Need help?**
-Check the detailed logs in `/var/log/ddops.log` for error messages.
+Check the detailed logs in `/var/log/ddogreen.log` for error messages.
 
 ## Uninstall
 
 ```bash
-sudo ddops --uninstall
-sudo rm -f /usr/local/bin/ddops
+sudo ddogreen --uninstall
+sudo rm -f /usr/local/bin/ddogreen
 ```
 
 ## Technical Details
@@ -163,4 +163,4 @@ sudo rm -f /usr/local/bin/ddops
 
 **Make your Linux laptop more sustainable with zero effort!**
 
-*Every laptop running ddops helps reduce global energy consumption.*
+*Every laptop running ddogreen helps reduce global energy consumption.*

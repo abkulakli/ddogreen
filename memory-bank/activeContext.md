@@ -1,4 +1,4 @@
-# Active Context - ddops
+# Active Context - ddogreen
 
 ## Current Work Focus
 **Project Status**: UPDATED - Console Logging for Non-Daemon Mode Implemented
@@ -81,20 +81,20 @@ powerManager->setPowerSavingMode();     // Maps to tlp bat on Linux
 ### Console Logging for Non-Daemon Mode
 - **Dual Logging Mode**: Automatic selection between console and file logging
 - **Non-Daemon Mode**: All log messages (DEBUG, INFO, WARNING, ERROR) printed to console
-- **Daemon Mode**: All messages logged to file (`/var/log/ddops.log`), only errors/warnings to stderr
+- **Daemon Mode**: All messages logged to file (`/var/log/ddogreen.log`), only errors/warnings to stderr
 - **Smart Initialization**: Logger automatically detects daemon mode and configures output accordingly
 - **Real-Time Monitoring**: When running interactively, users can see live activity monitoring and TLP switching
 
 ### Logging Behavior
-1. **Interactive Mode** (`ddops` without `-d`):
+1. **Interactive Mode** (`ddogreen` without `-d`):
    - All logs displayed on console with timestamps
    - Real-time visibility of load monitoring and TLP mode changes
    - Perfect for testing and debugging
    - Example: `[2025-07-17 01:21:30.728] [INFO] System idle - switching to TLP battery mode`
 
-2. **Daemon Mode** (`ddops -d`):
+2. **Daemon Mode** (`ddogreen -d`):
    - Silent console operation
-   - All logs written to `/var/log/ddops.log`
+   - All logs written to `/var/log/ddogreen.log`
    - Errors and warnings still shown on stderr for critical issues
    - Suitable for production service deployment
 
@@ -110,14 +110,14 @@ powerManager->setPowerSavingMode();     // Maps to tlp bat on Linux
 - **Executable Path Detection**: Automatic detection of current executable path for service installation
 
 ### Service Management Features
-1. **Install Service**: `sudo ddops --install` or `sudo ddops -i`
-   - Creates systemd service file in `/etc/systemd/system/ddops.service`
+1. **Install Service**: `sudo ddogreen --install` or `sudo ddogreen -i`
+   - Creates systemd service file in `/etc/systemd/system/ddogreen.service`
    - Configures proper daemon mode execution with `--daemon` flag
    - Sets up PID file management and automatic restart
    - Reloads systemd daemon
    - Provides clear next steps for user
 
-2. **Uninstall Service**: `sudo ddops --uninstall` or `sudo ddops -u`
+2. **Uninstall Service**: `sudo ddogreen --uninstall` or `sudo ddogreen -u`
    - Stops and disables service if running
    - Removes systemd service file
    - Reloads systemd daemon
@@ -128,7 +128,7 @@ powerManager->setPowerSavingMode();     // Maps to tlp bat on Linux
 
 ### Enhanced Usage Information
 ```
-Usage: ddops [OPTIONS]
+Usage: ddogreen [OPTIONS]
 Options:
   -d, --daemon           Run as daemon
   -h, --help             Show this help message
@@ -137,8 +137,8 @@ Options:
   -u, --uninstall        Uninstall system service
 
 Service Management:
-  Install:   sudo ddops --install (or -i)
-  Uninstall: sudo ddops --uninstall (or -u)
+  Install:   sudo ddogreen --install (or -i)
+  Uninstall: sudo ddogreen --uninstall (or -u)
 ```
 
 ## Latest Update: Platform Abstraction Layer ✅
@@ -200,7 +200,7 @@ Service Management:
 - **Load Threshold**: Hardcoded to 0.10 (10% of one CPU core)
 - **Idle Timeout**: Hardcoded to 300 seconds (5 minutes)
 - **Check Interval**: Hardcoded to 60 seconds (1 minute)
-- **Log File**: Hardcoded to `/var/log/ddops.log`
+- **Log File**: Hardcoded to `/var/log/ddogreen.log`
 - **No Sampling**: Direct load average reading with no averaging or circular buffers
 
 ### Terminology Corrections ✅
@@ -251,7 +251,7 @@ Service Management:
 ### Settings
 - `LOAD_THRESHOLD_PERCENT`: 0.10 (10% per CPU core)
 - `CHECK_INTERVAL`: 60 seconds (1 minute)
-- `LOG_FILE`: `/var/log/ddops.log`
+- `LOG_FILE`: `/var/log/ddogreen.log`
 - `CORE_COUNT`: Auto-detected using `nproc` command
 
 ## Project Status: COMPLETE ✅

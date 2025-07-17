@@ -1,7 +1,9 @@
-# Project Brief - ddops
+# Project Brief - ddogreen
 
 ## Project Overview
-**ddops** (Dynamic Device Optimization Power Switcher) is an ultra-minimal Linux system service that automatically manages TLP (ThinkPad-Linux-Power) power settings based on 1-minute load average monitoring.
+**ddogreen** is an ultra-minimal sustainability-focused power management service for PCs and laptops that automatically optimizes TLP (ThinkPad-Linux-Power) power settings based on intelligent system load monitoring.
+
+**Product of DDOSoft Sustainability Solutions** - where "ddo" represents the company heritage and "green" represents our commitment to environmental sustainability and energy efficiency.
 
 ## Core Objective
 Create the simplest possible power management daemon that:
@@ -44,10 +46,12 @@ Create the simplest possible power management daemon that:
 - **Load Threshold**: 0.15 (15% of one CPU core)
 - **Idle Timeout**: 300 seconds (5 minutes)
 - **Check Interval**: 60 seconds (1 minute)
-- **Log File**: `/var/log/ddops.log`
+- **Log File**: `/var/log/ddogreen.log`
 
 ## Target Users
-- Linux laptop users wanting zero-maintenance automatic power management
+- PC and laptop users seeking zero-maintenance automatic green power management
+- Organizations focused on sustainability and energy efficiency
+- Future expansion planned for server environments
 - System administrators who need reliable, config-free power optimization
 - Users of ThinkPad laptops with TLP who want "set and forget" operation
 - Developers who need minimal-overhead background power management

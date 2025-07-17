@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
-project(ddops VERSION 1.0.0
-        DESCRIPTION "Dynamic Device Optimization Power Switcher"
+project(ddogreen VERSION 1.0.0
+        DESCRIPTION "Intelligent Green Power Management for Sustainable Computing"
         HOMEPAGE_URL "https://www.ddosoft.com")
 
 set(CMAKE_CXX_STANDARD 17)
@@ -45,7 +45,7 @@ endif()
 include_directories(include)
 
 # Create executable
-add_executable(ddops ${SOURCES})
+add_executable(ddogreen ${SOURCES})
 
 # Installation
-install(TARGETS ddops DESTINATION /usr/local/bin)
+install(TARGETS ddogreen DESTINATION /usr/local/bin)

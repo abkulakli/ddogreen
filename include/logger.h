@@ -11,7 +11,7 @@ enum class LogLevel {
 
 class Logger {
 public:
-    static void init(const std::string& logFile = "/var/log/ddops.log", bool consoleOutput = false);
+    static void init(const std::string& logFile = "/var/log/ddogreen.log", bool consoleOutput = false);
     static void log(LogLevel level, const std::string& message);
     static void debug(const std::string& message);
     static void info(const std::string& message);

@@ -1,17 +1,13 @@
 /*
- * ddops - Dynamic Device Optimizatiovoid printVersion() {
-    std::cout << "ddops version 1.0.0\n"
-              << "Dynamic Device Optimization Power Switcher\n"
-              << "Copyright (c) 2025 ddosoft (www.ddosoft.com)\n";
-}er Switcher
+ * ddogreen - Intelligent Green Power Management for Sustainable Computing
  *
  * Automatically manages TLP power settings based on system load monitoring
  *
- * Copyright (c) 2025 ddosoft (www.ddosoft.com)
+ * Copyright (c) 2025 DDOSoft Sustainability Solutions (www.ddosoft.com)
  *
  * This program automatically switches between performance and power-saving modes
  * based on 1-minute and 5-minute load average monitoring, providing
- * intelligent power management for Linux systems.
+ * intelligent power management for sustainable computing on PCs and laptops.
  */
 
 #include "activity_monitor.h"
@@ -43,9 +39,9 @@ void printUsage(const char* programName) {
 }
 
 void printVersion() {
-    std::cout << "ddops version 1.0.0\n"
-              << "Dynamic Device Optimization Power Switcher\n"
-              << "Copyright (c) 2025 ddosoft (www.ddosoft.com)\n";
+    std::cout << "ddogreen version 1.0.0\n"
+              << "Intelligent Green Power Management for Sustainable Computing\n"
+              << "Copyright (c) 2025 DDOSoft Sustainability Solutions (www.ddosoft.com)\n";
 }
 
 std::string getExecutablePath() {
@@ -73,7 +69,7 @@ int installService() {
     }
 
     // Define the target installation path
-    std::string targetExecutablePath = "/usr/local/bin/ddops";
+    std::string targetExecutablePath = "/usr/local/bin/ddogreen";
 
     auto serviceManager = PlatformFactory::createServiceManager();
     if (!serviceManager->isAvailable()) {
@@ -100,25 +96,25 @@ int installService() {
     if (system("mkdir -p /var/log") != 0) {
         std::cerr << "Warning: Failed to create /var/log directory" << std::endl;
     }
-    if (system("touch /var/log/ddops.log") != 0) {
+    if (system("touch /var/log/ddogreen.log") != 0) {
         std::cerr << "Warning: Failed to create log file" << std::endl;
     }
-    if (system("chmod 644 /var/log/ddops.log") != 0) {
+    if (system("chmod 644 /var/log/ddogreen.log") != 0) {
         std::cerr << "Warning: Failed to set log file permissions" << std::endl;
     }
     
     // Create config directory
-    if (system("mkdir -p /etc/ddops") != 0) {
+    if (system("mkdir -p /etc/ddogreen") != 0) {
         std::cerr << "Warning: Failed to create config directory" << std::endl;
     }
 
-    std::string serviceName = "ddops";
-    std::string description = "Dynamic Device Optimization Power Switcher - Automatic TLP power management";
+    std::string serviceName = "ddogreen";
+    std::string description = "DDOSoft ddogreen - Intelligent Green Power Management for Sustainable Computing";
 
     std::cout << "Installing system service..." << std::endl;
     if (serviceManager->installService(serviceName, targetExecutablePath, description)) {
         std::cout << "Service installed, enabled, and started successfully!" << std::endl;
-        std::cout << "ddops is now running and will auto-start on boot." << std::endl;
+        std::cout << "ddogreen is now running and will auto-start on boot." << std::endl;
         std::cout << "To view logs:" << std::endl;
         std::cout << "  sudo journalctl -u " << serviceName << " -f" << std::endl;
         return 0;
@@ -141,25 +137,25 @@ int uninstallService() {
         return 1;
     }
 
-    std::string serviceName = "ddops";
+    std::string serviceName = "ddogreen";
 
     std::cout << "Uninstalling system service..." << std::endl;
     if (serviceManager->uninstallService(serviceName)) {
         std::cout << "Cleaning up files..." << std::endl;
         
         // Remove installed executable
-        if (system("rm -f /usr/local/bin/ddops") != 0) {
+        if (system("rm -f /usr/local/bin/ddogreen") != 0) {
             std::cerr << "Warning: Failed to remove installed executable" << std::endl;
         }
         
         // Clean up log and config files
-        if (system("rm -f /var/log/ddops.log") != 0) {
+        if (system("rm -f /var/log/ddogreen.log") != 0) {
             std::cerr << "Warning: Failed to remove log file" << std::endl;
         }
-        if (system("rm -f /run/ddops.pid") != 0) {
+        if (system("rm -f /run/ddogreen.pid") != 0) {
             std::cerr << "Warning: Failed to remove PID file" << std::endl;
         }
-        if (system("rm -rf /etc/ddops") != 0) {
+        if (system("rm -rf /etc/ddogreen") != 0) {
             std::cerr << "Warning: Failed to remove config directory" << std::endl;
         }
         
@@ -217,7 +213,7 @@ int main(int argc, char* argv[]) {
     }
 
     // Initialize logger with console output when not running as daemon
-    Logger::init("/var/log/ddops.log", !runAsDaemon);
+    Logger::init("/var/log/ddogreen.log", !runAsDaemon);
 
     if (runAsDaemon) {
         if (!Daemon::daemonize()) {
@@ -256,7 +252,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    Logger::info("ddops service started successfully");
+    Logger::info("ddogreen service started successfully");
 
     // Main loop - just keep the process alive while monitoring runs in background
     while (Daemon::shouldRun()) {
@@ -264,12 +260,12 @@ int main(int argc, char* argv[]) {
     }
 
     // Cleanup
-    Logger::info("Shutting down ddops service");
+    Logger::info("Shutting down ddogreen service");
     activityMonitor.stop();
 
     // Remove PID file
     if (runAsDaemon) {
-        unlink("/run/ddops.pid");
+        unlink("/run/ddogreen.pid");
     }
 
     return 0;

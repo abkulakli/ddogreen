@@ -5,7 +5,7 @@
 #include <iomanip>
 #include <sstream>
 
-std::string Logger::m_logFile = "/var/log/ddops.log";
+std::string Logger::m_logFile = "/var/log/ddogreen.log";
 bool Logger::m_consoleOutput = false;
 
 void Logger::init(const std::string& logFile, bool consoleOutput) {

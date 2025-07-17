@@ -26,7 +26,7 @@ bool Daemon::daemonize() {
         const int max_attempts = 100; // 1 second total timeout
         
         while (attempts < max_attempts) {
-            std::ifstream pidFile("/run/ddops.pid");
+            std::ifstream pidFile("/run/ddogreen.pid");
             if (pidFile.is_open()) {
                 pidFile.close();
                 Logger::info("Parent process: PID file detected, exiting");
@@ -62,7 +62,7 @@ bool Daemon::daemonize() {
 
     // Second child continues as daemon
     // Write PID file to signal parent we're ready
-    std::ofstream pidFile("/run/ddops.pid");
+    std::ofstream pidFile("/run/ddogreen.pid");
     if (pidFile.is_open()) {
         pidFile << getpid() << std::endl;
         pidFile.flush(); // Ensure data is written to disk
@@ -71,9 +71,9 @@ bool Daemon::daemonize() {
         // Sync to ensure write is complete
         sync();
         
-        Logger::info("PID file written by daemon: /run/ddops.pid with PID: " + std::to_string(getpid()));
+        Logger::info("PID file written by daemon: /run/ddogreen.pid with PID: " + std::to_string(getpid()));
     } else {
-        Logger::error("Failed to write PID file: /run/ddops.pid");
+        Logger::error("Failed to write PID file: /run/ddogreen.pid");
         return false;
     }
 
