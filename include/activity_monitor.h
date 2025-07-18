@@ -3,6 +3,8 @@
 #include <chrono>
 #include <functional>
 #include <vector>
+#include <memory>
+#include "platform/isystem_monitor.h"
 
 class ActivityMonitor {
 public:
@@ -28,8 +30,8 @@ public:
     bool isActive() const;
 
 private:
-    std::tuple<double, double, double> getLoadAverages();  // Get 1-min, 5-min, and 15-min load averages from /proc/loadavg
-    int getCpuCoreCount();  // Get CPU core count using /proc/cpuinfo
+    double getLoadAverage();  // Get load average using platform-specific monitor
+    int getCpuCoreCount();  // Get CPU core count using platform-specific monitor
     void monitorLoop();
 
     bool m_isActive;
@@ -37,6 +39,7 @@ private:
     double m_loadThreshold;  // Threshold as percentage (0.10 = 10%)
     int m_coreCount;  // Number of CPU cores
     ActivityCallback m_callback;
+    std::unique_ptr<ISystemMonitor> m_systemMonitor;  // Platform-specific system monitor
 
     std::chrono::steady_clock::time_point m_lastLoadCheckTime;
 };

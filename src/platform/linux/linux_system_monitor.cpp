@@ -21,33 +21,33 @@ public:
     virtual ~LinuxSystemMonitor() = default;
 
     /**
-     * Get system load averages from /proc/loadavg
-     * @return tuple of (1-minute, 5-minute, 15-minute) load averages
+     * Get system load average from /proc/loadavg
+     * @return load average
      */
-    std::tuple<double, double, double> getLoadAverages() override {
+    double getLoadAverage() override {
         std::ifstream file("/proc/loadavg");
         if (!file.is_open()) {
             Logger::error("Failed to open /proc/loadavg");
-            return std::make_tuple(0.0, 0.0, 0.0);
+            return 0.0;
         }
 
         std::string line;
         if (!std::getline(file, line)) {
             Logger::error("Failed to read from /proc/loadavg");
-            return std::make_tuple(0.0, 0.0, 0.0);
+            return 0.0;
         }
 
-        // Parse the load averages
+        // Parse the first load average
         // Format: "0.15 0.12 0.08 1/123 1234"
         std::istringstream iss(line);
-        double load1min, load5min, load15min;
+        double load1min;
         
-        if (!(iss >> load1min >> load5min >> load15min)) {
-            Logger::error("Failed to parse load averages from /proc/loadavg");
-            return std::make_tuple(0.0, 0.0, 0.0);
+        if (!(iss >> load1min)) {
+            Logger::error("Failed to parse load average from /proc/loadavg");
+            return 0.0;
         }
 
-        return std::make_tuple(load1min, load5min, load15min);
+        return load1min;
     }
 
     /**

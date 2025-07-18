@@ -34,9 +34,7 @@ public:
         m_coreCount = getCpuCoreCountInternal();
         m_available = (m_coreCount > 0);
         
-        if (m_available) {
-            Logger::info("Detected " + std::to_string(m_coreCount) + " CPU cores");
-        } else {
+        if (!m_available) {
             Logger::error("Failed to initialize Windows system monitoring");
         }
     }
@@ -51,12 +49,12 @@ public:
     }
 
     /**
-     * Get system load averages
-     * Windows doesn't have native load averages, so we calculate them from CPU usage
-     * @return tuple of (1-minute, 5-minute, 15-minute) load averages
+     * Get system load average
+     * Windows doesn't have native load averages, so we calculate from CPU usage
+     * @return load average
      */
-    std::tuple<double, double, double> getLoadAverages() override {
-        Logger::debug("Getting Windows system load averages");
+    double getLoadAverage() override {
+        Logger::debug("Getting Windows system load average");
         
         // Get current CPU usage percentage
         const double cpuUsage = getCurrentCpuUsage();
@@ -68,16 +66,10 @@ public:
         // Update our moving averages
         updateLoadAverages(currentLoad);
         
-        // Calculate averages over different time periods
-        const double load1min = calculateAverage(m_loadHistory, 60);    // 1 minute (60 samples at 1 sec each)
-        const double load5min = calculateAverage(m_loadHistory, 300);   // 5 minutes (300 samples)
-        const double load15min = calculateAverage(m_loadHistory, 900);  // 15 minutes (900 samples)
+        // Calculate average (60 samples at 1 sec each)
+        const double load1min = calculateAverage(m_loadHistory, 60);
         
-        Logger::debug("Load averages - 1min: " + std::to_string(load1min) + 
-                     ", 5min: " + std::to_string(load5min) + 
-                     ", 15min: " + std::to_string(load15min));
-        
-        return std::make_tuple(load1min, load5min, load15min);
+        return load1min;
     }
 
     /**
@@ -120,8 +112,14 @@ private:
             return;
         }
         
-        // Initialize with first sample
-        PdhCollectQueryData(m_cpuQuery);
+        // Initialize with first sample (baseline)
+        status = PdhCollectQueryData(m_cpuQuery);
+        if (status != ERROR_SUCCESS) {
+            Logger::error("Failed to collect initial CPU baseline: " + std::to_string(status));
+            PdhCloseQuery(m_cpuQuery);
+            m_cpuQuery = nullptr;
+            return;
+        }
         
         Logger::debug("Performance Counters initialized successfully");
 #else
@@ -140,10 +138,23 @@ private:
             return 0.0;
         }
         
-        // Collect data
+        // PDH requires at least two calls with a delay to calculate CPU usage
+        // First call establishes baseline, second call calculates the percentage
+        
+        // First collection (baseline)
         PDH_STATUS status = PdhCollectQueryData(m_cpuQuery);
         if (status != ERROR_SUCCESS) {
-            Logger::debug("Failed to collect CPU data: " + std::to_string(status));
+            Logger::debug("Failed to collect baseline CPU data: " + std::to_string(status));
+            return 0.0;
+        }
+        
+        // Wait at least 1 second for meaningful CPU calculation
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        
+        // Second collection (actual measurement)
+        status = PdhCollectQueryData(m_cpuQuery);
+        if (status != ERROR_SUCCESS) {
+            Logger::debug("Failed to collect CPU measurement data: " + std::to_string(status));
             return 0.0;
         }
         
@@ -156,7 +167,6 @@ private:
         }
         
         const double cpuUsage = value.doubleValue;
-        Logger::debug("Current CPU usage: " + std::to_string(cpuUsage) + "%");
         
         return cpuUsage;
 #else
@@ -177,9 +187,8 @@ private:
         // Add current load to history
         m_loadHistory.push(currentLoad);
         
-        // Keep only last 15 minutes of data (900 samples at 1 second intervals)
-        // Note: In practice, we might sample less frequently
-        const size_t maxSamples = 900;
+        // Keep only last minute of data (60 samples at 1 second intervals)
+        const size_t maxSamples = 60;
         while (m_loadHistory.size() > maxSamples) {
             m_loadHistory.pop();
         }
@@ -228,7 +237,6 @@ private:
         GetSystemInfo(&sysInfo);
         
         const int coreCount = static_cast<int>(sysInfo.dwNumberOfProcessors);
-        Logger::debug("Detected " + std::to_string(coreCount) + " logical processors");
         
         return coreCount;
 #else

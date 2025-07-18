@@ -6,7 +6,7 @@
  * Copyright (c) 2025 DDOSoft Sustainability Solutions (www.ddosoft.com)
  *
  * This program automatically switches between performance and power-saving modes
- * based on 1-minute and 5-minute load average monitoring, providing
+ * based on load average monitoring, providing
  * intelligent power management for sustainable computing on PCs and laptops.
  */
 

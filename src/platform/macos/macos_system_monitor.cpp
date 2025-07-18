@@ -25,31 +25,26 @@ public:
     virtual ~MacOSSystemMonitor() = default;
 
     /**
-     * Get system load averages using sysctl
-     * @return tuple of (1-minute, 5-minute, 15-minute) load averages
+     * Get system load average using sysctl
+     * @return load average
      */
-    std::tuple<double, double, double> getLoadAverages() override {
-        Logger::debug("MOCK: Getting macOS system load averages");
+    double getLoadAverage() override {
+        Logger::debug("MOCK: Getting macOS system load average");
         
-        // Mock implementation - simulate some load values
+        // Mock implementation - simulate load value
         Logger::debug("MOCK: Would execute: sysctl -n vm.loadavg");
-        Logger::debug("MOCK: Would parse sysctl output for load averages");
+        Logger::debug("MOCK: Would parse first load average value");
         
-        // Generate some mock load values (between 0.0 and 2.0)
+        // Generate mock load value (between 0.0 and 2.0)
         auto now = std::chrono::steady_clock::now().time_since_epoch();
         auto seconds = std::chrono::duration_cast<std::chrono::seconds>(now).count();
         
-        // Create some variation in the mock values
-        double base = 0.1 + (seconds % 10) * 0.05; // Varies between 0.1 and 0.6
-        double load1min = base;
-        double load5min = base * 0.8;
-        double load15min = base * 0.6;
+        // Create variation in the mock value
+        double load1min = 0.1 + (seconds % 10) * 0.05; // Varies between 0.1 and 0.6
         
-        Logger::debug("MOCK: Simulated load averages - 1min: " + std::to_string(load1min) + 
-                     ", 5min: " + std::to_string(load5min) + 
-                     ", 15min: " + std::to_string(load15min));
+        Logger::debug("MOCK: Simulated load average: " + std::to_string(load1min));
         
-        return std::make_tuple(load1min, load5min, load15min);
+        return load1min;
     }
 
     /**

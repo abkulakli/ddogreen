@@ -11,11 +11,11 @@ public:
     virtual ~ISystemMonitor() = default;
 
     /**
-     * Get system load averages
-     * @return tuple of (1-minute, 5-minute, 15-minute) load averages
-     * Note: On Windows, may simulate load averages or use alternative metrics
+     * Get system load average
+     * @return load average
+     * Note: On Windows, may simulate load average or use alternative metrics
      */
-    virtual std::tuple<double, double, double> getLoadAverages() = 0;
+    virtual double getLoadAverage() = 0;
 
     /**
      * Get the number of CPU cores in the system
