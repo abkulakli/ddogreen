@@ -32,18 +32,21 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         src/platform/linux/linux_power_manager.cpp
         src/platform/linux/linux_service_manager.cpp
         src/platform/linux/linux_system_monitor.cpp
+        src/platform/linux/linux_platform_utils.cpp
     )
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     list(APPEND SOURCES
         src/platform/windows/windows_power_manager.cpp
         src/platform/windows/windows_service_manager.cpp
         src/platform/windows/windows_system_monitor.cpp
+        src/platform/windows/windows_platform_utils.cpp
     )
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     list(APPEND SOURCES
         src/platform/macos/macos_power_manager.cpp
         src/platform/macos/macos_service_manager.cpp
         src/platform/macos/macos_system_monitor.cpp
+        src/platform/macos/macos_platform_utils.cpp
     )
 else()
     message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")

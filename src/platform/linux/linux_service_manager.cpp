@@ -26,6 +26,42 @@ public:
                        const std::string& executablePath,
                        const std::string& description) override {
         
+        // Define the target installation path
+        std::string targetExecutablePath = "/usr/local/bin/" + serviceName;
+        
+        Logger::info("Setting up directories and permissions...");
+        
+        // Copy executable to system location
+        Logger::info("Installing executable to " + targetExecutablePath + "...");
+        std::string copyCommand = "cp \"" + executablePath + "\" \"" + targetExecutablePath + "\"";
+        if (!executeCommand(copyCommand)) {
+            Logger::error("Failed to copy executable to " + targetExecutablePath);
+            return false;
+        }
+        
+        // Set proper permissions
+        if (!executeCommand("chmod 755 \"" + targetExecutablePath + "\"")) {
+            Logger::warning("Failed to set executable permissions");
+        }
+        
+        // Create log directory and file
+        if (!executeCommand("mkdir -p /var/log")) {
+            Logger::warning("Failed to create /var/log directory");
+        }
+        std::string logFile = "/var/log/" + serviceName + ".log";
+        if (!executeCommand("touch " + logFile)) {
+            Logger::warning("Failed to create log file");
+        }
+        if (!executeCommand("chmod 644 " + logFile)) {
+            Logger::warning("Failed to set log file permissions");
+        }
+        
+        // Create config directory
+        std::string configDir = "/etc/" + serviceName;
+        if (!executeCommand("mkdir -p " + configDir)) {
+            Logger::warning("Failed to create config directory");
+        }
+        
         std::string serviceFile = "/etc/systemd/system/" + serviceName + ".service";
         
         // Create systemd service file content with security settings
@@ -38,7 +74,7 @@ public:
             "\n"
             "[Service]\n"
             "Type=forking\n"
-            "ExecStart=" + executablePath + " --daemon\n"
+            "ExecStart=" + targetExecutablePath + " --daemon\n"
             "ExecReload=/bin/kill -HUP $MAINPID\n"
             "PIDFile=/run/" + serviceName + ".pid\n"
             "Restart=always\n"
@@ -110,6 +146,30 @@ public:
         
         // Reload systemd daemon
         executeCommand("systemctl daemon-reload");
+        
+        Logger::info("Cleaning up files...");
+        
+        // Remove installed executable
+        std::string executablePath = "/usr/local/bin/" + serviceName;
+        if (!executeCommand("rm -f " + executablePath)) {
+            Logger::warning("Failed to remove installed executable");
+        }
+        
+        // Clean up log and config files
+        std::string logFile = "/var/log/" + serviceName + ".log";
+        if (!executeCommand("rm -f " + logFile)) {
+            Logger::warning("Failed to remove log file");
+        }
+        
+        std::string pidFile = "/run/" + serviceName + ".pid";
+        if (!executeCommand("rm -f " + pidFile)) {
+            Logger::warning("Failed to remove PID file");
+        }
+        
+        std::string configDir = "/etc/" + serviceName;
+        if (!executeCommand("rm -rf " + configDir)) {
+            Logger::warning("Failed to remove config directory");
+        }
         
         Logger::info("Successfully uninstalled service: " + serviceName);
         return true;

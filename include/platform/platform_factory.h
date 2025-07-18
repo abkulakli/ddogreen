@@ -3,6 +3,7 @@
 #include "platform/isystem_monitor.h"
 #include "platform/ipower_manager.h"
 #include "platform/iservice_manager.h"
+#include "platform/iplatform_utils.h"
 #include <memory>
 
 /**
@@ -28,6 +29,12 @@ public:
      * @return unique_ptr to platform-specific service manager implementation
      */
     static std::unique_ptr<IServiceManager> createServiceManager();
+
+    /**
+     * Create platform utilities for the current platform
+     * @return unique_ptr to platform-specific platform utilities implementation
+     */
+    static std::unique_ptr<IPlatformUtils> createPlatformUtils();
 
     /**
      * Get the current platform name

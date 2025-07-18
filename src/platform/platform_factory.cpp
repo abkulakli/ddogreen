@@ -8,14 +8,17 @@
 std::unique_ptr<ISystemMonitor> createLinuxSystemMonitor();
 std::unique_ptr<IPowerManager> createLinuxPowerManager();
 std::unique_ptr<IServiceManager> createLinuxServiceManager();
+std::unique_ptr<IPlatformUtils> createLinuxPlatformUtils();
 #elif defined(_WIN32) || defined(_WIN64)
 std::unique_ptr<ISystemMonitor> createWindowsSystemMonitor();
 std::unique_ptr<IPowerManager> createWindowsPowerManager();
 std::unique_ptr<IServiceManager> createWindowsServiceManager();
+std::unique_ptr<IPlatformUtils> createWindowsPlatformUtils();
 #elif defined(__APPLE__) && defined(__MACH__)
 std::unique_ptr<ISystemMonitor> createMacOSSystemMonitor();
 std::unique_ptr<IPowerManager> createMacOSPowerManager();
 std::unique_ptr<IServiceManager> createMacOSServiceManager();
+std::unique_ptr<IPlatformUtils> createMacOSPlatformUtils();
 #endif
 
 /**
@@ -71,6 +74,26 @@ std::unique_ptr<IServiceManager> PlatformFactory::createServiceManager() {
     return createWindowsServiceManager();
 #else
     Logger::error("Unsupported platform for service manager");
+    return nullptr;
+#endif
+}
+
+/**
+ * Create platform utilities for the current platform
+ * @return unique_ptr to platform-specific platform utilities implementation
+ */
+std::unique_ptr<IPlatformUtils> PlatformFactory::createPlatformUtils() {
+#if defined(__linux__)
+    Logger::debug("Creating Linux platform utilities");
+    return createLinuxPlatformUtils();
+#elif defined(_WIN32) || defined(_WIN64)
+    Logger::debug("Creating Windows platform utilities");
+    return createWindowsPlatformUtils();
+#elif defined(__APPLE__) && defined(__MACH__)
+    Logger::debug("Creating macOS platform utilities");
+    return createMacOSPlatformUtils();
+#else
+    Logger::error("Unsupported platform for platform utilities");
     return nullptr;
 #endif
 }
