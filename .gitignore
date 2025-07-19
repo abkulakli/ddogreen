@@ -35,5 +35,5 @@ Thumbs.db
 *.pid
 *.lock
 
-# Memory Bank is intentionally tracked
-# memory-bank/ should be committed to git
+# clang files
+.cache/*
