@@ -50,15 +50,15 @@ Build options:
   --help               Show this help message
 
 Package options:
-  --package            Create DEB package after build
+  --package            Create DEB and RPM packages after build
 
 Examples:
   $0                   # Standard release build (default)
   $0 --debug           # Debug build
   $0 --clean           # Clean build directory only
-  $0 --package         # Build release and create DEB package
-  $0 --debug --package # Build debug and create DEB package
-  $0 --clean --package # Clean, build and create DEB package
+  $0 --package         # Build release and create DEB and RPM packages
+  $0 --debug --package # Build debug and create DEB and RPM packages
+  $0 --clean --package # Clean, build and create DEB and RPM packages
 
 EOF
 }
@@ -208,47 +208,72 @@ if [[ "$PACKAGE_REQUESTED" == "ON" ]]; then
     # Change to build directory for packaging
     cd "$BUILD_DIR"
 
-    # Create the package
+    # Create DEB package
     print_package_status "Creating DEB package..."
     cpack -G DEB || exit 1
 
-    # Find the created package
-    PACKAGE_FILE=$(find . -name "*.deb" -type f | head -n 1)
+    # Create RPM package
+    print_package_status "Creating RPM package..."
+    cpack -G RPM || exit 1
 
-    if [[ -z "$PACKAGE_FILE" ]]; then
-        print_error "Package creation failed - no .deb file found"
+    # Find the created packages
+    DEB_FILE=$(find . -name "*.deb" -type f | head -n 1)
+    RPM_FILE=$(find . -name "*.rpm" -type f | head -n 1)
+
+    if [[ -z "$DEB_FILE" ]]; then
+        print_error "DEB package creation failed - no .deb file found"
+        exit 1
+    fi
+
+    if [[ -z "$RPM_FILE" ]]; then
+        print_error "RPM package creation failed - no .rpm file found"
         exit 1
     fi
 
     # Get package info
-    PACKAGE_NAME=$(basename "$PACKAGE_FILE")
-    PACKAGE_SIZE=$(du -h "$PACKAGE_FILE" | cut -f1)
+    DEB_NAME=$(basename "$DEB_FILE")
+    DEB_SIZE=$(du -h "$DEB_FILE" | cut -f1)
+    RPM_NAME=$(basename "$RPM_FILE")
+    RPM_SIZE=$(du -h "$RPM_FILE" | cut -f1)
 
-    print_success "DEB package created successfully!"
-    print_package_status "Package: $PACKAGE_NAME"
-    print_package_status "Size: $PACKAGE_SIZE"
-    print_package_status "Location: $BUILD_DIR/$PACKAGE_NAME"
+    print_success "DEB and RPM packages created successfully!"
+    echo
+    print_package_status "DEB Package: $DEB_NAME"
+    print_package_status "DEB Size: $DEB_SIZE"
+    print_package_status "DEB Location: $BUILD_DIR/$DEB_NAME"
+    echo
+    print_package_status "RPM Package: $RPM_NAME"
+    print_package_status "RPM Size: $RPM_SIZE"
+    print_package_status "RPM Location: $BUILD_DIR/$RPM_NAME"
 
-    # Show package contents
-    print_package_status "Package contents:"
-    dpkg-deb -c "$PACKAGE_FILE" | head -10
+    # Show DEB package contents
+    print_package_status "DEB package contents:"
+    dpkg-deb -c "$DEB_FILE" | head -5
 
-    # Show package info
-    print_package_status "Package information:"
-    dpkg-deb -I "$PACKAGE_FILE" | grep -E "(Package|Version|Architecture|Description|Depends)"
+    # Show DEB package info
+    print_package_status "DEB package information:"
+    dpkg-deb -I "$DEB_FILE" | grep -E "(Package|Version|Architecture|Description|Depends)"
 
     # Installation instructions
     print_success "Package creation completed successfully!"
     echo
-    print_package_status "To install the package:"
-    print_package_status "  sudo dpkg -i $BUILD_DIR/$PACKAGE_NAME"
-    print_package_status "  sudo apt-get install -f  # Fix dependencies if needed"
+    print_package_status "To install DEB package (Debian/Ubuntu):"
+    print_package_status "  sudo dpkg -i $BUILD_DIR/$DEB_NAME"
+    print_package_status "  sudo apt install -f  # Fix dependencies if needed"
+    print_package_status "  (Service will be automatically installed and started)"
     echo
-    print_package_status "To remove the package:"
-    print_package_status "  sudo apt-get remove ddogreen"
-    print_package_status "  sudo apt-get purge ddogreen  # Remove all config files"
+    print_package_status "To install RPM package (RHEL/CentOS/Fedora):"
+    print_package_status "  sudo rpm -i $BUILD_DIR/$RPM_NAME"
+    print_package_status "  # or: sudo dnf install $BUILD_DIR/$RPM_NAME"
+    print_package_status "  (Service will be automatically installed and started)"
     echo
-    print_package_status "To inspect the package:"
-    print_package_status "  dpkg-deb -c $BUILD_DIR/$PACKAGE_NAME  # List contents"
-    print_package_status "  dpkg-deb -I $BUILD_DIR/$PACKAGE_NAME  # Show package info"
+    print_package_status "Service management after installation:"
+    print_package_status "  sudo systemctl status ddogreen   # Check status"
+    print_package_status "  sudo systemctl stop ddogreen     # Stop service"
+    print_package_status "  sudo systemctl start ddogreen    # Start service"
+    print_package_status "  sudo journalctl -u ddogreen -f   # View logs"
+    echo
+    print_package_status "To remove packages:"
+    print_package_status "  sudo apt remove ddogreen     # Debian/Ubuntu"
+    print_package_status "  sudo rpm -e ddogreen             # RHEL/CentOS/Fedora"
 fi

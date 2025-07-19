@@ -1,0 +1,24 @@
+#!/bin/bash
+# Post-removal script for ddogreen (DEB)
+
+set -e
+
+case "$1" in
+    remove)
+        # Clean up any remaining service files
+        if [ -f /etc/systemd/system/ddogreen.service ]; then
+            rm -f /etc/systemd/system/ddogreen.service
+            systemctl daemon-reload
+        fi
+        echo "ddogreen has been removed."
+        ;;
+    purge)
+        # Clean up any remaining files and logs
+        rm -f /etc/systemd/system/ddogreen.service
+        rm -f /var/log/ddogreen.log
+        systemctl daemon-reload
+        echo "ddogreen has been purged completely."
+        ;;
+esac
+
+exit 0

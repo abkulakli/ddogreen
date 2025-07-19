@@ -1,0 +1,24 @@
+#!/bin/bash
+# RPM post-uninstall script for ddogreen
+
+# RPM postun script - $1 = 0 for uninstall, $1 = 1 for upgrade
+if [ "$1" = "0" ]; then
+    # Complete removal
+    echo "Cleaning up ddogreen..."
+    
+    # Clean up any remaining service files
+    if [ -f /etc/systemd/system/ddogreen.service ]; then
+        rm -f /etc/systemd/system/ddogreen.service
+        systemctl daemon-reload
+    fi
+    
+    # Clean up log files
+    rm -f /var/log/ddogreen.log
+    
+    echo "ddogreen has been removed completely."
+elif [ "$1" = "1" ]; then
+    # Upgrade - service should be restarted by post script
+    echo "ddogreen upgrade completed."
+fi
+
+exit 0

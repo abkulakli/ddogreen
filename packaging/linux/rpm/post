@@ -1,0 +1,32 @@
+#!/bin/bash
+# RPM post-installation script for ddogreen
+
+# RPM post script - $1 = 1 for install, $1 = 2 for upgrade
+if [ "$1" = "1" ]; then
+    # Fresh installation
+    echo "Setting up ddogreen..."
+    
+    # Use the application's built-in service installation
+    if /usr/bin/ddogreen --install; then
+        echo "ddogreen service has been installed and started successfully!"
+        echo "The service will automatically start on boot."
+        echo ""
+        echo "Service management:"
+        echo "  Status:  sudo systemctl status ddogreen"
+        echo "  Stop:    sudo systemctl stop ddogreen"
+        echo "  Start:   sudo systemctl start ddogreen"
+        echo "  Restart: sudo systemctl restart ddogreen"
+        echo "  Logs:    sudo journalctl -u ddogreen -f"
+    else
+        echo "Warning: Failed to install ddogreen service automatically."
+        echo "You can manually install it with: sudo ddogreen --install"
+    fi
+elif [ "$1" = "2" ]; then
+    # Upgrade - restart service if it was running
+    if systemctl is-active --quiet ddogreen.service; then
+        echo "Restarting ddogreen service after upgrade..."
+        systemctl restart ddogreen.service
+    fi
+fi
+
+exit 0

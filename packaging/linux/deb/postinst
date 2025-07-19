@@ -1,0 +1,28 @@
+#!/bin/bash
+# Post-installation script for ddogreen (DEB)
+
+set -e
+
+case "$1" in
+    configure)
+        echo "Setting up ddogreen..."
+        
+        # Use the application's built-in service installation
+        if /usr/bin/ddogreen --install; then
+            echo "ddogreen service has been installed and started successfully!"
+            echo "The service will automatically start on boot."
+            echo ""
+            echo "Service management:"
+            echo "  Status:  sudo systemctl status ddogreen"
+            echo "  Stop:    sudo systemctl stop ddogreen"
+            echo "  Start:   sudo systemctl start ddogreen"
+            echo "  Restart: sudo systemctl restart ddogreen"
+            echo "  Logs:    sudo journalctl -u ddogreen -f"
+        else
+            echo "Warning: Failed to install ddogreen service automatically."
+            echo "You can manually install it with: sudo ddogreen --install"
+        fi
+        ;;
+esac
+
+exit 0

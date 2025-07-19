@@ -1,0 +1,23 @@
+#!/bin/bash
+# Pre-removal script for ddogreen (DEB)
+
+set -e
+
+case "$1" in
+    remove|upgrade|deconfigure)
+        echo "Stopping and removing ddogreen service..."
+        
+        # Use the application's built-in service uninstallation
+        if /usr/bin/ddogreen --uninstall; then
+            echo "ddogreen service has been stopped and removed successfully."
+        else
+            echo "Warning: Failed to uninstall ddogreen service automatically."
+            echo "Attempting manual cleanup..."
+            # Fallback to manual cleanup
+            systemctl stop ddogreen.service || true
+            systemctl disable ddogreen.service || true
+        fi
+        ;;
+esac
+
+exit 0
