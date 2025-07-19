@@ -54,10 +54,10 @@ jobs:
     - name: Test TGZ package contents
       run: |
         cd /tmp
-        tar -tf $GITHUB_WORKSPACE/build/*/*.tar.gz | sort
+        tar -tzf $GITHUB_WORKSPACE/build/linux/release/*.tar.gz | sort
         
         # Extract and verify structure
-        tar -xzf $GITHUB_WORKSPACE/build/*/*.tar.gz
+        tar -xzf $GITHUB_WORKSPACE/build/linux/release/*.tar.gz
         
         echo "=== TGZ Contents ==="
         find ddogreen-* -type f | sort
