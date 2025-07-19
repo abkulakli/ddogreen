@@ -1,0 +1,16 @@
+# ddogreen Power Management Configuration File
+# All values are required - no defaults are provided
+
+# CPU load thresholds (as decimal percentages per core)
+# high_performance_threshold: Switch to high performance when load exceeds this per core
+# Example: 0.70 = 70% load per core - for aggressive performance switching
+# power_save_threshold: Switch to power save when load drops below this per core  
+# Example: 0.30 = 30% load per core - for conservative power saving
+# The gap between thresholds (30%-70%) creates hysteresis to prevent rapid mode switching
+high_performance_threshold=0.70
+power_save_threshold=0.30
+
+# Monitoring frequency in seconds
+# How often to check system load and potentially switch power modes
+# Example: 10 = check every 10 seconds for responsive power management
+monitoring_frequency=10

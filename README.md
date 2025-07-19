@@ -26,10 +26,10 @@ A smart sustainability-focused service that automatically optimizes your PC and 
 
 ddogreen watches how busy your computer is and automatically switches power modes:
 
-- **High Performance Mode**: When you're actively working (system load > 70%)
+- **High Performance Mode**: When you're actively working (high system load)
   - **Linux**: TLP AC mode (`tlp ac`)
   - **Windows**: High Performance power plan
-- **Power Saving Mode**: When your laptop is mostly idle (system load < 30%)
+- **Power Saving Mode**: When your laptop is mostly idle (low system load)
   - **Linux**: TLP battery mode (`tlp bat`)
   - **Windows**: Power Saver power plan
 
@@ -96,6 +96,60 @@ Options:
   -i, --install          Install system service
   -u, --uninstall        Uninstall system service
 ```
+
+## Configuration
+
+ddogreen requires a configuration file at `/etc/ddogreen/ddogreen.conf` on Linux.
+
+### Configuration Setup
+
+1. Create the configuration directory:
+   ```bash
+   sudo mkdir -p /etc/ddogreen
+   ```
+
+2. Copy the example configuration:
+   ```bash
+   sudo cp example-config/ddogreen.conf /etc/ddogreen/
+   ```
+
+3. Edit the configuration as needed:
+   ```bash
+   sudo nano /etc/ddogreen/ddogreen.conf
+   ```
+
+### Configuration Format
+
+The configuration file uses a simple key=value format:
+
+```ini
+# CPU load thresholds (as decimal percentages per core)
+# Example: 0.70 = 70% load per core - for aggressive performance switching
+# Example: 0.30 = 30% load per core - for conservative power saving
+# The gap between thresholds (30%-70%) creates hysteresis to prevent rapid mode switching
+high_performance_threshold=0.70
+power_save_threshold=0.30
+
+# Monitoring frequency in seconds
+# Example: 10 = check every 10 seconds for responsive power management
+monitoring_frequency=10
+```
+
+### Configuration Parameters
+
+- **high_performance_threshold**: CPU load per core threshold for switching to high performance mode (0.1-1.0)
+- **power_save_threshold**: CPU load per core threshold for switching to power save mode (0.05-0.9)  
+- **monitoring_frequency**: How often to check system load in seconds (1-300)
+
+### Hysteresis Behavior
+
+The application uses hysteresis to prevent rapid mode switching:
+- Switches to **high performance** when load > (cores × high_performance_threshold)
+- Switches to **power save** when load < (cores × power_save_threshold)
+
+Example with 20 cores and default thresholds:
+- High performance trigger: 20 × 0.70 = 14.00 load average
+- Power save trigger: 20 × 0.30 = 6.00 load average
 
 ### Service Management
 
@@ -266,8 +320,8 @@ del C:\path\to\ddogreen.exe
 ### System Monitoring
 - **Linux**: Reads load averages from `/proc/loadavg`
 - **Windows**: Uses Performance Counters to calculate load averages
-- **Thresholds**: 70% CPU load per core to switch to performance mode, 30% to switch to power save mode (with hysteresis to prevent rapid switching)
-- **Check Interval**: Every 60 seconds for minimal system impact
+- **Thresholds**: Configurable CPU load per core thresholds with hysteresis to prevent rapid switching
+- **Check Interval**: Configurable monitoring frequency (default: 10 seconds)
 
 ### Service Management
 - **Linux**: Integrates with systemd for service management
@@ -290,7 +344,7 @@ del C:\path\to\ddogreen.exe
 ## Same Rules, Every Platform
 
 ddogreen uses the same intelligent logic across all platforms:
-- **70%/30% CPU load thresholds** with hysteresis for stable performance/power-saving switching
-- **60-second monitoring interval** for minimal system impact
+- **Configurable CPU load thresholds** with hysteresis for stable performance/power-saving switching
+- **Configurable monitoring interval** for optimal responsiveness vs system impact balance
 - **Automatic service/daemon management** for production deployment
 - **Cross-platform logging and monitoring** capabilities

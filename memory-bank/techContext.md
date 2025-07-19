@@ -149,6 +149,38 @@ User=root
 - `ProtectHome=yes`
 - `PrivateTmp=yes`
 
+## Configuration System
+
+### Configuration Architecture
+- **Read-Only Configuration**: Values loaded once at startup from file
+- **File Location**: `/etc/ddogreen/ddogreen.conf` (Linux)
+- **Format**: Key-value pairs with validation and error handling
+- **No Auto-Creation**: Configuration file must be manually created
+- **No Runtime Modification**: All changes require application restart
+
+### Configuration Parameters
+```ini
+# CPU load thresholds (decimal percentages per core)
+high_performance_threshold=0.70  # Switch to high performance (0.1-1.0)
+power_save_threshold=0.30        # Switch to power save (0.05-0.9)
+
+# Monitoring frequency in seconds
+monitoring_frequency=10          # Check interval (1-300 seconds)
+```
+
+### Validation Rules
+- **high_performance_threshold**: 0.1 to 1.0 (10% to 100%)
+- **power_save_threshold**: 0.05 to 0.9 (5% to 90%)
+- **monitoring_frequency**: 1 to 300 seconds
+- **Missing Parameters**: Application fails with clear error messages
+- **Invalid Values**: Application fails with validation errors
+
+### Configuration Setup Process
+1. **Create Directory**: `sudo mkdir -p /etc/ddogreen`
+2. **Copy Template**: `sudo cp example-config/ddogreen.conf /etc/ddogreen/`
+3. **Edit Values**: `sudo nano /etc/ddogreen/ddogreen.conf`
+4. **Start Service**: Configuration automatically loaded at startup
+
 ### File System Layout
 ```
 /usr/local/bin/ddogreen              # Main executable

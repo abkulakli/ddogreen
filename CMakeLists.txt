@@ -23,6 +23,7 @@ set(SOURCES
     src/activity_monitor.cpp
     src/daemon.cpp
     src/logger.cpp
+    src/config.cpp
     src/platform/platform_factory.cpp
 )
 
@@ -66,6 +67,11 @@ endif()
 
 # Installation
 install(TARGETS ddogreen DESTINATION bin)
+
+# Install configuration file
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/config/ddogreen.conf.default" 
+        DESTINATION share/ddogreen 
+        PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
 
 # Install generic installer script for TGZ package
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")

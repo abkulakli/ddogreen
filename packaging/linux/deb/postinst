@@ -7,6 +7,20 @@ case "$1" in
     configure)
         echo "Setting up ddogreen..."
         
+        # Ensure configuration directory exists
+        mkdir -p /etc/ddogreen
+        
+        # Install default configuration if it doesn't exist
+        if [ ! -f /etc/ddogreen/ddogreen.conf ]; then
+            if [ -f /usr/share/ddogreen/ddogreen.conf.default ]; then
+                cp /usr/share/ddogreen/ddogreen.conf.default /etc/ddogreen/ddogreen.conf
+                chmod 644 /etc/ddogreen/ddogreen.conf
+                echo "Default configuration installed at /etc/ddogreen/ddogreen.conf"
+            fi
+        else
+            echo "Existing configuration preserved at /etc/ddogreen/ddogreen.conf"
+        fi
+        
         # Use the application's built-in service installation
         if /usr/bin/ddogreen --install; then
             echo "ddogreen service has been installed and started successfully!"

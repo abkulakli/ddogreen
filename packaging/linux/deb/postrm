@@ -16,6 +16,11 @@ case "$1" in
         # Clean up any remaining files and logs
         rm -f /etc/systemd/system/ddogreen.service
         rm -f /var/log/ddogreen.log
+        # Remove configuration directory and files
+        rm -rf /etc/ddogreen
+        # Remove package configuration template
+        rm -f /usr/share/ddogreen/ddogreen.conf
+        rmdir /usr/share/ddogreen 2>/dev/null || true
         systemctl daemon-reload
         echo "ddogreen has been purged completely."
         ;;

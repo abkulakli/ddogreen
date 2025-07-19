@@ -15,6 +15,13 @@ if [ "$1" = "0" ]; then
     # Clean up log files
     rm -f /var/log/ddogreen.log
     
+    # Remove configuration directory and files
+    rm -rf /etc/ddogreen
+    
+    # Remove package configuration template
+    rm -f /usr/share/ddogreen/ddogreen.conf
+    rmdir /usr/share/ddogreen 2>/dev/null || true
+    
     echo "ddogreen has been removed completely."
 elif [ "$1" = "1" ]; then
     # Upgrade - service should be restarted by post script

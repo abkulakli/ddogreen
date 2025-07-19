@@ -13,6 +13,7 @@
 #include "activity_monitor.h"
 #include "daemon.h"
 #include "logger.h"
+#include "config.h"
 #include "platform/platform_factory.h"
 #include <iostream>
 #include <thread>
@@ -23,6 +24,7 @@ void printUsage(const char* programName) {
     std::cout << "Usage: " << programName << " [OPTIONS]\n"
               << "Options:\n"
               << "  -d, --daemon           Run as daemon\n"
+              << "  -c, --config PATH      Use custom configuration file\n"
               << "  -h, --help             Show this help message\n"
               << "  -v, --version          Show version information\n"
               << "  -i, --install          Install system service\n"
@@ -31,6 +33,10 @@ void printUsage(const char* programName) {
               << "Service Management:\n"
               << "  Install:   sudo " << programName << " --install (or -i)\n"
               << "  Uninstall: sudo " << programName << " --uninstall (or -u)\n"
+              << "\n"
+              << "Configuration:\n"
+              << "  Default:   /etc/ddogreen/ddogreen.conf\n"
+              << "  Custom:    " << programName << " --config /path/to/config.conf\n"
               << "\n"
               << "Automatically switches between performance and power-saving modes based on system load.\n";
 }
@@ -168,6 +174,15 @@ int main(int argc, char* argv[]) {
     // Setup signal handlers
     Daemon::setupSignalHandlers();
 
+    // Load configuration
+    Config config;
+    std::string configPath = args.configPath.empty() ? Config::getDefaultConfigPath() : args.configPath;
+    
+    // Load configuration - application fails if config file doesn't exist or has errors
+    if (!config.loadFromFile(configPath)) {
+        return 1;
+    }
+
     // Initialize components
     ActivityMonitor activityMonitor;
     auto powerManager = PlatformFactory::createPowerManager();
@@ -178,13 +193,17 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    // Configure activity monitor with settings from config
+    activityMonitor.setLoadThresholds(config.getHighPerformanceThreshold(), config.getPowerSaveThreshold());
+    activityMonitor.setMonitoringFrequency(config.getMonitoringFrequency());
+
     // Set up activity callback
     activityMonitor.setActivityCallback([&powerManager](bool isActive) {
         if (isActive) {
-            // System is active (load > 70%), switch to performance mode
+            // System is active (load above high performance threshold), switch to performance mode
             powerManager->setPerformanceMode();
         } else {
-            // System is idle (load < 30%), switch to power saving mode
+            // System is idle (load below power save threshold), switch to power saving mode
             powerManager->setPowerSavingMode();
         }
     });

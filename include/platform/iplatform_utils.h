@@ -14,6 +14,7 @@ struct ParsedArgs {
     bool uninstall = false;
     bool hasUnknownOptions = false;
     std::string unknownOption;
+    std::string configPath;  // Custom configuration file path
 };
 
 /**

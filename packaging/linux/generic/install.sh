@@ -94,8 +94,38 @@ install_ddogreen() {
     
     # Copy executable to system location
     print_info "Installing executable to $TARGET_EXECUTABLE_PATH..."
-    cp "ddogreen" "$TARGET_EXECUTABLE_PATH"
+    if [[ -f "bin/ddogreen" ]]; then
+        cp "bin/ddogreen" "$TARGET_EXECUTABLE_PATH"
+    elif [[ -f "ddogreen" ]]; then
+        cp "ddogreen" "$TARGET_EXECUTABLE_PATH"
+    else
+        print_error "ddogreen executable not found in package"
+        exit 1
+    fi
     chmod 755 "$TARGET_EXECUTABLE_PATH"
+    
+    # Install configuration file
+    print_info "Setting up configuration..."
+    mkdir -p /etc/ddogreen
+    if [[ ! -f "/etc/ddogreen/ddogreen.conf" ]]; then
+        if [[ -f "share/ddogreen/ddogreen.conf.default" ]]; then
+            cp "share/ddogreen/ddogreen.conf.default" "/etc/ddogreen/ddogreen.conf"
+            chmod 644 "/etc/ddogreen/ddogreen.conf"
+            print_success "Default configuration installed at /etc/ddogreen/ddogreen.conf"
+        elif [[ -f "ddogreen.conf.default" ]]; then
+            cp "ddogreen.conf.default" "/etc/ddogreen/ddogreen.conf"
+            chmod 644 "/etc/ddogreen/ddogreen.conf"
+            print_success "Default configuration installed at /etc/ddogreen/ddogreen.conf"
+        elif [[ -f "ddogreen.conf" ]]; then
+            cp "ddogreen.conf" "/etc/ddogreen/ddogreen.conf"
+            chmod 644 "/etc/ddogreen/ddogreen.conf"
+            print_success "Default configuration installed at /etc/ddogreen/ddogreen.conf"
+        else
+            print_warning "Configuration template not found in package - you may need to create /etc/ddogreen/ddogreen.conf manually"
+        fi
+    else
+        print_info "Existing configuration preserved at /etc/ddogreen/ddogreen.conf"
+    fi
     
     # Create log file and set permissions
     print_info "Setting up log file..."
@@ -201,6 +231,18 @@ uninstall_ddogreen() {
     print_info "Cleaning up files..."
     rm -f "$LOG_FILE"
     rm -f "$PID_FILE"
+    
+    # Remove configuration directory (ask user first)
+    if [[ -d "/etc/ddogreen" ]]; then
+        echo -n "Remove configuration directory /etc/ddogreen? [y/N]: "
+        read -r response
+        if [[ "$response" =~ ^[Yy]$ ]]; then
+            rm -rf "/etc/ddogreen"
+            print_info "Configuration directory removed."
+        else
+            print_info "Configuration directory preserved."
+        fi
+    fi
     
     print_success "ddogreen has been completely uninstalled."
 }
