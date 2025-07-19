@@ -72,61 +72,9 @@ jobs:
         name: ddogreen-binary-linux
         path: build/ddogreen
 
-  build-windows:
-    runs-on: windows-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Configure CMake
-      run: |
-        cmake -B build -DCMAKE_BUILD_TYPE=$env:BUILD_TYPE
-
-    - name: Build
-      run: |
-        cmake --build build --config $env:BUILD_TYPE
-
-    - name: Test executable
-      run: |
-        ./build/$env:BUILD_TYPE/ddogreen.exe --help
-        ./build/$env:BUILD_TYPE/ddogreen.exe --version
-
-    - name: Upload binary
-      uses: actions/upload-artifact@v4
-      with:
-        name: ddogreen-binary-windows
-        path: build/${{ env.BUILD_TYPE }}/ddogreen.exe
-
-  build-macos:
-    runs-on: macos-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Configure CMake
-      run: |
-        cmake -B build -DCMAKE_BUILD_TYPE=$BUILD_TYPE
-
-    - name: Build
-      run: |
-        cmake --build build --config $BUILD_TYPE -j$(sysctl -n hw.ncpu)
-
-    - name: Test executable
-      run: |
-        ./build/ddogreen --help
-        ./build/ddogreen --version
-
-    - name: Upload binary
-      uses: actions/upload-artifact@v4
-      with:
-        name: ddogreen-binary-macos
-        path: build/ddogreen
-
   create-release:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [build-linux, build-windows, build-macos]
+    needs: [build-linux]
     runs-on: ubuntu-latest
     
     steps:
@@ -147,8 +95,6 @@ jobs:
           ddogreen-rpm/*.rpm
           ddogreen-tgz/*.tar.gz
           ddogreen-binary-linux/ddogreen
-          ddogreen-binary-windows/ddogreen.exe
-          ddogreen-binary-macos/ddogreen
         generate_release_notes: true
         draft: false
         prerelease: false
