@@ -216,9 +216,14 @@ if [[ "$PACKAGE_REQUESTED" == "ON" ]]; then
     print_package_status "Creating RPM package..."
     cpack -G RPM || exit 1
 
+    # Create TGZ package (generic installer)
+    print_package_status "Creating TGZ package (generic installer)..."
+    cpack -G TGZ || exit 1
+
     # Find the created packages
     DEB_FILE=$(find . -name "*.deb" -type f | head -n 1)
     RPM_FILE=$(find . -name "*.rpm" -type f | head -n 1)
+    TGZ_FILE=$(find . -name "*.tar.gz" -type f | head -n 1)
 
     if [[ -z "$DEB_FILE" ]]; then
         print_error "DEB package creation failed - no .deb file found"
@@ -230,13 +235,20 @@ if [[ "$PACKAGE_REQUESTED" == "ON" ]]; then
         exit 1
     fi
 
+    if [[ -z "$TGZ_FILE" ]]; then
+        print_error "TGZ package creation failed - no .tar.gz file found"
+        exit 1
+    fi
+
     # Get package info
     DEB_NAME=$(basename "$DEB_FILE")
     DEB_SIZE=$(du -h "$DEB_FILE" | cut -f1)
     RPM_NAME=$(basename "$RPM_FILE")
     RPM_SIZE=$(du -h "$RPM_FILE" | cut -f1)
+    TGZ_NAME=$(basename "$TGZ_FILE")
+    TGZ_SIZE=$(du -h "$TGZ_FILE" | cut -f1)
 
-    print_success "DEB and RPM packages created successfully!"
+    print_success "DEB, RPM, and TGZ packages created successfully!"
     echo
     print_package_status "DEB Package: $DEB_NAME"
     print_package_status "DEB Size: $DEB_SIZE"
@@ -245,6 +257,10 @@ if [[ "$PACKAGE_REQUESTED" == "ON" ]]; then
     print_package_status "RPM Package: $RPM_NAME"
     print_package_status "RPM Size: $RPM_SIZE"
     print_package_status "RPM Location: $BUILD_DIR/$RPM_NAME"
+    echo
+    print_package_status "Generic TGZ Package: $TGZ_NAME"
+    print_package_status "TGZ Size: $TGZ_SIZE"
+    print_package_status "TGZ Location: $BUILD_DIR/$TGZ_NAME"
 
     # Show DEB package contents
     print_package_status "DEB package contents:"
@@ -267,6 +283,12 @@ if [[ "$PACKAGE_REQUESTED" == "ON" ]]; then
     print_package_status "  # or: sudo dnf install $BUILD_DIR/$RPM_NAME"
     print_package_status "  (Service will be automatically installed and started)"
     echo
+    print_package_status "To install generic TGZ package (All Linux distributions):"
+    print_package_status "  tar -xzf $BUILD_DIR/$TGZ_NAME"
+    print_package_status "  cd ddogreen-*/"
+    print_package_status "  sudo ./install.sh --install"
+    print_package_status "  (Works on any Linux distribution with systemd)"
+    echo
     print_package_status "Service management after installation:"
     print_package_status "  sudo systemctl status ddogreen   # Check status"
     print_package_status "  sudo systemctl stop ddogreen     # Stop service"
@@ -276,4 +298,5 @@ if [[ "$PACKAGE_REQUESTED" == "ON" ]]; then
     print_package_status "To remove packages:"
     print_package_status "  sudo apt remove ddogreen     # Debian/Ubuntu"
     print_package_status "  sudo rpm -e ddogreen             # RHEL/CentOS/Fedora"
+    print_package_status "  sudo ./install.sh --uninstall   # Generic TGZ"
 fi

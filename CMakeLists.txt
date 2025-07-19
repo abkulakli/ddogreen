@@ -67,8 +67,15 @@ endif()
 # Installation
 install(TARGETS ddogreen DESTINATION bin)
 
-# CPack configuration for DEB and RPM packages
-set(CPACK_GENERATOR "DEB;RPM")
+# Install generic installer script for TGZ package
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/packaging/linux/generic/install.sh" 
+            DESTINATION . 
+            PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+endif()
+
+# CPack configuration for DEB, RPM, and TGZ packages
+set(CPACK_GENERATOR "DEB;RPM;TGZ")
 set(CPACK_PACKAGE_NAME "ddogreen")
 set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Intelligent Green Power Management for Sustainable Computing")
