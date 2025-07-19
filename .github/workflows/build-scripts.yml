@@ -1,0 +1,109 @@
+name: Build Scripts Test
+
+on:
+  push:
+    paths:
+      - 'build.sh'
+      - 'CMakeLists.txt'
+      - 'packaging/**'
+  pull_request:
+    paths:
+      - 'build.sh'
+      - 'CMakeLists.txt'
+      - 'packaging/**'
+
+jobs:
+  test-build-scripts:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential cmake rpm
+
+    - name: Make build script executable
+      run: chmod +x build.sh
+
+    - name: Test build script help
+      run: ./build.sh --help
+
+    - name: Test clean operation
+      run: ./build.sh --clean
+
+    - name: Test debug build
+      run: ./build.sh --debug
+
+    - name: Test release build
+      run: ./build.sh
+
+    - name: Test package creation
+      run: ./build.sh --package
+
+    - name: Verify packages created
+      run: |
+        echo "=== Packages created ==="
+        find build -name "*.deb" -o -name "*.rpm" -o -name "*.tar.gz" | sort
+        
+        echo "=== Package sizes ==="
+        find build -name "*.deb" -o -name "*.rpm" -o -name "*.tar.gz" -exec ls -lh {} \;
+
+    - name: Test TGZ package contents
+      run: |
+        cd /tmp
+        tar -tf $GITHUB_WORKSPACE/build/*/*.tar.gz | sort
+        
+        # Extract and verify structure
+        tar -xzf $GITHUB_WORKSPACE/build/*/*.tar.gz
+        
+        echo "=== TGZ Contents ==="
+        find ddogreen-* -type f | sort
+        
+        # Verify install script exists
+        test -x ddogreen-*/install.sh
+        echo "install.sh found and executable ✓"
+
+  test-install-script:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Test install script help
+      run: |
+        cd packaging/linux/generic
+        ./install.sh --help
+
+    - name: Test install script status (before installation)
+      run: |
+        cd packaging/linux/generic
+        ./install.sh --status
+
+    - name: Install TLP (dependency)
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y tlp
+
+    - name: Build binary for testing
+      run: |
+        sudo apt-get install -y build-essential cmake
+        cmake -B build -DCMAKE_BUILD_TYPE=Release
+        cmake --build build -j$(nproc)
+
+    - name: Test installation (dry run simulation)
+      run: |
+        # Copy binary to test directory
+        cp build/ddogreen packaging/linux/generic/
+        cd packaging/linux/generic
+        
+        # Test that script can find the binary
+        test -f ddogreen
+        echo "Binary found for installation ✓"
+        
+        # Test script validation
+        ./install.sh --help
+        ./install.sh --status

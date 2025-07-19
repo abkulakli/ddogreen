@@ -1,0 +1,195 @@
+name: Build and Package ddogreen
+
+on:
+  push:
+    branches: [ main, develop ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential cmake rpm
+
+    - name: Configure CMake
+      run: |
+        cmake -B build -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+
+    - name: Build
+      run: |
+        cmake --build build --config $BUILD_TYPE -j$(nproc)
+
+    - name: Test executable
+      run: |
+        ./build/ddogreen --help
+        ./build/ddogreen --version
+
+    - name: Create packages
+      run: |
+        cd build
+        cpack -G DEB
+        cpack -G RPM  
+        cpack -G TGZ
+
+    - name: List created packages
+      run: |
+        echo "=== Created packages ==="
+        find build -name "*.deb" -o -name "*.rpm" -o -name "*.tar.gz" | sort
+
+    - name: Upload DEB package
+      uses: actions/upload-artifact@v4
+      with:
+        name: ddogreen-deb
+        path: build/*.deb
+
+    - name: Upload RPM package
+      uses: actions/upload-artifact@v4
+      with:
+        name: ddogreen-rpm
+        path: build/*.rpm
+
+    - name: Upload TGZ package
+      uses: actions/upload-artifact@v4
+      with:
+        name: ddogreen-tgz
+        path: build/*.tar.gz
+
+    - name: Upload binary
+      uses: actions/upload-artifact@v4
+      with:
+        name: ddogreen-binary-linux
+        path: build/ddogreen
+
+  build-windows:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure CMake
+      run: |
+        cmake -B build -DCMAKE_BUILD_TYPE=$env:BUILD_TYPE
+
+    - name: Build
+      run: |
+        cmake --build build --config $env:BUILD_TYPE
+
+    - name: Test executable
+      run: |
+        ./build/$env:BUILD_TYPE/ddogreen.exe --help
+        ./build/$env:BUILD_TYPE/ddogreen.exe --version
+
+    - name: Upload binary
+      uses: actions/upload-artifact@v4
+      with:
+        name: ddogreen-binary-windows
+        path: build/${{ env.BUILD_TYPE }}/ddogreen.exe
+
+  build-macos:
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure CMake
+      run: |
+        cmake -B build -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+
+    - name: Build
+      run: |
+        cmake --build build --config $BUILD_TYPE -j$(sysctl -n hw.ncpu)
+
+    - name: Test executable
+      run: |
+        ./build/ddogreen --help
+        ./build/ddogreen --version
+
+    - name: Upload binary
+      uses: actions/upload-artifact@v4
+      with:
+        name: ddogreen-binary-macos
+        path: build/ddogreen
+
+  create-release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [build-linux, build-windows, build-macos]
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+
+    - name: Display structure of downloaded files
+      run: find . -type f -name "ddogreen*" | sort
+
+    - name: Create release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: |
+          ddogreen-deb/*.deb
+          ddogreen-rpm/*.rpm
+          ddogreen-tgz/*.tar.gz
+          ddogreen-binary-linux/ddogreen
+          ddogreen-binary-windows/ddogreen.exe
+          ddogreen-binary-macos/ddogreen
+        generate_release_notes: true
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  package-validation:
+    needs: [build-linux]
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download packages
+      uses: actions/download-artifact@v4
+      with:
+        name: ddogreen-deb
+
+    - name: Install TLP (for testing)
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y tlp
+
+    - name: Test DEB package installation
+      run: |
+        # Install package
+        sudo dpkg -i *.deb || sudo apt-get install -f -y
+        
+        # Verify installation
+        which ddogreen
+        ddogreen --version
+        
+        # Check service status
+        sudo systemctl status ddogreen --no-pager || true
+        
+        # Test service functionality (don't start daemon in CI)
+        sudo ddogreen --help
+
+    - name: Test package removal
+      run: |
+        sudo apt-get remove -y ddogreen
+        # Verify removal
+        ! which ddogreen || echo "WARNING: ddogreen still found after removal"

@@ -35,7 +35,6 @@ TARGET_EXECUTABLE_PATH="/usr/local/bin/ddogreen"
 SERVICE_FILE="/etc/systemd/system/ddogreen.service"
 LOG_FILE="/var/log/ddogreen.log"
 PID_FILE="/run/ddogreen.pid"
-CONFIG_DIR="/etc/ddogreen"
 
 # Function to check if running as root
 check_root() {
@@ -103,10 +102,6 @@ install_ddogreen() {
     mkdir -p /var/log
     touch "$LOG_FILE"
     chmod 644 "$LOG_FILE"
-    
-    # Create config directory
-    print_info "Creating config directory..."
-    mkdir -p "$CONFIG_DIR"
     
     # Create systemd service file
     print_info "Creating systemd service..."
@@ -206,7 +201,6 @@ uninstall_ddogreen() {
     print_info "Cleaning up files..."
     rm -f "$LOG_FILE"
     rm -f "$PID_FILE"
-    rm -rf "$CONFIG_DIR"
     
     print_success "ddogreen has been completely uninstalled."
 }
