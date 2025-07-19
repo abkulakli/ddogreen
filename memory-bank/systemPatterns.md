@@ -50,28 +50,22 @@
 
 #### IPlatformUtils (New Interface)
 - **Purpose**: Platform-specific utility functions abstraction
-- **Privilege checking**: `hasRequiredPrivileges()` - replaces ifdef privilege checks
-- **Executable path**: `getExecutablePath()` - replaces ifdef path detection
-- **Command line parsing**: `parseCommandLine()` - unified across platforms
-- **Default paths**: Platform-specific installation, log, and PID file paths
-- **Error messages**: Platform-appropriate privilege escalation messages
+- **Responsibility**: Abstract platform-dependent operations like privilege checking and path management
+- **Interface**: Provides uniform utility operations across platforms
+- **Encapsulation**: Hides platform-specific implementation details from application code
 
 #### ActivityMonitor
-- **Purpose**: Monitor system activity through CPU usage
-- **Data Source**: `/proc/stat` filesystem
-- **Decision Logic**: CPU threshold-based activity detection
-- **Callback Pattern**: Notifies main daemon of state changes
-- **Threading**: Runs monitoring loop in separate thread
+- **Purpose**: Monitor system activity and notify of state changes
+- **Responsibility**: Detect system activity levels and trigger power mode changes
+- **Pattern**: Uses Observer pattern to notify subscribers of activity state changes
+- **Threading**: Operates asynchronously to avoid blocking main application flow
 
 #### PowerManager (Platform Abstraction)
 - **Purpose**: Cross-platform power management interface
+- **Responsibility**: Abstract power mode switching and power state management
+- **Interface**: Provides uniform power control operations across platforms
 - **Implementation**: Platform-specific power control (Linux: TLP, Windows: powercfg)
-- **Methods**: `setPerformanceMode()`, `setPowerSavingMode()`, `getCurrentMode()`
-- **Abstraction**: Hides platform-specific details from application code
-- **Command Execution**: Executes `tlp start` and `tlp bat` commands
-- **Output Capture**: Captures and processes TLP command output
-- **State Tracking**: Maintains current power mode state
-- **Error Handling**: Robust command failure handling
+- **Encapsulation**: Hides platform-specific power management details from application code
 
 #### ServiceManager (Platform Abstraction)
 - **Purpose**: Cross-platform service management
@@ -238,6 +232,26 @@ class ActivityMonitor {
 - **Platform-Specific Parsing**: Linux uses `getopt_long`, Windows uses simple string parsing
 - **Return Structure**: `ParsedArgs` struct provides platform-agnostic argument representation
 
+### Power Management Implementation
+- **PowerManager Methods**: `setPerformanceMode()`, `setPowerSavingMode()`, `getCurrentMode()`
+- **Linux Implementation**: Executes `tlp start` and `tlp bat` commands
+- **Windows Implementation**: Uses `powercfg` command for power plan switching
+- **Output Capture**: Captures and processes command output for logging
+- **State Tracking**: Maintains current power mode state
+- **Error Handling**: Robust command failure handling
+
+### Activity Monitoring Implementation
+- **Data Source**: Uses `/proc/stat` filesystem on Linux
+- **Decision Logic**: CPU threshold-based activity detection (10% threshold)
+- **Monitoring Interval**: 5-second polling for CPU usage calculation
+- **Callback Mechanism**: Notifies main daemon of state changes via callback function
+
+### Platform Utilities Implementation
+- **Privilege Checking**: `hasRequiredPrivileges()` - Linux uses `geteuid()`, Windows uses token membership
+- **Executable Path**: `getExecutablePath()` - Linux uses `/proc/self/exe`, Windows uses `GetModuleFileName`
+- **Default Paths**: Platform-specific installation, log, and PID file paths
+- **Error Messages**: Platform-appropriate privilege escalation messages
+
 ## Critical Implementation Decisions
 
 ### 1. Platform Abstraction Architecture (July 2025 Refactoring)
@@ -396,7 +410,7 @@ if (!platformUtils->hasRequiredPrivileges()) {
 // ✅ ALWAYS - Platform implementations handle complexity
 auto serviceManager = PlatformFactory::createServiceManager();
 serviceManager->installService(name, path, description);
-// Platform implementation handles: file copying, directories, permissions, etc.
+// Platform implementation handles all required platform-specific operations
 ```
 
 #### 3. Platform-Agnostic Application Logic
