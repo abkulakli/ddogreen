@@ -3,6 +3,24 @@
 ## Overview
 This document establishes comprehensive coding and testing standards for the ddogreen project. These standards ensure code quality, maintainability, and consistency across the cross-platform codebase.
 
+## **DOCUMENTATION PHILOSOPHY** ⚠️
+
+### Minimal Documentation Principle
+**CRITICAL GUIDELINE**: This project follows an ultra-minimal documentation approach:
+
+- **Do NOT**: Create additional .md files without explicit user request
+- **Do NOT**: Add comprehensive documentation for simple functionality
+- **Do NOT**: Create README files for individual directories/components
+- **Do**: Keep scripts self-documenting with built-in help text
+- **Do**: Use clear, descriptive code that documents itself
+- **Do**: Align all documentation with the project's simplicity principle
+
+### Documentation Standards
+- **Self-Documenting Code**: Write clear, readable code that explains its purpose
+- **Built-in Help**: Scripts should include `--help` options with usage examples
+- **Minimal External Docs**: Only create documentation files when absolutely necessary
+- **Avoid Redundancy**: Never duplicate information across multiple files
+
 ## Coding Standards
 
 ### 1. File Organization and Naming

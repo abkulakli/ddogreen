@@ -1,53 +1,52 @@
 # Active Context - ddogreen
 
 ## Current Work Focus
-**Project Status**: BUILD SYSTEM FINALIZED ✅
+**Project Status**: BUILD SYSTEM SIMPLIFIED ✅
 **Last Updated**: July 19, 2025
-**Current Priority**: Finalized simplified build system with smart clean functionality
+**Current Priority**: Maintain ultra-minimal project structure and eliminate redundant functionality
 
-## Latest Achievement: Build System Finalization ✅
+## Latest Achievement: Build System Simplification ✅
 
-### Complete Build System Simplification
-**Final User Request**: Multiple iterations to perfect the build system:
-1. "remove --static-analysis --format-check --clean"
-2. "add --clean. It may be used" 
-3. "remove STRICT_WARNINGS"
-4. "remove clang format"
-5. "--clean should not build the project" → "If user provides --clean only, it should clean... But builds will be done If user provides both --clean and --debug"
+### Removed --package-only Option
+**User Request**: "remove this also. we will do incremental build anyway and ensure executable exists. no direct packaging without build"
 
-✅ **Smart Clean Functionality**: Perfect implementation of flexible clean behavior
-✅ **Minimal Build Options**: Essential set: --debug, --release, --clean, --help
-✅ **No Quality Automation**: Removed all automated formatting, analysis, and strict compilation
-✅ **Manual Standards**: Developers apply coding standards manually during development
-✅ **Platform-Specific Directories**: Maintained `build/{platform}/{debug|release}/` structure
-✅ **Flexible Clean Logic**: Clean-only or clean+build combinations working perfectly
+**Rationale**: 
+- Incremental builds ensure executable exists when needed
+- No need for direct packaging without build step
+- Eliminates unnecessary complexity and options
+- Aligns with ultra-minimal design philosophy
+
+✅ **Simplified Argument Parsing**: Removed --package-only option from build.sh
+✅ **Updated Help Text**: Cleaned up help output to remove --package-only references
+✅ **Simplified Build Logic**: Removed complex build-or-package conditional logic
+✅ **Updated Makefile**: Removed package-only target and references
+✅ **Tested Functionality**: Verified --package still works correctly with clean builds
 
 ### Final Build System State
-**Complete and Tested**: All build functionality verified working
-
-#### Current Build Commands
+**Current Options**: Clean and minimal
 ```bash
-./build.sh                     # Standard release build
-./build.sh --debug             # Debug build
-./build.sh --clean             # Clean build directory only
-./build.sh --clean --release   # Clean then build release  
-./build.sh --clean --debug     # Clean then build debug
-./build.sh --help              # Show usage information
+# Available options:
+./build.sh              # Standard release build (default)
+./build.sh --debug      # Debug build  
+./build.sh --clean      # Clean build directory only
+./build.sh --package    # Build release and create DEB package
+./build.sh --debug --package  # Build debug and create DEB package
+./build.sh --clean --package  # Clean, build and create DEB package
 ```
 
-#### Smart Clean Logic Implementation
-- **BUILD_REQUESTED flag**: Tracks when --debug or --release explicitly specified
-- **Clean-only behavior**: When only --clean used, cleans and exits
-- **Clean+build behavior**: When --clean combined with build options, cleans then builds
-- **Platform detection**: Automatic Linux/macOS/Windows environment detection
-- **Directory structure**: `build/{platform}/{debug|release}/` maintained
+**Key Simplifications**:
+- **Removed**: --release (release is default), --force (use --clean), --package-only (unnecessary)
+- **Kept**: Essential options only - --debug, --clean, --package
+- **Philosophy**: One way to do each task, no redundant options
+- **Result**: 56KB functional DEB packages with systemd integration
 
 ## Current Status Summary
 
-**PROJECT STATE**: PRODUCTION READY WITH OPTIMAL BUILD SYSTEM ✅
+**PROJECT STATE**: PRODUCTION READY WITH MINIMAL PACKAGING ✅
 - **Application**: Fully functional cross-platform power management daemon
 - **Architecture**: Clean platform abstraction with zero ifdefs in main.cpp
 - **Build System**: Simplified, flexible, and developer-friendly
+- **Packaging**: Functional DEB packaging with minimal documentation overhead
 - **Code Quality**: Manual standards application without automated enforcement
 - **Documentation**: Comprehensive coding standards and memory bank maintained
 
@@ -76,10 +75,26 @@
 
 ## Key Insights for Future Development
 
+### **DOCUMENTATION PHILOSOPHY** ⚠️
+**CRITICAL PATTERN**: User strongly prefers minimal documentation approach
+- **Do NOT**: Create additional .md files without explicit request
+- **Do NOT**: Add comprehensive documentation for simple functionality  
+- **Do**: Keep scripts self-documenting with built-in help
+- **Do**: Align with project's "ultra-minimal design" principle
+- **Reasoning**: Extra documentation violates the simplicity principle
+
+### Development Patterns
 1. **Simplicity Preferred**: User consistently requested removal of complex automated features
 2. **Manual Control**: Preference for manual application of standards over automation
 3. **Essential Functionality**: Focus on core build requirements without extras
 4. **Flexibility Important**: Smart clean logic shows value of flexible, combinable options
+5. **Minimal Documentation**: Self-documenting code preferred over extensive docs
+
+### Build System Evolution Summary
+- **Started**: Complex QA system with static analysis, format checking, strict warnings
+- **Simplified**: User requested removal of complex quality features step by step
+- **Finalized**: Essential build functionality with smart clean logic
+- **Result**: Developer-focused, minimal, and flexible build system
 
 #### IPlatformUtils Interface (New)
 - **Privilege Checking**: `hasRequiredPrivileges()` - replaces ifdef privilege checks

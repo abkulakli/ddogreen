@@ -1,0 +1,38 @@
+#!/bin/bash
+# Post-installation script for ddogreen
+
+set -e
+
+case "$1" in
+    configure)
+        echo "Setting up ddogreen..."
+        
+        # Create systemd service file
+        cat > /etc/systemd/system/ddogreen.service << 'EOF'
+[Unit]
+Description=ddogreen - Intelligent Green Power Management
+After=multi-user.target
+Wants=tlp.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/ddogreen
+Restart=always
+RestartSec=5
+User=root
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+        # Reload systemd and enable service
+        systemctl daemon-reload
+        systemctl enable ddogreen.service
+        
+        echo "ddogreen has been installed successfully!"
+        echo "To start the service: sudo systemctl start ddogreen"
+        echo "To check status: sudo systemctl status ddogreen"
+        ;;
+esac
+
+exit 0

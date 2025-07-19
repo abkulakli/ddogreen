@@ -65,4 +65,24 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 endif()
 
 # Installation
-install(TARGETS ddogreen DESTINATION /usr/local/bin)
+install(TARGETS ddogreen DESTINATION bin)
+
+# CPack configuration for DEB package
+set(CPACK_GENERATOR "DEB")
+set(CPACK_PACKAGE_NAME "ddogreen")
+set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Intelligent Green Power Management for Sustainable Computing")
+set(CPACK_PACKAGE_DESCRIPTION "A smart sustainability-focused service that automatically optimizes your PC and laptop power consumption by intelligently switching between high-performance and power-saving modes based on actual system usage patterns.")
+set(CPACK_PACKAGE_VENDOR "DDOSoft Sustainability Solutions")
+set(CPACK_PACKAGE_CONTACT "support@ddosoft.com")
+set(CPACK_PACKAGE_HOMEPAGE_URL "https://www.ddosoft.com")
+
+# Debian-specific settings
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "DDOSoft Sustainability Solutions <support@ddosoft.com>")
+set(CPACK_DEBIAN_PACKAGE_SECTION "utils")
+set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "tlp (>= 1.0)")
+set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
+set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_CURRENT_SOURCE_DIR}/packaging/debian/postinst;${CMAKE_CURRENT_SOURCE_DIR}/packaging/debian/prerm;${CMAKE_CURRENT_SOURCE_DIR}/packaging/debian/postrm")
+
+include(CPack)

@@ -1,0 +1,14 @@
+#!/bin/bash
+# Pre-removal script for ddogreen
+
+set -e
+
+case "$1" in
+    remove|upgrade|deconfigure)
+        # Stop and disable service
+        systemctl stop ddogreen.service || true
+        systemctl disable ddogreen.service || true
+        ;;
+esac
+
+exit 0
