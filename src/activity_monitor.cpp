@@ -7,11 +7,20 @@
 #include <sstream>
 #include <iostream>
 #include <tuple>
+#include <iomanip>
+
+// Helper function to format numbers with exactly 2 decimal places
+std::string formatNumber(double value) {
+    std::ostringstream oss;
+    oss << std::fixed << std::setprecision(2) << value;
+    return oss.str();
+}
 
 ActivityMonitor::ActivityMonitor()
     : m_isActive(false)
     , m_running(false)
-    , m_loadThreshold(0.10)  // 10% load per core threshold
+    , m_highPerformanceThreshold(0.70)  // 70% load per core threshold to switch to high performance
+    , m_powerSaveThreshold(0.30)        // 30% load per core threshold to switch to power save
     , m_coreCount(0)
     , m_callback(nullptr)
     , m_systemMonitor(nullptr) {
@@ -22,8 +31,10 @@ ActivityMonitor::ActivityMonitor()
     if (m_systemMonitor && m_systemMonitor->isAvailable()) {
         m_coreCount = m_systemMonitor->getCpuCoreCount();
         Logger::info("Detected " + std::to_string(m_coreCount) + " CPU core(s)");
-        Logger::info("Load threshold: " + std::to_string(m_loadThreshold) + " (" + std::to_string(m_loadThreshold * 100) + "% per core)");
-        Logger::info("Absolute load threshold: " + std::to_string(m_loadThreshold * m_coreCount));
+        Logger::info("High performance threshold: " + formatNumber(m_highPerformanceThreshold) + " (" + formatNumber(m_highPerformanceThreshold * 100) + "% per core)");
+        Logger::info("Power save threshold: " + formatNumber(m_powerSaveThreshold) + " (" + formatNumber(m_powerSaveThreshold * 100) + "% per core)");
+        Logger::info("Absolute high performance threshold: " + formatNumber(m_highPerformanceThreshold * m_coreCount));
+        Logger::info("Absolute power save threshold: " + formatNumber(m_powerSaveThreshold * m_coreCount));
     } else {
         Logger::error("Failed to initialize platform-specific system monitor");
         m_coreCount = 1; // fallback
@@ -45,18 +56,21 @@ bool ActivityMonitor::start() {
     // Perform initial load check to set correct mode immediately
     if (m_callback) {
         double load1min = getLoadAverage();
-        double absoluteThreshold = m_loadThreshold * m_coreCount;
+        double highPerformanceAbsoluteThreshold = m_highPerformanceThreshold * m_coreCount;
         
-        // Apply threshold logic: 1-min > 10% = AC, 1-min <= 10% = BAT
-        if (load1min > absoluteThreshold) {
+        // Apply dual threshold logic with hysteresis:
+        // If load > 70%, switch to high performance
+        // If load < 30%, switch to power save
+        // Between 30-70%, maintain current state (but start with power save as default)
+        if (load1min > highPerformanceAbsoluteThreshold) {
             m_isActive = true;
         } else {
-            m_isActive = false;
+            m_isActive = false;  // Default to power save for initial state
         }
         
         double load1minPercentage = (load1min / m_coreCount) * 100;
-        Logger::info("Initial state: load: " + std::to_string(load1min) +
-                    " (" + std::to_string(load1minPercentage) + "% avg per core)");
+        Logger::info("Initial state: load: " + formatNumber(load1min) +
+                    " (" + formatNumber(load1minPercentage) + "% avg per core)");
         Logger::info(m_isActive ?
             "System active - switching to performance mode" :
             "System idle - switching to power saving mode");
@@ -67,7 +81,7 @@ bool ActivityMonitor::start() {
     std::thread monitorThread(&ActivityMonitor::monitorLoop, this);
     monitorThread.detach();
 
-    Logger::info("Activity monitor started (load > 10% = performance mode, load <= 10% = power saving mode)");
+    Logger::info("Activity monitor started (load > 70% = performance mode, load < 30% = power saving mode, 30-70% = maintain current mode)");
     return true;
 }
 
@@ -80,11 +94,15 @@ void ActivityMonitor::setActivityCallback(ActivityCallback callback) {
     m_callback = callback;
 }
 
-void ActivityMonitor::setLoadThreshold(double threshold) {
-    m_loadThreshold = threshold;
-    double absoluteThreshold = threshold * m_coreCount;
-    Logger::info("Load threshold set to " + std::to_string(threshold) + " (" + std::to_string(threshold * 100) + "% per core)");
-    Logger::info("Absolute load threshold: " + std::to_string(absoluteThreshold) + " (for " + std::to_string(m_coreCount) + " cores)");
+void ActivityMonitor::setLoadThresholds(double highPerformanceThreshold, double powerSaveThreshold) {
+    m_highPerformanceThreshold = highPerformanceThreshold;
+    m_powerSaveThreshold = powerSaveThreshold;
+    double highPerformanceAbsoluteThreshold = highPerformanceThreshold * m_coreCount;
+    double powerSaveAbsoluteThreshold = powerSaveThreshold * m_coreCount;
+    Logger::info("High performance threshold set to " + formatNumber(highPerformanceThreshold) + " (" + formatNumber(highPerformanceThreshold * 100) + "% per core)");
+    Logger::info("Power save threshold set to " + formatNumber(powerSaveThreshold) + " (" + formatNumber(powerSaveThreshold * 100) + "% per core)");
+    Logger::info("Absolute high performance threshold: " + formatNumber(highPerformanceAbsoluteThreshold) + " (for " + std::to_string(m_coreCount) + " cores)");
+    Logger::info("Absolute power save threshold: " + formatNumber(powerSaveAbsoluteThreshold) + " (for " + std::to_string(m_coreCount) + " cores)");
 }
 
 bool ActivityMonitor::isActive() const {
@@ -113,43 +131,50 @@ void ActivityMonitor::monitorLoop() {
     while (m_running) {
         auto now = std::chrono::steady_clock::now();
 
-        // Check load average every 30 seconds as requested
-        if (std::chrono::duration_cast<std::chrono::seconds>(now - m_lastLoadCheckTime).count() >= 30) {
+        // Check load average every 10 seconds for responsive switching
+        if (std::chrono::duration_cast<std::chrono::seconds>(now - m_lastLoadCheckTime).count() >= 10) {
             double load1min = getLoadAverage();
             m_lastLoadCheckTime = now;
 
-            // Calculate the actual threshold based on core count
-            double absoluteThreshold = m_loadThreshold * m_coreCount;
+            // Calculate the actual thresholds based on core count
+            double highPerformanceAbsoluteThreshold = m_highPerformanceThreshold * m_coreCount;
+            double powerSaveAbsoluteThreshold = m_powerSaveThreshold * m_coreCount;
 
-            Logger::debug("Load average: " + std::to_string(load1min) +
-                         " (threshold: " + std::to_string(absoluteThreshold) +
-                         " = " + std::to_string(m_loadThreshold * 100) + "% of " + std::to_string(m_coreCount) + " cores)");
+            Logger::debug("Load average: " + formatNumber(load1min) +
+                         " (high perf threshold: " + formatNumber(highPerformanceAbsoluteThreshold) +
+                         " = " + formatNumber(m_highPerformanceThreshold * 100) + "% of " + std::to_string(m_coreCount) + " cores, " +
+                         "power save threshold: " + formatNumber(powerSaveAbsoluteThreshold) +
+                         " = " + formatNumber(m_powerSaveThreshold * 100) + "% of " + std::to_string(m_coreCount) + " cores)");
 
-            // Determine activity state using threshold logic
+            // Determine activity state using hysteresis logic
             bool wasActive = m_isActive;
             
-            // Simple logic: 1-min > threshold = active, 1-min <= threshold = idle
-            if (load1min > absoluteThreshold) {
-                m_isActive = true;
-            } else {
-                m_isActive = false;
+            // Hysteresis logic:
+            // - If currently in power save mode and load > 70%, switch to high performance
+            // - If currently in high performance mode and load < 30%, switch to power save
+            // - Otherwise, maintain current state
+            if (!m_isActive && load1min > highPerformanceAbsoluteThreshold) {
+                m_isActive = true;  // Switch to high performance
+            } else if (m_isActive && load1min < powerSaveAbsoluteThreshold) {
+                m_isActive = false;  // Switch to power save
             }
+            // Else: maintain current state (hysteresis zone between 30-70%)
 
             // If activity state changed, notify callback
             if (wasActive != m_isActive && m_callback) {
                 double load1minPercentage = (load1min / m_coreCount) * 100;
                 
                 if (m_isActive) {
-                    Logger::info("System became active (load: " + std::to_string(load1min) +
-                                " = " + std::to_string(load1minPercentage) + "% avg per core > 10%) - switching to performance mode");
+                    Logger::info("System became active (load: " + formatNumber(load1min) +
+                                " = " + formatNumber(load1minPercentage) + "% avg per core > 70%) - switching to performance mode");
                 } else {
-                    Logger::info("System became idle (load: " + std::to_string(load1min) +
-                                " = " + std::to_string(load1minPercentage) + "% avg per core <= 10%) - switching to power saving mode");
+                    Logger::info("System became idle (load: " + formatNumber(load1min) +
+                                " = " + formatNumber(load1minPercentage) + "% avg per core < 30%) - switching to power saving mode");
                 }
                 m_callback(m_isActive);
             }
         }
 
-        std::this_thread::sleep_for(std::chrono::seconds(30));
+        std::this_thread::sleep_for(std::chrono::seconds(10));
     }
 }

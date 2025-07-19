@@ -181,10 +181,10 @@ int main(int argc, char* argv[]) {
     // Set up activity callback
     activityMonitor.setActivityCallback([&powerManager](bool isActive) {
         if (isActive) {
-            // System is active (1-min load > 10%), switch to performance mode
+            // System is active (load > 70%), switch to performance mode
             powerManager->setPerformanceMode();
         } else {
-            // System is idle (both 5-min AND 15-min load <= 10%), switch to power saving mode
+            // System is idle (load < 30%), switch to power saving mode
             powerManager->setPowerSavingMode();
         }
     });

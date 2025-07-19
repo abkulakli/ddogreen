@@ -23,8 +23,8 @@ public:
     // Set callback for activity changes
     void setActivityCallback(ActivityCallback callback);
 
-    // Set load average threshold for activity detection (default: 0.10)
-    void setLoadThreshold(double threshold);
+    // Set load average thresholds for activity detection with hysteresis
+    void setLoadThresholds(double highPerformanceThreshold, double powerSaveThreshold);
 
     // Check if system is currently active
     bool isActive() const;
@@ -36,7 +36,8 @@ private:
 
     bool m_isActive;
     bool m_running;
-    double m_loadThreshold;  // Threshold as percentage (0.10 = 10%)
+    double m_highPerformanceThreshold;  // Threshold to switch to high performance (0.70 = 70%)
+    double m_powerSaveThreshold;        // Threshold to switch to power save (0.30 = 30%)
     int m_coreCount;  // Number of CPU cores
     ActivityCallback m_callback;
     std::unique_ptr<ISystemMonitor> m_systemMonitor;  // Platform-specific system monitor

@@ -26,10 +26,10 @@ A smart sustainability-focused service that automatically optimizes your PC and 
 
 ddogreen watches how busy your computer is and automatically switches power modes:
 
-- **High Performance Mode**: When you're actively working (system load > 10%)
+- **High Performance Mode**: When you're actively working (system load > 70%)
   - **Linux**: TLP AC mode (`tlp ac`)
   - **Windows**: High Performance power plan
-- **Power Saving Mode**: When your laptop is mostly idle (system load ≤ 10%)
+- **Power Saving Mode**: When your laptop is mostly idle (system load < 30%)
   - **Linux**: TLP battery mode (`tlp bat`)
   - **Windows**: Power Saver power plan
 
@@ -266,7 +266,7 @@ del C:\path\to\ddogreen.exe
 ### System Monitoring
 - **Linux**: Reads load averages from `/proc/loadavg`
 - **Windows**: Uses Performance Counters to calculate load averages
-- **Threshold**: 10% CPU load per core determines mode switching
+- **Thresholds**: 70% CPU load per core to switch to performance mode, 30% to switch to power save mode (with hysteresis to prevent rapid switching)
 - **Check Interval**: Every 60 seconds for minimal system impact
 
 ### Service Management
@@ -290,7 +290,7 @@ del C:\path\to\ddogreen.exe
 ## Same Rules, Every Platform
 
 ddogreen uses the same intelligent logic across all platforms:
-- **10% CPU load threshold** for performance/power-saving switching
+- **70%/30% CPU load thresholds** with hysteresis for stable performance/power-saving switching
 - **60-second monitoring interval** for minimal system impact
 - **Automatic service/daemon management** for production deployment
 - **Cross-platform logging and monitoring** capabilities
