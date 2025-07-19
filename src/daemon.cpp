@@ -36,7 +36,7 @@ bool Daemon::daemonize() {
         // Check for PID file creation with timeout
         int attempts = 0;
         const int max_attempts = 100; // 1 second total timeout
-        
+
         while (attempts < max_attempts) {
             std::ifstream pidFile("/run/ddogreen.pid");
             if (pidFile.is_open()) {
@@ -47,7 +47,7 @@ bool Daemon::daemonize() {
             usleep(10000); // 10ms delay
             attempts++;
         }
-        
+
         Logger::error("Parent process: Timeout waiting for PID file");
         exit(1);
     }
@@ -79,10 +79,10 @@ bool Daemon::daemonize() {
         pidFile << getpid() << std::endl;
         pidFile.flush(); // Ensure data is written to disk
         pidFile.close();
-        
+
         // Sync to ensure write is complete
         sync();
-        
+
         Logger::info("PID file written by daemon: /run/ddogreen.pid with PID: " + std::to_string(getpid()));
     } else {
         Logger::error("Failed to write PID file: /run/ddogreen.pid");

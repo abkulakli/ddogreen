@@ -10,6 +10,30 @@
 - **Service Framework**: systemd (Linux), Windows Service Manager (Windows)
 - **Logging**: Custom implementation with logrotate integration
 
+### Build System
+
+#### Simplified Build Script (Updated July 2025)
+```bash
+# Essential build commands
+./build.sh                     # Standard release build
+./build.sh --debug             # Debug build
+./build.sh --clean             # Clean build directory only
+./build.sh --clean --release   # Clean then build release
+./build.sh --clean --debug     # Clean then build debug
+```
+
+#### Build Requirements
+- **cmake**: 3.16 or later
+- **make**: GNU make or compatible
+- **gcc/g++**: C++17 support required
+- **Platform Detection**: Automatic Linux/macOS/Windows detection
+
+#### Removed Build Features (Per User Request)
+- **Static Analysis**: No cppcheck or clang-tidy integration
+- **Format Checking**: No clang-format verification
+- **Strict Warnings**: No warnings-as-errors compilation
+- **Quality Modes**: No automated quality assurance checks
+
 ### Platform Abstraction
 - **Design**: Generic interfaces with platform-specific implementations
 - **Compilation**: Compile-time platform selection using preprocessor directives

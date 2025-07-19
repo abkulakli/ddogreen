@@ -16,6 +16,32 @@
     └─────────┘              └─────────┘              └─────────┘
 ```
 
+## Build System Architecture
+
+### Simplified Build Structure (Updated July 2025)
+```
+ddogreen/
+├── build.sh                    # Simplified build script
+├── CMakeLists.txt             # Build configuration
+└── build/                     # Platform-specific builds
+    ├── linux/
+    │   ├── debug/             # Linux debug builds
+    │   └── release/           # Linux release builds
+    ├── windows/
+    │   ├── debug/             # Windows debug builds  
+    │   └── release/           # Windows release builds
+    └── macos/
+        ├── debug/             # macOS debug builds
+        └── release/           # macOS release builds
+```
+
+### Build Script Features
+- **Smart Clean**: `--clean` standalone or combined with build options
+- **Platform Detection**: Automatic environment detection
+- **Minimal Dependencies**: Only cmake and make required
+- **Essential Options**: --debug, --release, --clean, --help
+- **No Quality Enforcement**: Manual coding standards application
+
 ### Cross-Platform Architecture (Refactored - July 2025)
 ```
 ┌─────────────────────────────────────────┐
