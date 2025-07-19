@@ -25,6 +25,7 @@ set(SOURCES
     src/logger.cpp
     src/config.cpp
     src/platform/platform_factory.cpp
+    src/platform/idaemon.cpp
 )
 
 # Platform-specific source files
@@ -34,6 +35,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         src/platform/linux/linux_service_manager.cpp
         src/platform/linux/linux_system_monitor.cpp
         src/platform/linux/linux_platform_utils.cpp
+        src/platform/linux/linux_daemon.cpp
     )
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     list(APPEND SOURCES
@@ -41,6 +43,7 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         src/platform/windows/windows_service_manager.cpp
         src/platform/windows/windows_system_monitor.cpp
         src/platform/windows/windows_platform_utils.cpp
+        src/platform/windows/windows_daemon.cpp
     )
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     list(APPEND SOURCES
@@ -48,6 +51,7 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         src/platform/macos/macos_service_manager.cpp
         src/platform/macos/macos_system_monitor.cpp
         src/platform/macos/macos_platform_utils.cpp
+        src/platform/macos/macos_daemon.cpp
     )
 else()
     message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")

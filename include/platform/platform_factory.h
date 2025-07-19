@@ -4,6 +4,7 @@
 #include "platform/ipower_manager.h"
 #include "platform/iservice_manager.h"
 #include "platform/iplatform_utils.h"
+#include "platform/idaemon.h"
 #include <memory>
 
 /**
@@ -35,6 +36,12 @@ public:
      * @return unique_ptr to platform-specific platform utilities implementation
      */
     static std::unique_ptr<IPlatformUtils> createPlatformUtils();
+
+    /**
+     * Create a daemon for the current platform
+     * @return unique_ptr to platform-specific daemon implementation
+     */
+    static std::unique_ptr<IDaemon> createDaemon();
 
     /**
      * Get the current platform name

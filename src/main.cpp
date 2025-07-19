@@ -19,6 +19,8 @@
 #include <thread>
 #include <chrono>
 #include <cstdio>
+#include <unistd.h>
+#include <cstdlib>
 
 void printUsage(const char* programName) {
     std::cout << "Usage: " << programName << " [OPTIONS]\n"
@@ -164,6 +166,36 @@ int main(int argc, char* argv[]) {
     std::string logPath = platformUtils->getDefaultLogPath();
     Logger::init(logPath, !args.runAsDaemon);
 
+    // Always convert relative config paths to absolute paths for consistency
+    // This prevents issues with working directory changes and provides clear path resolution
+    if (!args.configPath.empty() && args.configPath[0] != '/') {
+        char* cwd = getcwd(nullptr, 0);
+        if (cwd) {
+            std::string tempPath = std::string(cwd) + "/" + args.configPath;
+            free(cwd);
+            
+            // Use realpath to resolve all . and .. components and get canonical path
+            char* resolvedPath = realpath(tempPath.c_str(), nullptr);
+            if (resolvedPath) {
+                args.configPath = std::string(resolvedPath);
+                free(resolvedPath);
+                Logger::info("Converted relative config path to absolute: " + args.configPath);
+            } else {
+                // If realpath fails, use the simple concatenation as fallback
+                args.configPath = tempPath;
+                Logger::warning("Could not resolve path components, using: " + args.configPath);
+            }
+        } else {
+            Logger::warning("Failed to get current working directory, using config path as-is");
+        }
+    }
+
+    // Initialize daemon
+    if (!Daemon::initialize()) {
+        Logger::error("Failed to initialize daemon");
+        return 1;
+    }
+
     if (args.runAsDaemon) {
         if (!Daemon::daemonize()) {
             Logger::error("Failed to daemonize");
@@ -224,6 +256,7 @@ int main(int argc, char* argv[]) {
     // Cleanup
     Logger::info("Shutting down ddogreen service");
     activityMonitor.stop();
+    Daemon::cleanup();
 
     // Remove PID file
     if (args.runAsDaemon) {

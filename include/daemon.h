@@ -1,19 +1,25 @@
 #pragma once
 
+#include "platform/platform_factory.h"
+#include <memory>
+
 class Daemon {
 public:
+    // Initialize the daemon (creates platform-specific implementation)
+    static bool initialize();
+
     // Daemonize the process
     static bool daemonize();
 
     // Setup signal handlers
     static void setupSignalHandlers();
 
-    // Signal handler function
-    static void signalHandler(int signal);
-
     // Check if daemon should continue running
     static bool shouldRun();
 
+    // Cleanup daemon resources
+    static void cleanup();
+
 private:
-    static volatile bool s_running;
+    static std::unique_ptr<IDaemon> s_daemon;
 };
