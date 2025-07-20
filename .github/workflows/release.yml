@@ -28,7 +28,10 @@ jobs:
 
     - name: Configure CMake
       run: |
-        cmake -B build -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+        VERSION="${{ github.event.inputs.version || github.ref_name }}"
+        VERSION_NUMBER=${VERSION#v}
+        echo "Configuring with version: $VERSION_NUMBER"
+        cmake -B build -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DPROJECT_VERSION_OVERRIDE="$VERSION_NUMBER"
 
     - name: Build
       run: |
@@ -85,10 +88,15 @@ jobs:
       run: |
         mkdir -p release-artifacts
         
-        # Copy packages
-        cp build/*.deb release-artifacts/
-        cp build/*.rpm release-artifacts/
-        cp build/*.tar.gz release-artifacts/
+        # Extract version number first
+        VERSION="${{ github.event.inputs.version || github.ref_name }}"
+        VERSION_NUMBER=${VERSION#v}
+        echo "Using version: $VERSION_NUMBER"
+        
+        # Copy and rename packages with version
+        cp build/ddogreen-linux.deb release-artifacts/ddogreen-${VERSION}-linux.deb
+        cp build/ddogreen-linux.rpm release-artifacts/ddogreen-${VERSION}-linux.rpm
+        cp build/ddogreen-linux.tar.gz release-artifacts/ddogreen-${VERSION}-linux.tar.gz
         
         # Copy standalone binary
         cp build/ddogreen release-artifacts/ddogreen-linux-x64
@@ -114,23 +122,23 @@ jobs:
           
           #### Debian/Ubuntu (DEB Package)
           ```bash
-          wget https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.version || github.ref_name }}/ddogreen-${{ github.event.inputs.version || github.ref_name }}-Linux.deb
-          sudo dpkg -i ddogreen-${{ github.event.inputs.version || github.ref_name }}-Linux.deb
+          wget https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.version || github.ref_name }}/ddogreen-${{ github.event.inputs.version || github.ref_name }}-linux.deb
+          sudo dpkg -i ddogreen-${{ github.event.inputs.version || github.ref_name }}-linux.deb
           sudo apt install -f  # Fix dependencies if needed
           ```
           
           #### RHEL/CentOS/Fedora (RPM Package)
           ```bash
-          wget https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.version || github.ref_name }}/ddogreen-${{ github.event.inputs.version || github.ref_name }}-Linux.rpm
-          sudo rpm -i ddogreen-${{ github.event.inputs.version || github.ref_name }}-Linux.rpm
-          # or: sudo dnf install ddogreen-${{ github.event.inputs.version || github.ref_name }}-Linux.rpm
+          wget https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.version || github.ref_name }}/ddogreen-${{ github.event.inputs.version || github.ref_name }}-linux.rpm
+          sudo rpm -i ddogreen-${{ github.event.inputs.version || github.ref_name }}-linux.rpm
+          # or: sudo dnf install ddogreen-${{ github.event.inputs.version || github.ref_name }}-linux.rpm
           ```
           
           #### Generic Linux (TGZ Package)
           ```bash
-          wget https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.version || github.ref_name }}/ddogreen-${{ github.event.inputs.version || github.ref_name }}-Linux.tar.gz
-          tar -xzf ddogreen-${{ github.event.inputs.version || github.ref_name }}-Linux.tar.gz
-          cd ddogreen-${{ github.event.inputs.version || github.ref_name }}-Linux/
+          wget https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.version || github.ref_name }}/ddogreen-${{ github.event.inputs.version || github.ref_name }}-linux.tar.gz
+          tar -xzf ddogreen-${{ github.event.inputs.version || github.ref_name }}-linux.tar.gz
+          cd ddogreen-*/
           sudo ./install.sh --install
           ```
           

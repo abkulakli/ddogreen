@@ -1,5 +1,11 @@
 cmake_minimum_required(VERSION 3.16)
-project(ddogreen VERSION 0.2.0
+
+# Set version from command line argument or default to local development version
+if(NOT DEFINED PROJECT_VERSION_OVERRIDE)
+    set(PROJECT_VERSION_OVERRIDE "0.0.0")
+endif()
+
+project(ddogreen VERSION ${PROJECT_VERSION_OVERRIDE}
         DESCRIPTION "Intelligent Green Power Management for Sustainable Computing"
         HOMEPAGE_URL "https://www.ddosoft.com")
 
@@ -63,6 +69,9 @@ include_directories(include)
 # Create executable
 add_executable(ddogreen ${SOURCES})
 
+# Add version definition for use in source code
+target_compile_definitions(ddogreen PRIVATE DDOGREEN_VERSION="${PROJECT_VERSION}")
+
 # Platform-specific libraries
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     # Link Windows-specific libraries for Performance Counters
@@ -87,12 +96,17 @@ endif()
 # CPack configuration for DEB, RPM, and TGZ packages
 set(CPACK_GENERATOR "DEB;RPM;TGZ")
 set(CPACK_PACKAGE_NAME "ddogreen")
-set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
+set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Intelligent Green Power Management for Sustainable Computing")
 set(CPACK_PACKAGE_DESCRIPTION "A smart sustainability-focused service that automatically optimizes your PC and laptop power consumption by intelligently switching between high-performance and power-saving modes based on actual system usage patterns.")
 set(CPACK_PACKAGE_VENDOR "DDOSoft Sustainability Solutions")
 set(CPACK_PACKAGE_CONTACT "support@ddosoft.com")
 set(CPACK_PACKAGE_HOMEPAGE_URL "https://www.ddosoft.com")
+
+# Configure package file names without version numbers
+set(CPACK_PACKAGE_FILE_NAME "ddogreen-linux")
+set(CPACK_DEBIAN_FILE_NAME "ddogreen-linux.deb")
+set(CPACK_RPM_FILE_NAME "ddogreen-linux.rpm")
 
 # Debian-specific settings
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "DDOSoft Sustainability Solutions <support@ddosoft.com>")

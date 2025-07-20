@@ -44,7 +44,7 @@ void printUsage(const char* programName) {
 }
 
 void printVersion() {
-    std::cout << "ddogreen version 0.2.0\n"
+    std::cout << "ddogreen version " << DDOGREEN_VERSION << "\n"
               << "Intelligent Green Power Management for Sustainable Computing\n"
               << "Copyright (c) 2025 DDOSoft Sustainability Solutions (www.ddosoft.com)\n";
 }
