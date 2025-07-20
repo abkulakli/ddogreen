@@ -7,14 +7,31 @@
 
 std::string Logger::m_logFile = "/var/log/ddogreen.log";
 bool Logger::m_consoleOutput = false;
+LogLevel Logger::m_minLevel = LogLevel::INFO;  // Default to INFO level for release builds
 
 void Logger::init(const std::string& logFile, bool consoleOutput) {
     m_logFile = logFile;
     m_consoleOutput = consoleOutput;
+    
+    // Set log level based on build type
+#ifdef NDEBUG
+    m_minLevel = LogLevel::INFO;   // Hide debug logs in release builds (NDEBUG defined)
+#else
+    m_minLevel = LogLevel::DEBUG;  // Show debug logs in debug builds (NDEBUG not defined)
+#endif
+    
     log(LogLevel::INFO, "Logger initialized");
 }
 
+void Logger::setLevel(LogLevel level) {
+    m_minLevel = level;
+}
+
 void Logger::log(LogLevel level, const std::string& message) {
+    // Filter out messages below minimum level
+    if (level < m_minLevel) {
+        return;
+    }
     // Get current time with milliseconds
     auto now = std::chrono::system_clock::now();
     auto time_t = std::chrono::system_clock::to_time_t(now);

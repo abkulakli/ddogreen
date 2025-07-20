@@ -166,6 +166,11 @@ int main(int argc, char* argv[]) {
     std::string logPath = platformUtils->getDefaultLogPath();
     Logger::init(logPath, !args.runAsDaemon);
 
+    // Log version information
+    Logger::info("Starting ddogreen - Intelligent Green Power Management");
+    Logger::info("Version: " + std::string(DDOGREEN_VERSION));
+    Logger::info("Copyright (c) 2025 DDOSoft Sustainability Solutions");
+
     // Always convert relative config paths to absolute paths for consistency
     // This prevents issues with working directory changes and provides clear path resolution
     if (!args.configPath.empty() && args.configPath[0] != '/') {
@@ -210,24 +215,37 @@ int main(int argc, char* argv[]) {
     Config config;
     std::string configPath = args.configPath.empty() ? Config::getDefaultConfigPath() : args.configPath;
     
+    Logger::info("Loading configuration from: " + configPath);
+    
     // Load configuration - application fails if config file doesn't exist or has errors
     if (!config.loadFromFile(configPath)) {
+        Logger::error("Failed to load configuration file: " + configPath);
         return 1;
     }
+    
+    Logger::info("Configuration loaded successfully");
 
     // Initialize components
     ActivityMonitor activityMonitor;
     auto powerManager = PlatformFactory::createPowerManager();
 
     // Check if power management is available
+    Logger::info("Checking power management availability...");
     if (!powerManager || !powerManager->isAvailable()) {
         Logger::error("Power management is not installed or not available");
+        Logger::error("Please install TLP: sudo apt install tlp (Debian/Ubuntu) or sudo dnf install tlp (Fedora)");
         return 1;
     }
+    Logger::info("Power management system (TLP) is available");
 
     // Configure activity monitor with settings from config
+    Logger::info("Configuring activity monitor...");
     activityMonitor.setLoadThresholds(config.getHighPerformanceThreshold(), config.getPowerSaveThreshold());
     activityMonitor.setMonitoringFrequency(config.getMonitoringFrequency());
+    
+    Logger::info("High performance threshold: " + std::to_string(config.getHighPerformanceThreshold()));
+    Logger::info("Power save threshold: " + std::to_string(config.getPowerSaveThreshold()));
+    Logger::info("Monitoring frequency: " + std::to_string(config.getMonitoringFrequency()) + " seconds");
 
     // Set up activity callback
     activityMonitor.setActivityCallback([&powerManager](bool isActive) {
@@ -247,6 +265,8 @@ int main(int argc, char* argv[]) {
     }
 
     Logger::info("ddogreen service started successfully");
+    Logger::info("Version: " + std::string(DDOGREEN_VERSION));
+    Logger::info("Copyright (c) 2025 DDOSoft Sustainability Solutions (www.ddosoft.com)");
 
     // Main loop - just keep the process alive while monitoring runs in background
     while (Daemon::shouldRun()) {
