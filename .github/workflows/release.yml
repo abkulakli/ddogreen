@@ -114,23 +114,23 @@ jobs:
           
           #### Debian/Ubuntu (DEB Package)
           ```bash
-          wget https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.version || github.ref_name }}/ddogreen-*-Linux.deb
-          sudo dpkg -i ddogreen-*-Linux.deb
+          wget https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.version || github.ref_name }}/ddogreen-${{ github.event.inputs.version || github.ref_name }}-Linux.deb
+          sudo dpkg -i ddogreen-${{ github.event.inputs.version || github.ref_name }}-Linux.deb
           sudo apt install -f  # Fix dependencies if needed
           ```
           
           #### RHEL/CentOS/Fedora (RPM Package)
           ```bash
-          wget https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.version || github.ref_name }}/ddogreen-*-Linux.rpm
-          sudo rpm -i ddogreen-*-Linux.rpm
-          # or: sudo dnf install ddogreen-*-Linux.rpm
+          wget https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.version || github.ref_name }}/ddogreen-${{ github.event.inputs.version || github.ref_name }}-Linux.rpm
+          sudo rpm -i ddogreen-${{ github.event.inputs.version || github.ref_name }}-Linux.rpm
+          # or: sudo dnf install ddogreen-${{ github.event.inputs.version || github.ref_name }}-Linux.rpm
           ```
           
           #### Generic Linux (TGZ Package)
           ```bash
-          wget https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.version || github.ref_name }}/ddogreen-*-Linux.tar.gz
-          tar -xzf ddogreen-*-Linux.tar.gz
-          cd ddogreen-*/
+          wget https://github.com/${{ github.repository }}/releases/download/${{ github.event.inputs.version || github.ref_name }}/ddogreen-${{ github.event.inputs.version || github.ref_name }}-Linux.tar.gz
+          tar -xzf ddogreen-${{ github.event.inputs.version || github.ref_name }}-Linux.tar.gz
+          cd ddogreen-${{ github.event.inputs.version || github.ref_name }}-Linux/
           sudo ./install.sh --install
           ```
           
