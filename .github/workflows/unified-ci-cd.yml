@@ -131,35 +131,36 @@ jobs:
         name: ddogreen-binary-linux
         path: build/ddogreen
 
-  # Step 4: Package Validation
+  # Step 4: Package Validation (Sequential)
   validate-packages:
     needs: build-packages
     runs-on: ubuntu-latest
-    
-    strategy:
-      matrix:
-        package_type: [deb, rpm, tgz]
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Download packages
+    - name: Download DEB package
       uses: actions/download-artifact@v4
       with:
-        name: ddogreen-${{ matrix.package_type }}
+        name: ddogreen-deb
+
+    - name: Download RPM package
+      uses: actions/download-artifact@v4
+      with:
+        name: ddogreen-rpm
+
+    - name: Download TGZ package
+      uses: actions/download-artifact@v4
+      with:
+        name: ddogreen-tgz
 
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y tlp
-        # Install rpm tools for RPM testing
-        if [ "${{ matrix.package_type }}" = "rpm" ]; then
-          sudo apt-get install -y rpm
-        fi
+        sudo apt-get install -y tlp rpm
 
     - name: Test DEB package
-      if: matrix.package_type == 'deb'
       run: |
         echo "=== Testing DEB Package Installation ==="
         
@@ -189,8 +190,17 @@ jobs:
         ! which ddogreen || echo "WARNING: ddogreen still found after removal"
         ! test -f /usr/bin/ddogreen || echo "WARNING: binary still exists after removal"
 
+    - name: Cleanup after DEB test
+      run: |
+        # Ensure complete cleanup before RPM test
+        sudo systemctl stop ddogreen.service || true
+        sudo systemctl disable ddogreen.service || true
+        sudo rm -f /etc/systemd/system/ddogreen.service
+        sudo rm -f /usr/bin/ddogreen /usr/local/bin/ddogreen
+        sudo rm -rf /etc/ddogreen
+        sudo systemctl daemon-reload
+
     - name: Test RPM package
-      if: matrix.package_type == 'rpm'
       run: |
         echo "=== Testing RPM Package Installation ==="
         
@@ -220,8 +230,17 @@ jobs:
         ! which ddogreen || echo "WARNING: ddogreen still found after removal"
         ! test -f /usr/bin/ddogreen || echo "WARNING: binary still exists after removal"
 
+    - name: Cleanup after RPM test
+      run: |
+        # Ensure complete cleanup before TGZ test
+        sudo systemctl stop ddogreen.service || true
+        sudo systemctl disable ddogreen.service || true
+        sudo rm -f /etc/systemd/system/ddogreen.service
+        sudo rm -f /usr/bin/ddogreen /usr/local/bin/ddogreen
+        sudo rm -rf /etc/ddogreen
+        sudo systemctl daemon-reload
+
     - name: Test TGZ package  
-      if: matrix.package_type == 'tgz'
       run: |
         echo "=== Testing TGZ Package Installation ==="
         
