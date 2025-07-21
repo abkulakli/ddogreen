@@ -6,9 +6,9 @@ set -e
 case "$1" in
     remove|upgrade|deconfigure)
         echo "Stopping and removing ddogreen service..."
-        
+
         # Use the application's built-in service uninstallation
-        if /usr/bin/ddogreen --uninstall; then
+        if /usr/local/bin/ddogreen --uninstall; then
             echo "ddogreen service has been stopped and removed successfully."
         else
             echo "Warning: Failed to uninstall ddogreen service automatically."

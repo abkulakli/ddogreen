@@ -22,7 +22,7 @@ case "$1" in
         fi
         
         # Use the application's built-in service installation
-        if /usr/bin/ddogreen --install; then
+        if /usr/local/bin/ddogreen --install; then
             echo "ddogreen service has been installed and started successfully!"
             echo "The service will automatically start on boot."
             echo ""
