@@ -77,7 +77,7 @@ jobs:
         path: build/ddogreen
 
   create-release:
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') && github.event_name == 'push'
     needs: [build-linux]
     runs-on: ubuntu-latest
     
