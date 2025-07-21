@@ -85,7 +85,7 @@ install_ddogreen() {
         exit 1
     fi
     
-    # Check if service already exists
+    # Check if service already exists and stop it
     if systemctl is-active --quiet "$SERVICE_NAME" 2>/dev/null; then
         print_warning "ddogreen service is already running"
         print_info "Stopping existing service..."
@@ -97,12 +97,7 @@ install_ddogreen() {
         systemctl disable "$SERVICE_NAME" || true
     fi
     
-    # Copy executable to system location
-    print_info "Installing executable to $TARGET_EXECUTABLE_PATH..."
-    cp "$DDOGREEN_BINARY" "$TARGET_EXECUTABLE_PATH"
-    chmod 755 "$TARGET_EXECUTABLE_PATH"
-    
-    # Install configuration file
+    # Install configuration file first (before service installation)
     print_info "Setting up configuration..."
     mkdir -p /etc/ddogreen
     if [[ ! -f "/etc/ddogreen/ddogreen.conf" ]]; then
@@ -125,9 +120,9 @@ install_ddogreen() {
         print_info "Existing configuration preserved at /etc/ddogreen/ddogreen.conf"
     fi
     
-    # Use the application's built-in service installation
-    print_info "Installing and starting system service..."
-    if "$TARGET_EXECUTABLE_PATH" --install; then
+    # Use the application's built-in service installation (which will also copy the executable)
+    print_info "Installing executable and starting system service..."
+    if "$DDOGREEN_BINARY" --install; then
         print_success "ddogreen installed and started successfully!"
         print_info ""
         print_info "Service Status:"
