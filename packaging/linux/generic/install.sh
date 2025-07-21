@@ -125,58 +125,9 @@ install_ddogreen() {
         print_info "Existing configuration preserved at /etc/ddogreen/ddogreen.conf"
     fi
     
-    # Create log file and set permissions
-    print_info "Setting up log file..."
-    mkdir -p /var/log
-    touch "$LOG_FILE"
-    chmod 644 "$LOG_FILE"
-    
-    # Create systemd service file
-    print_info "Creating systemd service..."
-    cat > "$SERVICE_FILE" << EOF
-[Unit]
-Description=$SERVICE_DESCRIPTION
-Documentation=https://github.com/abkulakli/ddogreen
-Documentation=https://www.ddosoft.com
-After=multi-user.target
-
-[Service]
-Type=forking
-ExecStart=$TARGET_EXECUTABLE_PATH --daemon
-ExecReload=/bin/kill -HUP \$MAINPID
-PIDFile=$PID_FILE
-Restart=always
-RestartSec=10
-User=root
-Group=root
-TimeoutStartSec=30
-RemainAfterExit=no
-
-# Security settings
-NoNewPrivileges=yes
-ProtectSystem=strict
-ProtectHome=yes
-ReadWritePaths=/var/log /run /tmp /proc
-PrivateTmp=yes
-ProtectKernelTunables=yes
-ProtectKernelModules=yes
-ProtectControlGroups=yes
-
-[Install]
-WantedBy=multi-user.target
-EOF
-    
-    # Reload systemd daemon
-    print_info "Reloading systemd daemon..."
-    systemctl daemon-reload
-    
-    # Enable service for auto-start
-    print_info "Enabling service for auto-start..."
-    systemctl enable "$SERVICE_NAME"
-    
-    # Start the service
-    print_info "Starting ddogreen service..."
-    if systemctl start "$SERVICE_NAME"; then
+    # Use the application's built-in service installation
+    print_info "Installing and starting system service..."
+    if "$TARGET_EXECUTABLE_PATH" --install; then
         print_success "ddogreen installed and started successfully!"
         print_info ""
         print_info "Service Status:"
@@ -188,7 +139,7 @@ EOF
         print_info ""
         print_success "ddogreen is now managing your system's power automatically!"
     else
-        print_error "Service installed but failed to start"
+        print_error "Service installation failed"
         print_info "Check the logs: sudo journalctl -u ddogreen"
         exit 1
     fi
@@ -198,34 +149,33 @@ EOF
 uninstall_ddogreen() {
     print_info "Uninstalling ddogreen..."
     
-    # Stop service if running
-    if systemctl is-active --quiet "$SERVICE_NAME" 2>/dev/null; then
-        print_info "Stopping ddogreen service..."
-        systemctl stop "$SERVICE_NAME"
-    fi
-    
-    # Disable service
-    if systemctl is-enabled --quiet "$SERVICE_NAME" 2>/dev/null; then
-        print_info "Disabling ddogreen service..."
-        systemctl disable "$SERVICE_NAME"
-    fi
-    
-    # Remove service file
-    if [[ -f "$SERVICE_FILE" ]]; then
-        print_info "Removing service file..."
-        rm -f "$SERVICE_FILE"
-    fi
-    
-    # Reload systemd daemon
-    systemctl daemon-reload
-    
-    # Remove executable
+    # Use the application's built-in service uninstallation if executable exists
     if [[ -f "$TARGET_EXECUTABLE_PATH" ]]; then
+        print_info "Using built-in service uninstall..."
+        if "$TARGET_EXECUTABLE_PATH" --uninstall; then
+            print_info "Service uninstalled successfully."
+        else
+            print_warning "Built-in uninstall failed, attempting manual cleanup..."
+            # Fallback to manual cleanup
+            systemctl stop "$SERVICE_NAME" || true
+            systemctl disable "$SERVICE_NAME" || true
+            rm -f "$SERVICE_FILE" || true
+            systemctl daemon-reload || true
+        fi
+        
+        # Remove executable
         print_info "Removing executable..."
         rm -f "$TARGET_EXECUTABLE_PATH"
+    else
+        print_warning "Executable not found, performing manual cleanup..."
+        # Manual cleanup if executable is missing
+        systemctl stop "$SERVICE_NAME" || true
+        systemctl disable "$SERVICE_NAME" || true
+        rm -f "$SERVICE_FILE" || true
+        systemctl daemon-reload || true
     fi
     
-    # Clean up files
+    # Clean up remaining files
     print_info "Cleaning up files..."
     rm -f "$LOG_FILE"
     rm -f "$PID_FILE"
