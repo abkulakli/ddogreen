@@ -136,6 +136,10 @@ jobs:
     needs: build-packages
     runs-on: ubuntu-latest
     
+    strategy:
+      matrix:
+        package_type: [deb, rpm, tgz]
+    
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -143,33 +147,123 @@ jobs:
     - name: Download packages
       uses: actions/download-artifact@v4
       with:
-        name: ddogreen-deb
+        name: ddogreen-${{ matrix.package_type }}
 
-    - name: Install TLP (for testing)
+    - name: Install system dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y tlp
+        # Install rpm tools for RPM testing
+        if [ "${{ matrix.package_type }}" = "rpm" ]; then
+          sudo apt-get install -y rpm
+        fi
 
-    - name: Test DEB package installation
+    - name: Test DEB package
+      if: matrix.package_type == 'deb'
       run: |
+        echo "=== Testing DEB Package Installation ==="
+        
         # Install package
         sudo dpkg -i *.deb || sudo apt-get install -f -y
         
         # Verify installation
+        echo "Checking if ddogreen is installed..."
         which ddogreen
         ddogreen --version
+        
+        # Check if files are in correct locations
+        test -f /usr/bin/ddogreen
+        test -f /usr/share/ddogreen/ddogreen.conf.default
         
         # Check service status
         sudo systemctl status ddogreen --no-pager || true
         
         # Test service functionality (don't start daemon in CI)
         sudo ddogreen --help
-
-    - name: Test package removal
-      run: |
+        
+        echo "=== Testing DEB Package Removal ==="
+        # Remove package
         sudo apt-get remove -y ddogreen
+        
         # Verify removal
         ! which ddogreen || echo "WARNING: ddogreen still found after removal"
+        ! test -f /usr/bin/ddogreen || echo "WARNING: binary still exists after removal"
+
+    - name: Test RPM package
+      if: matrix.package_type == 'rpm'
+      run: |
+        echo "=== Testing RPM Package Installation ==="
+        
+        # Install package using rpm (ignore dependencies for testing)
+        sudo rpm -i --nodeps *.rpm
+        
+        # Verify installation
+        echo "Checking if ddogreen is installed..."
+        which ddogreen
+        ddogreen --version
+        
+        # Check if files are in correct locations
+        test -f /usr/bin/ddogreen
+        test -f /usr/share/ddogreen/ddogreen.conf.default
+        
+        # Test executable functionality
+        sudo ddogreen --help
+        
+        # Check RPM package info
+        rpm -qi ddogreen
+        
+        echo "=== Testing RPM Package Removal ==="
+        # Remove package
+        sudo rpm -e ddogreen
+        
+        # Verify removal
+        ! which ddogreen || echo "WARNING: ddogreen still found after removal"
+        ! test -f /usr/bin/ddogreen || echo "WARNING: binary still exists after removal"
+
+    - name: Test TGZ package  
+      if: matrix.package_type == 'tgz'
+      run: |
+        echo "=== Testing TGZ Package Installation ==="
+        
+        # Extract package
+        tar -xzf *.tar.gz
+        cd ddogreen-*/
+        
+        # List contents to verify structure
+        echo "Package contents:"
+        find . -type f | sort
+        
+        # Verify required files exist
+        test -f install.sh
+        test -x install.sh
+        # Binary should be in bin/ directory (CPack structure)
+        test -f bin/ddogreen || test -f ddogreen
+        
+        # Install using install script
+        sudo ./install.sh --install
+        
+        # Verify installation
+        echo "Checking if ddogreen is installed..."
+        which ddogreen
+        ddogreen --version
+        
+        # Check if files are in correct locations
+        test -f /usr/local/bin/ddogreen
+        test -d /etc/ddogreen
+        
+        # Check service status
+        sudo systemctl status ddogreen --no-pager || true
+        
+        # Test service functionality
+        sudo ddogreen --help
+        
+        echo "=== Testing TGZ Package Removal ==="
+        # Uninstall using install script
+        sudo ./install.sh --uninstall
+        
+        # Verify removal
+        ! which ddogreen || echo "WARNING: ddogreen still found after removal"
+        ! test -f /usr/local/bin/ddogreen || echo "WARNING: binary still exists after removal"
 
   # Step 5: Create Release (only on tags)
   create-release:
