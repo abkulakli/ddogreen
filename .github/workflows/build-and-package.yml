@@ -88,6 +88,27 @@ jobs:
     - name: Download all artifacts
       uses: actions/download-artifact@v4
 
+    - name: Prepare versioned release files
+      run: |
+        mkdir -p release-files
+        
+        # Extract version from tag
+        VERSION="${GITHUB_REF#refs/tags/}"
+        echo "Creating release files for version: $VERSION"
+        
+        # Copy and rename files with version
+        cp ddogreen-deb/*.deb "release-files/ddogreen-${VERSION}-linux.deb"
+        cp ddogreen-rpm/*.rpm "release-files/ddogreen-${VERSION}-linux.rpm"
+        cp ddogreen-tgz/*.tar.gz "release-files/ddogreen-${VERSION}-linux.tar.gz"
+        cp ddogreen-binary-linux/ddogreen "release-files/ddogreen-${VERSION}-linux-x64"
+        
+        # Create checksums
+        cd release-files
+        sha256sum * > checksums.txt
+        
+        echo "=== Release Files ==="
+        ls -lah
+
     - name: Display structure of downloaded files
       run: find . -type f -name "ddogreen*" | sort
 
@@ -95,10 +116,7 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         files: |
-          ddogreen-deb/*.deb
-          ddogreen-rpm/*.rpm
-          ddogreen-tgz/*.tar.gz
-          ddogreen-binary-linux/ddogreen
+          release-files/*
         generate_release_notes: true
         draft: false
         prerelease: false
