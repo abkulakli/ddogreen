@@ -1,0 +1,214 @@
+name: Unified CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: write
+  packages: read
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  # Step 1: Basic CI Testing
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        build_type: [Debug, Release]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential cmake libgtest-dev
+
+    - name: Configure CMake
+      run: |
+        cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DBUILD_TESTS=ON
+
+    - name: Build
+      run: |
+        cmake --build build --config ${{ matrix.build_type }} -j$(nproc)
+
+    - name: Run Tests
+      run: |
+        cd build
+        ctest --output-on-failure --verbose
+
+    - name: Test executable
+      run: |
+        ./build/ddogreen --help
+        ./build/ddogreen --version
+
+  # Step 2: Build Scripts Testing (only on relevant file changes)
+  test-build-scripts:
+    if: >
+      contains(github.event.head_commit.modified, 'build.sh') ||
+      contains(github.event.head_commit.modified, 'CMakeLists.txt') ||
+      contains(github.event.head_commit.modified, 'packaging/') ||
+      github.event_name == 'pull_request'
+    needs: test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Test build script
+      run: |
+        chmod +x build.sh
+        ./build.sh
+
+    - name: Verify build output
+      run: |
+        ls -la build/
+        test -f build/ddogreen
+        ./build/ddogreen --version
+
+  # Step 3: Package Building (only on main branch, tags, or PRs)
+  build-packages:
+    needs: test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install packaging dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential cmake rpm dpkg-dev
+
+    - name: Configure CMake
+      run: |
+        cmake -B build -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+
+    - name: Build
+      run: |
+        cmake --build build --config $BUILD_TYPE -j$(nproc)
+
+    - name: Create packages
+      run: |
+        cd build
+        cpack -G DEB
+        cpack -G RPM  
+        cpack -G TGZ
+
+    - name: Upload DEB package
+      uses: actions/upload-artifact@v4
+      with:
+        name: ddogreen-deb
+        path: build/*.deb
+
+    - name: Upload RPM package
+      uses: actions/upload-artifact@v4
+      with:
+        name: ddogreen-rpm
+        path: build/*.rpm
+
+    - name: Upload TGZ package
+      uses: actions/upload-artifact@v4
+      with:
+        name: ddogreen-tgz
+        path: build/*.tar.gz
+
+    - name: Upload binary
+      uses: actions/upload-artifact@v4
+      with:
+        name: ddogreen-binary-linux
+        path: build/ddogreen
+
+  # Step 4: Package Validation
+  validate-packages:
+    needs: build-packages
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download packages
+      uses: actions/download-artifact@v4
+      with:
+        name: ddogreen-deb
+
+    - name: Install TLP (for testing)
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y tlp
+
+    - name: Test DEB package installation
+      run: |
+        # Install package
+        sudo dpkg -i *.deb || sudo apt-get install -f -y
+        
+        # Verify installation
+        which ddogreen
+        ddogreen --version
+        
+        # Check service status
+        sudo systemctl status ddogreen --no-pager || true
+        
+        # Test service functionality (don't start daemon in CI)
+        sudo ddogreen --help
+
+    - name: Test package removal
+      run: |
+        sudo apt-get remove -y ddogreen
+        # Verify removal
+        ! which ddogreen || echo "WARNING: ddogreen still found after removal"
+
+  # Step 5: Create Release (only on tags)
+  create-release:
+    if: startsWith(github.ref, 'refs/tags/v') && github.event_name == 'push'
+    needs: [test, build-packages, validate-packages]
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+
+    - name: Prepare versioned release files
+      run: |
+        mkdir -p release-files
+        
+        # Extract version from tag
+        VERSION="${GITHUB_REF#refs/tags/}"
+        echo "Creating release files for version: $VERSION"
+        
+        # Copy and rename files with version
+        cp ddogreen-deb/*.deb "release-files/ddogreen-${VERSION}-linux.deb"
+        cp ddogreen-rpm/*.rpm "release-files/ddogreen-${VERSION}-linux.rpm"
+        cp ddogreen-tgz/*.tar.gz "release-files/ddogreen-${VERSION}-linux.tar.gz"
+        cp ddogreen-binary-linux/ddogreen "release-files/ddogreen-${VERSION}-linux-x64"
+        
+        # Create checksums
+        cd release-files
+        sha256sum * > checksums.txt
+        
+        echo "=== Release Files ==="
+        ls -lah
+
+    - name: Create release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: |
+          release-files/*
+        generate_release_notes: true
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
