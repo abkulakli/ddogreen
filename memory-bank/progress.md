@@ -15,7 +15,8 @@
 ### ✅ Continuous Integration Pipeline Implementation  
 - **GitHub Actions CI**: Complete CI pipeline that runs tests on every push and pull request
 - **Test Integration**: Unit tests run automatically and fail the build if tests fail
-- **Build Script Enhancement**: Added `--with-tests` flag to build.sh for test integration
+- **GoogleTest Dependencies**: Fixed CI by installing libgtest-dev package in GitHub Actions
+- **Build Script Separation**: Clean separation - build script focuses on building, CI handles testing
 - **Multi-Configuration Testing**: Tests run on both Debug and Release builds
 - **CMake Presets Testing**: Validates CMake presets work correctly in CI environment
 - **Artifact Upload**: Test results automatically uploaded for debugging failed runs
