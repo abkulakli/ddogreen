@@ -16,7 +16,142 @@
     └─────────┘              └─────────┘              └─────────┘
 ```
 
-## Build System Architecture
+## Memory Bank Organization Guidelines
+
+### Content Placement Rules
+
+#### projectbrief.md - Foundation Document
+**Purpose**: Project scope, requirements, and core objectives
+**Content Should Include**:
+- Project overview and final status
+- Core objectives and what was achieved
+- Project type (language, build system, architecture)
+- Key functional, technical, and performance requirements
+- Success criteria and completion status
+
+**Content Should NOT Include**:
+- Implementation details or code specifications
+- Progress tracking or milestone dates
+- Current work focus or active context
+- Detailed technical patterns or architecture
+
+#### productContext.md - Business Purpose
+**Purpose**: Why project exists and user value proposition
+**Content Should Include**:
+- Problem statement and solution overview
+- Real-world impact and business value
+- User experience descriptions
+- Market need and target audience
+- Benefits and value delivered
+
+**Content Should NOT Include**:
+- Technical implementation details
+- Code architecture or patterns
+- Development progress or milestones
+- Current work status or active tasks
+
+#### activeContext.md - Current State Focus
+**Purpose**: Current work focus and immediate context
+**Content Should Include**:
+- Current work status and priorities
+- Recent achievements and immediate context
+- Active decisions and working patterns
+- Next steps and immediate tasks
+- Current blockers or challenges
+- Recent technical decisions and insights
+
+**Content Should NOT Include**:
+- Completed historical achievements (belongs in progress.md)
+- Detailed technical specifications (belongs in systemPatterns.md)
+- Architecture patterns (belongs in systemPatterns.md)
+- Technology stack details (belongs in techContext.md)
+
+#### systemPatterns.md - Architecture & Design
+**Purpose**: System architecture, patterns, and technical decisions
+**Content Should Include**:
+- Architecture overview and component relationships
+- Design patterns and implementation strategies
+- Configuration system architecture
+- Code organization principles
+- Technical specifications and system design
+- Interface definitions and component responsibilities
+
+**Content Should NOT Include**:
+- Progress tracking or completion status
+- Technology stack or build setup (belongs in techContext.md)
+- Current work focus (belongs in activeContext.md)
+- Historical milestones (belongs in progress.md)
+
+#### techContext.md - Technology Stack
+**Purpose**: Technologies, tools, and development environment
+**Content Should Include**:
+- Programming languages and frameworks
+- Build system configuration and requirements
+- Dependencies and external integrations
+- Development tools and environment setup
+- Platform requirements and constraints
+- Tool usage patterns and configurations
+
+**Content Should NOT Include**:
+- Architecture patterns (belongs in systemPatterns.md)
+- Progress tracking (belongs in progress.md)
+- Current work focus (belongs in activeContext.md)
+- Implementation specifications (belongs in systemPatterns.md)
+
+#### progress.md - Achievements & Milestones
+**Purpose**: What has been completed and project evolution
+**Content Should Include**:
+- Major milestones and their completion dates
+- Completed features and achievements
+- Project health metrics and status
+- Evolution of major decisions
+- Final status and delivery confirmation
+- High-level "what works" summaries
+
+**Content Should NOT Include**:
+- Detailed implementation specifications (belongs in systemPatterns.md)
+- Current work focus (belongs in activeContext.md)
+- Architecture patterns (belongs in systemPatterns.md)
+- Technology setup details (belongs in techContext.md)
+
+### Content Flow Guidelines
+
+#### When Content Should Move Between Files:
+1. **Completed Work**: Move from activeContext.md → progress.md when work is finished
+2. **Architecture Decisions**: Move from activeContext.md → systemPatterns.md when patterns are established
+3. **Tech Stack Changes**: Update techContext.md when tools or technologies change
+4. **Requirements Evolution**: Update projectbrief.md only for scope changes
+
+#### Red Flags for Misplaced Content:
+- **In progress.md**: Detailed "how it works" technical specifications
+- **In activeContext.md**: Completed work that's no longer active
+- **In systemPatterns.md**: Progress tracking or milestone information
+- **In techContext.md**: Architecture patterns or design decisions
+- **In projectbrief.md**: Current work status or detailed implementations
+
+#### File Size Guidelines:
+- **activeContext.md**: Should be concise, focus on immediate context
+- **progress.md**: Should focus on achievements, not implementation details
+- **systemPatterns.md**: Can be detailed for architecture, but avoid progress tracking
+- **techContext.md**: Focus on setup and tools, not patterns
+- **projectbrief.md**: High-level only, avoid technical deep dives
+- **productContext.md**: User-focused, avoid technical implementation details
+
+## Documentation Principles
+
+### File Documentation Strategy
+- **Component README Files**: Detailed documentation for each major component
+- **Memory Bank**: Context, implementation decisions, and progress tracking
+- **No Redundant Files**: Avoid creating additional markdown files that duplicate information
+- **Consolidated Maintenance**: Keep documentation in minimal, well-defined locations
+
+### Documentation Standards
+- Use existing README files in component directories (like `tests/README.md`)
+- Document architectural decisions and patterns in `systemPatterns.md`
+- Track progress and context in memory bank files
+- Avoid creating summary files that duplicate information from other sources
+
+## Code Organization Principles
 
 ### Simplified Build Structure (Updated July 2025)
 ```
@@ -65,7 +200,37 @@ ddogreen/
 └──────────────────┴──────────────────────┘
 ```
 
-### Component Responsibilities
+## Configuration System Architecture
+
+### Read-Only Configuration Pattern
+- **Design Principle**: Configuration file must exist, no auto-creation or defaults
+- **Failure Mode**: Application fails cleanly when configuration missing (user requirement)
+- **Validation**: Complete parameter validation with clear error messages
+- **Parsing**: Robust key-value parsing with whitespace handling
+- **Custom Paths**: `--config` parameter support for non-standard configuration locations
+
+### Dual Threshold Hysteresis System
+**Implementation Details**:
+- **High Performance Threshold**: 0.7 (70% per core) - prevents oscillation
+- **Power Save Threshold**: 0.3 (30% per core) - creates stable switching zones
+- **Hysteresis Benefits**: Eliminates rapid mode switching between performance levels
+- **Load Calculation**: Per-core basis (e.g., 20 cores = 14.00 load for high performance, 6.00 load for power save)
+
+### Configuration File Format
+```ini
+# /etc/ddogreen/ddogreen.conf
+high_performance_threshold=0.70
+power_save_threshold=0.30  
+monitoring_frequency=10
+```
+
+### User Experience Design
+- **Number Formatting**: All outputs show exactly 2 decimal places consistently
+- **Monitoring Frequency**: Configurable (default 10 seconds for responsiveness)
+- **Clear Logging**: Threshold information displayed in both percentage and absolute values
+- **Error Handling**: Single clear error messages, no redundant logging
+
+## Component Responsibilities
 
 #### main.cpp (Refactored - Clean Architecture)
 - **Purpose**: Pure platform-agnostic orchestration and coordination

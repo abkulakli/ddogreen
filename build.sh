@@ -124,7 +124,7 @@ if [[ "$CLEAN_BUILD" == "ON" ]]; then
     print_status "Cleaning build directory..."
     rm -rf "$BUILD_DIR"
     print_success "Build directory cleaned successfully!"
-    
+
     # If no build was explicitly requested, exit after cleaning
     if [[ "$BUILD_REQUESTED" == "OFF" && "$PACKAGE_REQUESTED" == "OFF" ]]; then
         exit 0
@@ -147,7 +147,7 @@ check_tool make || exit 1
 # Check if packaging tools are needed
 if [[ "$PACKAGE_REQUESTED" == "ON" ]]; then
     check_tool cpack || exit 1
-    
+
     # Only support Linux packaging for now
     if [[ "$PLATFORM" != "linux" ]]; then
         print_error "DEB packaging is only supported on Linux platforms"
