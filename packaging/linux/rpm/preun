@@ -7,7 +7,15 @@ if [ "$1" = "0" ]; then
     echo "Stopping and removing ddogreen service..."
 
     # Use the application's built-in service uninstallation
-    if /usr/local/bin/ddogreen --uninstall; then
+    # Try different possible installation paths
+    DDOGREEN_BIN=""
+    if [ -x "/usr/bin/ddogreen" ]; then
+        DDOGREEN_BIN="/usr/bin/ddogreen"
+    elif [ -x "/usr/local/bin/ddogreen" ]; then
+        DDOGREEN_BIN="/usr/local/bin/ddogreen"
+    fi
+    
+    if [ -n "$DDOGREEN_BIN" ] && $DDOGREEN_BIN --uninstall; then
         echo "ddogreen service has been stopped and removed successfully."
     else
         echo "Warning: Failed to uninstall ddogreen service automatically."
