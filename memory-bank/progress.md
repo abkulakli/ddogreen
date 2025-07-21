@@ -28,7 +28,8 @@
 - **Comprehensive Coverage**: Constructor, file I/O, parsing, validation, error handling, boundary testing
 - **Build Integration**: Optional testing via `-DBUILD_TESTS=ON` CMake flag
 - **Performance**: All 24 tests pass in <30 seconds with proper test isolation
-- **Documentation**: Complete testing guide consolidated in `tests/README.md`
+- **Test Focus**: Currently focused on config.cpp unit tests - comprehensive coverage of configuration system
+- **Future Testing**: Platform-specific and integration tests planned for future development
 
 ## Previous Achievement: Configuration File Integration in Packaging System ✅
 
@@ -107,10 +108,10 @@
 - **Robust Error Handling**: Comprehensive error checking and user feedback
 - **Production Logging**: Structured logging with timestamps and appropriate levels
 
-## Current Application Capabilities
+### ✅ Current Application Capabilities
 
 ### ✅ Real-World User Experience
-- **Zero Configuration**: Install and run with no setup required
+- **Configuration Required**: Requires `/etc/ddogreen/ddogreen.conf` configuration file
 - **Automatic Operation**: Intelligently switches power modes based on system load
 - **Service Integration**: Complete systemd service with start/stop/status functionality
 - **Interactive & Daemon Modes**: Run interactively for monitoring or as background service
@@ -130,11 +131,11 @@
 - **Uninstall Process**: Clean removal of all installed components
 - **Security**: Proper privilege checks and safe operation procedures
 
-### ✅ Ultra-Minimal Design
-- **Hardcoded Settings**: All parameters built into the binary for maximum reliability
-- **Single Purpose**: Only monitors load average and switches TLP modes
-- **No CLI Options**: Only supports --daemon, --help, --version
-- **No Configuration Parsing**: Eliminates entire class of configuration-related bugs
+### ✅ Configuration-Based Design
+- **Read-Only Configuration**: All parameters loaded from configuration file with validation
+- **Dual Threshold System**: Configurable high/low thresholds with hysteresis
+- **Flexible Monitoring**: Configurable monitoring frequency (1-300 seconds)
+- **Robust Validation**: Comprehensive parameter range checking and error handling
 
 ### ✅ Documentation
 - **Comprehensive README**: Complete installation and usage documentation
@@ -175,7 +176,7 @@
 - ✅ **Load Average Monitoring**: Stable monitoring with configurable thresholds
 - ✅ **TLP Integration**: Reliable switching between performance and power save modes
 - ✅ **Activity Detection**: Dual threshold hysteresis system prevents oscillation
-- ✅ **Configuration System**: Read-only configuration with validation
+- ✅ **Configuration System**: Read-only configuration with comprehensive validation
 - ✅ **Mode Switching**: Intelligent switching based on system load patterns
 
 ### System Integration
@@ -210,7 +211,7 @@
 ### Deployment Success
 - **Cross-Platform**: Linux primary with Windows/macOS abstraction ready
 - **Service Integration**: Complete systemd service with auto-start capability
-- **Configuration**: Read-only configuration system with validation
+- **Configuration**: Read-only configuration system with comprehensive validation
 - **Installation**: Automated installation with proper file placement
 
 ## Current Project Health

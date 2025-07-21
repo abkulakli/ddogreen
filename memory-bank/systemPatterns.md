@@ -187,7 +187,7 @@ Application Layer (main.cpp, daemon.cpp)
 - **Consolidated Maintenance**: Keep documentation in minimal, well-defined locations
 
 ### Documentation Standards
-- Use existing README files in component directories (like `tests/README.md`)
+- Follow established documentation organization in memory-bank/
 - Document architectural decisions and patterns in `systemPatterns.md`
 - Track progress and context in memory bank files
 - Avoid creating summary files that duplicate information from other sources
@@ -738,19 +738,20 @@ This architectural discipline ensures maintainable, testable, and extensible cro
 ## Testing Strategy Patterns
 
 ### 1. Component Testing
-- Mock TLP commands for testing
-- Configurable CPU thresholds for testing
-- Separate test builds with debug logging
+- **GoogleTest Framework**: Modern C++ testing with automatic discovery
+- **Interface Compliance**: Platform implementations must pass interface tests
+- **Configuration System**: 24 comprehensive tests for config.cpp (constructor, file I/O, parsing, validation, error handling, boundary testing)
+- **Mock Platform Services**: Test platform abstractions independently
 
 ### 2. Integration Testing
-- Test full daemon lifecycle
-- Verify systemd integration
-- Test log rotation and cleanup
+- **Full Daemon Lifecycle**: Test startup, monitoring, shutdown sequences
+- **Platform Integration**: Verify real platform service interactions
+- **Configuration Loading**: Test real configuration file processing
 
 ### 3. Performance Testing
-- Long-running stability tests
-- Resource usage monitoring
-- Activity detection accuracy testing
+- **Long-running Stability**: Extended monitoring cycles
+- **Resource Usage**: Memory and CPU impact measurement
+- **Activity Detection Accuracy**: CPU threshold response testing
 
 ## Memory Bank Content Guidelines
 
