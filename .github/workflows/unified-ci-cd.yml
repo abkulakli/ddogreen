@@ -155,7 +155,7 @@ jobs:
         
         # Verify installation
         echo "Checking if ddogreen is installed..."
-        which ddogreen
+        which ddogreen || command -v ddogreen
         ddogreen --version
         
         # Check if files are in correct locations
@@ -173,7 +173,7 @@ jobs:
         sudo apt-get remove -y ddogreen
         
         # Verify removal
-        ! which ddogreen || echo "WARNING: ddogreen still found after removal"
+        ! which ddogreen 2>/dev/null && ! command -v ddogreen 2>/dev/null || echo "WARNING: ddogreen still found after removal"
         ! test -f /usr/bin/ddogreen || echo "WARNING: binary still exists after removal"
 
   validate-rpm:
@@ -193,7 +193,7 @@ jobs:
 
     - name: Install system dependencies
       run: |
-        dnf install -y tlp systemd
+        dnf install -y tlp systemd which sudo
 
     - name: Test RPM package
       run: |
@@ -204,7 +204,7 @@ jobs:
         
         # Verify installation
         echo "Checking if ddogreen is installed..."
-        which ddogreen
+        which ddogreen || command -v ddogreen
         ddogreen --version
         
         # Check if files are in correct locations
@@ -222,7 +222,7 @@ jobs:
         dnf remove -y ddogreen
         
         # Verify removal
-        ! which ddogreen || echo "WARNING: ddogreen still found after removal"
+        ! which ddogreen 2>/dev/null && ! command -v ddogreen 2>/dev/null || echo "WARNING: ddogreen still found after removal"
         ! test -f /usr/bin/ddogreen || echo "WARNING: binary still exists at /usr/bin/ddogreen after removal"
         ! test -f /usr/local/bin/ddogreen || echo "WARNING: binary still exists at /usr/local/bin/ddogreen after removal"
 
@@ -244,7 +244,7 @@ jobs:
     - name: Install system dependencies
       run: |
         pacman -Syu --noconfirm
-        pacman -S --noconfirm tlp systemd bash coreutils findutils
+        pacman -S --noconfirm tlp systemd bash coreutils findutils which sudo
 
     - name: Test TGZ package  
       run: |
@@ -269,7 +269,7 @@ jobs:
         
         # Verify installation
         echo "Checking if ddogreen is installed..."
-        which ddogreen
+        which ddogreen || command -v ddogreen
         ddogreen --version
         
         # Check if files are in correct locations
@@ -285,7 +285,7 @@ jobs:
         sudo ./install.sh --uninstall
         
         # Verify removal
-        ! which ddogreen || echo "WARNING: ddogreen still found after removal"
+        ! which ddogreen 2>/dev/null && ! command -v ddogreen 2>/dev/null || echo "WARNING: ddogreen still found after removal"
         ! test -f /usr/local/bin/ddogreen || echo "WARNING: binary still exists after removal"
 
   # Step 5: Create Release (only on tags)
