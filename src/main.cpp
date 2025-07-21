@@ -29,96 +29,21 @@ void printUsage(const char* programName) {
               << "  -c, --config PATH      Use custom configuration file\n"
               << "  -h, --help             Show this help message\n"
               << "  -v, --version          Show version information\n"
-              << "  -i, --install          Install system service\n"
-              << "  -u, --uninstall        Uninstall system service\n"
-              << "\n"
-              << "Service Management:\n"
-              << "  Install:   sudo " << programName << " --install (or -i)\n"
-              << "  Uninstall: sudo " << programName << " --uninstall (or -u)\n"
               << "\n"
               << "Configuration:\n"
               << "  Default:   /etc/ddogreen/ddogreen.conf\n"
               << "  Custom:    " << programName << " --config /path/to/config.conf\n"
               << "\n"
-              << "Automatically switches between performance and power-saving modes based on system load.\n";
+              << "Automatically switches between performance and power-saving modes based on system load.\n"
+              << "\n"
+              << "Installation:\n"
+              << "  Use your package manager or the provided installer scripts in the packaging/ directory.\n";
 }
 
 void printVersion() {
     std::cout << "ddogreen version " << DDOGREEN_VERSION << "\n"
               << "Intelligent Green Power Management for Sustainable Computing\n"
               << "Copyright (c) 2025 DDOSoft Sustainability Solutions (www.ddosoft.com)\n";
-}
-
-int installService() {
-    auto platformUtils = PlatformFactory::createPlatformUtils();
-    if (!platformUtils || !platformUtils->isAvailable()) {
-        std::cerr << "Platform utilities are not available" << std::endl;
-        return 1;
-    }
-
-    // Check if running with required privileges
-    if (!platformUtils->hasRequiredPrivileges()) {
-        std::cerr << platformUtils->getPrivilegeEscalationMessage() << std::endl;
-        return 1;
-    }
-
-    // Get the full path to this executable
-    std::string currentExecutablePath = platformUtils->getExecutablePath();
-    if (currentExecutablePath.empty()) {
-        std::cerr << "Failed to determine executable path" << std::endl;
-        return 1;
-    }
-
-    auto serviceManager = PlatformFactory::createServiceManager();
-    if (!serviceManager || !serviceManager->isAvailable()) {
-        std::cerr << "Service management is not available on this platform" << std::endl;
-        return 1;
-    }
-
-    std::string serviceName = "ddogreen";
-    std::string description = "DDOSoft ddogreen - Intelligent Green Power Management for Sustainable Computing";
-
-    std::cout << "Installing system service..." << std::endl;
-    if (serviceManager->installService(serviceName, currentExecutablePath, description)) {
-        std::cout << "Service installed, enabled, and started successfully!" << std::endl;
-        std::cout << "ddogreen is now running and will auto-start on boot." << std::endl;
-        std::cout << "To view logs, check your system log viewer." << std::endl;
-        return 0;
-    } else {
-        std::cerr << "Failed to install service" << std::endl;
-        return 1;
-    }
-}
-
-int uninstallService() {
-    auto platformUtils = PlatformFactory::createPlatformUtils();
-    if (!platformUtils || !platformUtils->isAvailable()) {
-        std::cerr << "Platform utilities are not available" << std::endl;
-        return 1;
-    }
-
-    // Check if running with required privileges
-    if (!platformUtils->hasRequiredPrivileges()) {
-        std::cerr << platformUtils->getPrivilegeEscalationMessage() << std::endl;
-        return 1;
-    }
-
-    auto serviceManager = PlatformFactory::createServiceManager();
-    if (!serviceManager || !serviceManager->isAvailable()) {
-        std::cerr << "Service management is not available on this platform" << std::endl;
-        return 1;
-    }
-
-    std::string serviceName = "ddogreen";
-
-    std::cout << "Uninstalling system service..." << std::endl;
-    if (serviceManager->uninstallService(serviceName)) {
-        std::cout << "Service uninstalled successfully!" << std::endl;
-        return 0;
-    } else {
-        std::cerr << "Failed to uninstall service" << std::endl;
-        return 1;
-    }
 }
 
 int main(int argc, char* argv[]) {
@@ -146,14 +71,6 @@ int main(int argc, char* argv[]) {
     if (args.showVersion) {
         printVersion();
         return 0;
-    }
-    
-    if (args.install) {
-        return installService();
-    }
-    
-    if (args.uninstall) {
-        return uninstallService();
     }
 
     // Check if running with required privileges

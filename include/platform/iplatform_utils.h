@@ -10,8 +10,6 @@ struct ParsedArgs {
     bool runAsDaemon = false;
     bool showHelp = false;
     bool showVersion = false;
-    bool install = false;
-    bool uninstall = false;
     bool hasUnknownOptions = false;
     std::string unknownOption;
     std::string configPath;  // Custom configuration file path

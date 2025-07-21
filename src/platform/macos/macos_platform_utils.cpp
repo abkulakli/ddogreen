@@ -46,11 +46,10 @@ public:
         ParsedArgs args;
         
         static struct option long_options[] = {
-            {"daemon",      no_argument, 0, 'd'},
-            {"help",        no_argument, 0, 'h'},
-            {"version",     no_argument, 0, 'v'},
-            {"install",     no_argument, 0, 'i'},
-            {"uninstall",   no_argument, 0, 'u'},
+            {"daemon",      no_argument,       0, 'd'},
+            {"help",        no_argument,       0, 'h'},
+            {"version",     no_argument,       0, 'v'},
+            {"config",      required_argument, 0, 'c'},
             {0, 0, 0, 0}
         };
 
@@ -60,7 +59,7 @@ public:
         // Reset getopt state
         optind = 1;
 
-        while ((c = getopt_long(argc, argv, "dhviu", long_options, &option_index)) != -1) {
+        while ((c = getopt_long(argc, argv, "dhvc:", long_options, &option_index)) != -1) {
             switch (c) {
                 case 'd':
                     args.runAsDaemon = true;
@@ -71,11 +70,8 @@ public:
                 case 'v':
                     args.showVersion = true;
                     break;
-                case 'i':
-                    args.install = true;
-                    break;
-                case 'u':
-                    args.uninstall = true;
+                case 'c':
+                    args.configPath = optarg;
                     break;
                 case '?':
                     args.hasUnknownOptions = true;

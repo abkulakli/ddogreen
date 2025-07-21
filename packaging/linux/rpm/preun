@@ -1,33 +1,19 @@
 #!/bin/bash
 # RPM pre-uninstall script for ddogreen
 
+SERVICE_NAME="ddogreen"
+
 # RPM preun script - $1 = 0 for uninstall, $1 = 1 for upgrade
 if [ "$1" = "0" ]; then
     # Complete removal
-    echo "Stopping and removing ddogreen service..."
-
-    # Use the application's built-in service uninstallation
-    # Try different possible installation paths
-    DDOGREEN_BIN=""
-    if [ -x "/usr/bin/ddogreen" ]; then
-        DDOGREEN_BIN="/usr/bin/ddogreen"
-    elif [ -x "/usr/local/bin/ddogreen" ]; then
-        DDOGREEN_BIN="/usr/local/bin/ddogreen"
-    fi
+    echo "Stopping ddogreen service for removal..."
     
-    if [ -n "$DDOGREEN_BIN" ] && $DDOGREEN_BIN --uninstall; then
-        echo "ddogreen service has been stopped and removed successfully."
-    else
-        echo "Warning: Failed to uninstall ddogreen service automatically."
-        echo "Attempting manual cleanup..."
-        # Fallback to manual cleanup
-        systemctl stop ddogreen.service || true
-        systemctl disable ddogreen.service || true
-    fi
+    # Stop the service (disable will be done in postun)
+    systemctl stop "$SERVICE_NAME" || true
 elif [ "$1" = "1" ]; then
     # Upgrade - don't remove service, just stop it temporarily
     echo "Stopping ddogreen service for upgrade..."
-    systemctl stop ddogreen.service || true
+    systemctl stop "$SERVICE_NAME" || true
 fi
 
 exit 0

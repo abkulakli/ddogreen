@@ -3,24 +3,51 @@
 
 set -e
 
+SERVICE_NAME="ddogreen"
+SERVICE_FILE="/etc/systemd/system/ddogreen.service"
+TARGET_EXECUTABLE_PATH="/usr/local/bin/ddogreen"
+LOG_FILE="/var/log/ddogreen.log"
+PID_FILE="/run/ddogreen.pid"
+
 case "$1" in
     remove)
-        # Clean up any remaining service files
-        if [ -f /etc/systemd/system/ddogreen.service ]; then
-            rm -f /etc/systemd/system/ddogreen.service
+        # Stop and disable service
+        systemctl stop "$SERVICE_NAME" || true
+        systemctl disable "$SERVICE_NAME" || true
+        
+        # Clean up service files
+        if [ -f "$SERVICE_FILE" ]; then
+            rm -f "$SERVICE_FILE"
             systemctl daemon-reload
         fi
+        
+        # Remove executable if it was installed by us
+        rm -f "$TARGET_EXECUTABLE_PATH"
+        
+        # Clean up log and PID files
+        rm -f "$LOG_FILE"
+        rm -f "$PID_FILE"
+        
         echo "ddogreen has been removed."
         ;;
     purge)
-        # Clean up any remaining files and logs
-        rm -f /etc/systemd/system/ddogreen.service
-        rm -f /var/log/ddogreen.log
+        # Stop and disable service
+        systemctl stop "$SERVICE_NAME" || true
+        systemctl disable "$SERVICE_NAME" || true
+        
+        # Clean up any remaining service files
+        rm -f "$SERVICE_FILE"
+        rm -f "$TARGET_EXECUTABLE_PATH"
+        rm -f "$LOG_FILE"
+        rm -f "$PID_FILE"
+        
         # Remove configuration directory and files
         rm -rf /etc/ddogreen
+        
         # Remove package configuration template
-        rm -f /usr/share/ddogreen/ddogreen.conf
+        rm -f /usr/share/ddogreen/ddogreen.conf.default
         rmdir /usr/share/ddogreen 2>/dev/null || true
+        
         systemctl daemon-reload
         echo "ddogreen has been purged completely."
         ;;

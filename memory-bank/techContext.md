@@ -98,8 +98,9 @@ sudo dnf install gcc-c++ cmake
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     list(APPEND SOURCES
         src/platform/linux/linux_power_manager.cpp
-        src/platform/linux/linux_service_manager.cpp
         src/platform/linux/linux_system_monitor.cpp
+        src/platform/linux/linux_platform_utils.cpp
+        src/platform/linux/linux_daemon.cpp
     )
 endif()
 ```
@@ -110,8 +111,9 @@ endif()
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     list(APPEND SOURCES
         src/platform/windows/windows_power_manager.cpp
-        src/platform/windows/windows_service_manager.cpp
         src/platform/windows/windows_system_monitor.cpp
+        src/platform/windows/windows_platform_utils.cpp
+        src/platform/windows/windows_daemon.cpp
     )
 ```
 

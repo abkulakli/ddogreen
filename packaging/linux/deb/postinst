@@ -3,6 +3,13 @@
 
 set -e
 
+SERVICE_NAME="ddogreen"
+SERVICE_DESCRIPTION="DDOSoft ddogreen - Intelligent Green Power Management for Sustainable Computing"
+TARGET_EXECUTABLE_PATH="/usr/local/bin/ddogreen"
+SERVICE_FILE="/etc/systemd/system/ddogreen.service"
+LOG_FILE="/var/log/ddogreen.log"
+PID_FILE="/run/ddogreen.pid"
+
 case "$1" in
     configure)
         echo "Setting up ddogreen..."
@@ -21,8 +28,7 @@ case "$1" in
             echo "Existing configuration preserved at /etc/ddogreen/ddogreen.conf"
         fi
         
-        # Use the application's built-in service installation
-        # Try different possible installation paths
+        # Find ddogreen binary - try different possible installation paths
         DDOGREEN_BIN=""
         if [ -x "/usr/bin/ddogreen" ]; then
             DDOGREEN_BIN="/usr/bin/ddogreen"
@@ -30,7 +36,59 @@ case "$1" in
             DDOGREEN_BIN="/usr/local/bin/ddogreen"
         fi
         
-        if [ -n "$DDOGREEN_BIN" ] && $DDOGREEN_BIN --install; then
+        # Install service directly using our own logic
+        echo "Installing service..."
+        
+        # Copy executable to target location if not already there
+        if [ -n "$DDOGREEN_BIN" ] && [ "$DDOGREEN_BIN" != "$TARGET_EXECUTABLE_PATH" ]; then
+            cp "$DDOGREEN_BIN" "$TARGET_EXECUTABLE_PATH"
+            chmod 755 "$TARGET_EXECUTABLE_PATH"
+        fi
+        
+        # Create log file
+        mkdir -p /var/log
+        touch "$LOG_FILE"
+        chmod 644 "$LOG_FILE"
+        
+        # Create systemd service file
+        cat > "$SERVICE_FILE" << EOF
+[Unit]
+Description=$SERVICE_DESCRIPTION
+Documentation=https://github.com/abkulakli/ddogreen
+Documentation=https://www.ddosoft.com
+After=multi-user.target
+
+[Service]
+Type=forking
+ExecStart=$TARGET_EXECUTABLE_PATH --daemon
+ExecReload=/bin/kill -HUP \$MAINPID
+PIDFile=$PID_FILE
+Restart=always
+RestartSec=10
+User=root
+Group=root
+TimeoutStartSec=30
+RemainAfterExit=no
+
+# Security settings
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=/var/log /run /tmp /proc
+PrivateTmp=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+
+[Install]
+WantedBy=multi-user.target
+EOF
+        
+        # Reload systemd daemon
+        systemctl daemon-reload
+        
+        # Enable and start the service
+        if systemctl enable "$SERVICE_NAME" && systemctl start "$SERVICE_NAME"; then
             echo "ddogreen service has been installed and started successfully!"
             echo "The service will automatically start on boot."
             echo ""
@@ -41,8 +99,8 @@ case "$1" in
             echo "  Restart: sudo systemctl restart ddogreen"
             echo "  Logs:    sudo journalctl -u ddogreen -f"
         else
-            echo "Warning: Failed to install ddogreen service automatically."
-            echo "You can manually install it with: sudo ddogreen --install"
+            echo "Warning: Failed to enable/start ddogreen service."
+            echo "You can manually start it with: sudo systemctl start ddogreen"
         fi
         ;;
 esac

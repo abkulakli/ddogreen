@@ -64,10 +64,13 @@ public:
                 args.showHelp = true;
             } else if (arg == "-v" || arg == "--version") {
                 args.showVersion = true;
-            } else if (arg == "-i" || arg == "--install") {
-                args.install = true;
-            } else if (arg == "-u" || arg == "--uninstall") {
-                args.uninstall = true;
+            } else if (arg == "-c" || arg == "--config") {
+                if (i + 1 < argc) {
+                    args.configPath = argv[++i];
+                } else {
+                    args.hasUnknownOptions = true;
+                    args.unknownOption = arg + " (missing argument)";
+                }
             } else {
                 args.hasUnknownOptions = true;
                 args.unknownOption = arg;

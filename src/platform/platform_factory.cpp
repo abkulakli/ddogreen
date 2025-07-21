@@ -7,19 +7,16 @@
 #if defined(__linux__)
 std::unique_ptr<ISystemMonitor> createLinuxSystemMonitor();
 std::unique_ptr<IPowerManager> createLinuxPowerManager();
-std::unique_ptr<IServiceManager> createLinuxServiceManager();
 std::unique_ptr<IPlatformUtils> createLinuxPlatformUtils();
 std::unique_ptr<IDaemon> createLinuxDaemon();
 #elif defined(_WIN32) || defined(_WIN64)
 std::unique_ptr<ISystemMonitor> createWindowsSystemMonitor();
 std::unique_ptr<IPowerManager> createWindowsPowerManager();
-std::unique_ptr<IServiceManager> createWindowsServiceManager();
 std::unique_ptr<IPlatformUtils> createWindowsPlatformUtils();
 std::unique_ptr<IDaemon> createWindowsDaemon();
 #elif defined(__APPLE__) && defined(__MACH__)
 std::unique_ptr<ISystemMonitor> createMacOSSystemMonitor();
 std::unique_ptr<IPowerManager> createMacOSPowerManager();
-std::unique_ptr<IServiceManager> createMacOSServiceManager();
 std::unique_ptr<IPlatformUtils> createMacOSPlatformUtils();
 std::unique_ptr<IDaemon> createMacOSDaemon();
 #endif
@@ -60,23 +57,6 @@ std::unique_ptr<IPowerManager> PlatformFactory::createPowerManager() {
     return createMacOSPowerManager();
 #else
     Logger::error("Unsupported platform for power manager");
-    return nullptr;
-#endif
-}
-
-/**
- * Create a service manager for the current platform
- * @return unique_ptr to platform-specific service manager implementation
- */
-std::unique_ptr<IServiceManager> PlatformFactory::createServiceManager() {
-#if defined(__linux__)
-    Logger::debug("Creating Linux service manager");
-    return createLinuxServiceManager();
-#elif defined(_WIN32) || defined(_WIN64)
-    Logger::debug("Creating Windows service manager");
-    return createWindowsServiceManager();
-#else
-    Logger::error("Unsupported platform for service manager");
     return nullptr;
 #endif
 }
