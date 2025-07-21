@@ -210,5 +210,54 @@ jobs:
         generate_release_notes: true
         draft: false
         prerelease: false
+        body: |
+          ## ddogreen ${{ github.ref_name }}
+          
+          ### Installation Options
+          
+          #### Debian/Ubuntu (DEB Package)
+          ```bash
+          wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/ddogreen-${{ github.ref_name }}-linux.deb
+          sudo dpkg -i ddogreen-${{ github.ref_name }}-linux.deb
+          sudo apt install -f  # Fix dependencies if needed
+          ```
+          
+          #### RHEL/CentOS/Fedora (RPM Package)
+          ```bash
+          wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/ddogreen-${{ github.ref_name }}-linux.rpm
+          sudo rpm -i ddogreen-${{ github.ref_name }}-linux.rpm
+          # or: sudo dnf install ddogreen-${{ github.ref_name }}-linux.rpm
+          ```
+          
+          #### Generic Linux (TGZ Package)
+          ```bash
+          wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/ddogreen-${{ github.ref_name }}-linux.tar.gz
+          tar -xzf ddogreen-${{ github.ref_name }}-linux.tar.gz
+          cd ddogreen-*/
+          sudo ./install.sh --install
+          ```
+          
+          #### Standalone Binary
+          ```bash
+          wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/ddogreen-${{ github.ref_name }}-linux-x64
+          chmod +x ddogreen-${{ github.ref_name }}-linux-x64
+          sudo ./ddogreen-${{ github.ref_name }}-linux-x64 --help
+          ```
+          
+          ### Requirements
+          - Linux with systemd
+          - TLP installed (`sudo apt install tlp` / `sudo dnf install tlp`)
+          - Root privileges for installation
+          
+          ### Service Management
+          ```bash
+          sudo systemctl status ddogreen      # Check status
+          sudo systemctl stop ddogreen       # Stop service
+          sudo systemctl start ddogreen      # Start service
+          sudo journalctl -u ddogreen -f     # View logs
+          ```
+          
+          ### Verify Installation
+          All packages automatically install and start the service. The service will manage your system's power automatically with no configuration required.
       env:
         GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
