@@ -73,9 +73,14 @@ check_tlp() {
 install_ddogreen() {
     print_info "Installing ddogreen..."
     
-    # Check if binary exists in current directory
-    if [[ ! -f "ddogreen" ]]; then
-        print_error "ddogreen binary not found in current directory"
+    # Check if binary exists in current directory or bin/ subdirectory
+    DDOGREEN_BINARY=""
+    if [[ -f "ddogreen" ]]; then
+        DDOGREEN_BINARY="ddogreen"
+    elif [[ -f "bin/ddogreen" ]]; then
+        DDOGREEN_BINARY="bin/ddogreen"
+    else
+        print_error "ddogreen binary not found in current directory or bin/ subdirectory"
         print_error "Please run this script from the extracted tar.gz directory"
         exit 1
     fi
@@ -94,14 +99,7 @@ install_ddogreen() {
     
     # Copy executable to system location
     print_info "Installing executable to $TARGET_EXECUTABLE_PATH..."
-    if [[ -f "bin/ddogreen" ]]; then
-        cp "bin/ddogreen" "$TARGET_EXECUTABLE_PATH"
-    elif [[ -f "ddogreen" ]]; then
-        cp "ddogreen" "$TARGET_EXECUTABLE_PATH"
-    else
-        print_error "ddogreen executable not found in package"
-        exit 1
-    fi
+    cp "$DDOGREEN_BINARY" "$TARGET_EXECUTABLE_PATH"
     chmod 755 "$TARGET_EXECUTABLE_PATH"
     
     # Install configuration file
