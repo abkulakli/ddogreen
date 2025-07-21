@@ -16,6 +16,47 @@
     └─────────┘              └─────────┘              └─────────┘
 ```
 
+### Cross-Platform Architecture
+```
+Application Layer (main.cpp, daemon.cpp)
+├── Platform Abstraction Layer
+│   ├── IPowerManager
+│   ├── ISystemMonitor  
+│   ├── IServiceManager
+│   └── IPlatformUtils
+└── Platform Implementations
+    ├── Linux (TLP integration)
+    ├── Windows (Power Plans)
+    └── macOS (future)
+```
+
+### Architectural Principles
+- **No platform-specific code** in application layer
+- **Interface-based design** for all platform operations
+- **Factory pattern** for platform selection
+- **RAII** for resource management
+- **Compile-time platform detection** for optimal binaries
+
+### Platform-Specific Implementation Details
+
+#### Linux Implementation
+- **Power Management**: TLP integration (`tlp ac`, `tlp bat`)
+- **System Monitoring**: `/proc/loadavg` reading
+- **Service Management**: systemd integration
+- **Privilege Checking**: `geteuid()` for root access
+
+#### Windows Implementation
+- **Power Management**: Power Plans via `powercfg`
+- **System Monitoring**: Performance Counters
+- **Service Management**: Windows Service Control Manager
+- **Privilege Checking**: Windows Token API
+
+#### macOS Implementation (Future)
+- **Power Management**: `pmset` integration planned
+- **System Monitoring**: System framework APIs
+- **Service Management**: launchd integration
+- **Privilege Checking**: Authorization Services
+
 ## Memory Bank Organization Guidelines
 
 ### Content Placement Rules

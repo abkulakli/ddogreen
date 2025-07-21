@@ -1,7 +1,13 @@
-# Coding and Testing Standards - ddogreen
+# Coding Standards - ddogreen
+
+> **File Purpose**: Comprehensive coding standards, practices, and conventions for ddogreen project
+> **Content Focus**: Code formatting, architecture compliance, documentation, and quality standards
+> **Cross-Reference**: For testing standards, see `testingStandards.md`
 
 ## Overview
-This document establishes comprehensive coding and testing standards for the ddogreen project. These standards ensure code quality, maintainability, and consistency across the cross-platform codebase.
+This document establishes comprehensive coding standards for the ddogreen project. These standards ensure code quality, maintainability, and consistency across the cross-platform codebase.
+
+**For Testing Standards**: See [`testingStandards.md`](testingStandards.md) for comprehensive testing guidelines, frameworks, and practices.
 
 ## **DOCUMENTATION PHILOSOPHY** ⚠️
 
@@ -255,176 +261,7 @@ void processEntries(const std::vector<std::string>& entries);
 
 ## Code Quality Tools
 
-### 1. Static Analysis
-
-#### Test Structure
-```
-tests/
-├── unit/
-│   ├── test_activity_monitor.cpp
-│   ├── test_logger.cpp
-│   └── platform/
-│       ├── test_linux_power_manager.cpp
-│       └── test_platform_factory.cpp
-├── integration/
-│   ├── test_full_daemon.cpp
-│   └── test_service_lifecycle.cpp
-└── mocks/
-    ├── mock_power_manager.h
-    └── mock_system_monitor.h
-```
-
-#### Test Naming
-- **Test files**: `test_[component].cpp`
-- **Test functions**: `test_[functionality]_[expected_result]()`
-- **Test classes**: `Test[Component]`
-
-### 2. Unit Testing Standards
-
-#### Test Function Structure
-```cpp
-#include <gtest/gtest.h>
-#include "activity_monitor.h"
-
-class TestActivityMonitor : public ::testing::Test
-{
-protected:
-    void SetUp() override
-    {
-        // Setup test environment
-        monitor = std::make_unique<ActivityMonitor>();
-    }
-
-    void TearDown() override
-    {
-        // Cleanup
-        monitor.reset();
-    }
-
-    std::unique_ptr<ActivityMonitor> monitor;
-};
-
-TEST_F(TestActivityMonitor, test_start_monitoring_returns_true_when_not_running)
-{
-    // Arrange
-    bool callbackCalled = false;
-    auto callback = [&callbackCalled](bool active) { callbackCalled = true; };
-
-    // Act
-    bool result = monitor->startMonitoring(0.1, callback);
-
-    // Assert
-    EXPECT_TRUE(result);
-    EXPECT_TRUE(monitor->isRunning());
-}
-
-TEST_F(TestActivityMonitor, test_start_monitoring_returns_false_when_already_running)
-{
-    // Arrange
-    auto callback = [](bool active) {};
-    monitor->startMonitoring(0.1, callback);
-
-    // Act
-    bool result = monitor->startMonitoring(0.1, callback);
-
-    // Assert
-    EXPECT_FALSE(result);
-}
-```
-
-#### Mock Standards
-```cpp
-// Mock interface implementations for testing
-class MockPowerManager : public IPowerManager
-{
-public:
-    MOCK_METHOD(bool, setPerformanceMode, (), (override));
-    MOCK_METHOD(bool, setPowerSavingMode, (), (override));
-    MOCK_METHOD(PowerMode, getCurrentMode, (), (const, override));
-    MOCK_METHOD(bool, isAvailable, (), (const, override));
-};
-```
-
-### 3. Integration Testing Standards
-
-#### Test Scenarios
-```cpp
-TEST(IntegrationTest, test_full_daemon_lifecycle)
-{
-    // Test complete daemon startup, operation, and shutdown
-
-    // Arrange
-    auto daemon = std::make_unique<Daemon>();
-
-    // Act
-    bool startResult = daemon->start();
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-    bool stopResult = daemon->stop();
-
-    // Assert
-    EXPECT_TRUE(startResult);
-    EXPECT_TRUE(stopResult);
-}
-```
-
-### 4. Platform Testing Standards
-
-#### Platform-Specific Tests
-```cpp
-#ifdef __linux__
-TEST(LinuxPlatformTest, test_tlp_availability_check)
-{
-    LinuxPowerManager manager;
-
-    // This test only runs on Linux
-    EXPECT_TRUE(manager.isAvailable() || !system("which tlp > /dev/null 2>&1"));
-}
-#endif
-
-#ifdef _WIN32
-TEST(WindowsPlatformTest, test_powercfg_availability)
-{
-    WindowsPowerManager manager;
-
-    // This test only runs on Windows
-    EXPECT_TRUE(manager.isAvailable());
-}
-#endif
-```
-
-#### Cross-Platform Interface Tests
-```cpp
-// Test that runs on all platforms
-TEST(CrossPlatformTest, test_platform_utils_interface_compliance)
-{
-    auto utils = PlatformFactory::createPlatformUtils();
-
-    // All platforms must implement these methods
-    EXPECT_NO_THROW(utils->hasRequiredPrivileges());
-    EXPECT_NO_THROW(utils->getExecutablePath());
-    EXPECT_FALSE(utils->getPrivilegeEscalationMessage().empty());
-}
-```
-
-### 5. Test Coverage Standards
-
-#### Coverage Requirements
-- **Unit tests**: Minimum 80% line coverage
-- **Platform implementations**: 90% coverage for each platform
-- **Critical paths**: 100% coverage (privilege checking, power management)
-- **Error handling**: All error paths must be tested
-
-#### Coverage Verification
-```bash
-# Generate coverage report
-./build.sh --coverage
-lcov --capture --directory build --output-file coverage.info
-genhtml coverage.info --output-directory coverage_report
-```
-
-## Code Quality Tools
-
-### 1. Static Analysis
+### Static Analysis
 
 #### Compiler Warnings
 ```cmake
@@ -441,7 +278,7 @@ endif()
 - **clang-tidy**: Modernization and best practices
 - **valgrind**: Memory leak detection (Linux)
 
-### 2. Formatting Tools
+### Formatting Tools
 
 #### clang-format Configuration
 ```yaml
@@ -454,7 +291,7 @@ BreakBeforeBraces: Allman
 ColumnLimit: 100
 ```
 
-### 3. Build Standards
+### Build Standards
 
 #### Build Requirements
 ```bash
@@ -472,22 +309,24 @@ ColumnLimit: 100
 
 ## Enforcement
 
-### 1. Pre-commit Checks
+### Pre-commit Checks
 - Code formatting verification
 - Basic compilation test
 - Unit test execution
 - Static analysis scan
 
-### 2. Code Review Requirements
+### Code Review Requirements
 - Architecture compliance verification
 - Test coverage review
 - Documentation completeness
 - Performance impact assessment
 
-### 3. Quality Gates
+### Quality Gates
 - No code merged without tests
 - No warnings in production builds
 - All public APIs must be documented
 - Platform abstraction compliance verified
 
 This comprehensive standard ensures maintainable, reliable, and consistent code across the entire ddogreen project.
+
+**For Testing Guidelines**: See [`testingStandards.md`](testingStandards.md) for detailed testing practices, frameworks, and quality assurance standards.

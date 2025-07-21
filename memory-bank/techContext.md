@@ -43,6 +43,31 @@
 
 ### Dependencies
 
+#### Development Dependencies
+```bash
+# Ubuntu/Debian
+sudo apt update
+sudo apt install build-essential cmake tlp libgtest-dev
+
+# Fedora/RHEL
+sudo dnf install gcc-c++ cmake tlp gtest-devel
+
+# Arch Linux
+sudo pacman -S base-devel cmake tlp gtest
+```
+
+#### Windows Development
+- **Visual Studio 2019+** or **MinGW-w64** with C++17 support
+- **CMake** 3.16 or later
+- **Git** for version control
+- **vcpkg** (optional, for dependency management)
+
+#### macOS Development
+```bash
+# Using Homebrew
+brew install cmake googletest
+```
+
 #### Build Dependencies
 ```bash
 # Ubuntu/Debian
@@ -123,7 +148,96 @@ cd ddogreen
 # CMakeLists.txt key settings
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -O2")
+```
+
+### Manual CMake Build Process
+```bash
+mkdir build && cd build
+
+# Configure for release
+cmake .. -DCMAKE_BUILD_TYPE=Release
+
+# Configure for development with tests
+cmake .. -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=ON
+
+# Build
+cmake --build . -j$(nproc)
+
+# Install (optional)
+sudo cmake --install .
+```
+
+### Available Build Targets
+```bash
+make ddogreen                     # Main executable
+make test_config                  # Unit tests
+make package                      # Create distribution packages
+```
+
+### Package Generation
+```bash
+# Linux packages
+cpack -G DEB                      # Debian/Ubuntu package
+cpack -G RPM                      # Fedora/RHEL package  
+cpack -G TGZ                      # Generic tarball
+
+# Windows packages
+cpack -G NSIS                     # Windows installer
+cpack -G ZIP                      # Windows ZIP archive
+```
+
+### Testing Integration
+```bash
+# Quick test run
+./test.sh
+
+# Manual test execution
+cd build
+ctest --output-on-failure
+
+# Run specific tests
+./tests/test_config
+./tests/test_config --gtest_filter="TestConfig.test_load_from_file_*"
+```
+
+### Performance Targets
+- **Memory**: Target <5MB RSS during operation
+- **CPU**: Minimal impact with 60-second check intervals
+- **Disk**: Log rotation to prevent unbounded growth
+- **Network**: No network dependencies
+
+### Debugging Setup
+```bash
+# Debug build
+./build.sh --debug
+gdb ./build/ddogreen
+```
+
+### Platform-Specific Debugging
+
+#### Linux Debug Commands
+```bash
+# Check TLP status
+sudo tlp-stat -s
+
+# Monitor system logs
+sudo journalctl -f -u ddogreen
+
+# Check load average
+cat /proc/loadavg
+```
+
+#### Windows Debug Commands
+```cmd
+# Check power plans
+powercfg /list
+powercfg /getactivescheme
+
+# Check service status
+sc query ddogreen
+
+# Monitor Windows Event Log
+eventvwr.msc
 ```
 
 ## System Integration

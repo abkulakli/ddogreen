@@ -37,51 +37,192 @@ ddogreen watches how busy your computer is and automatically switches power mode
 
 ### Linux Installation
 
-#### 1. Install Requirements
-Ubuntu/Debian:
+#### Quick Install (Recommended)
 ```bash
-sudo apt update
-sudo apt install build-essential cmake tlp
+# Download and install from releases
+wget https://github.com/abkulakli/ddogreen/releases/latest/download/ddogreen-linux.deb
+sudo dpkg -i ddogreen-linux.deb
+
+# Or for RPM-based systems
+wget https://github.com/abkulakli/ddogreen/releases/latest/download/ddogreen-linux.rpm
+sudo rpm -i ddogreen-linux.rpm
+
+# Install and start the service
+sudo ddogreen --install
 ```
 
-Fedora/RHEL:
+#### Prerequisites
+Make sure TLP is installed:
 ```bash
-sudo dnf install gcc-c++ cmake tlp
-```
+# Ubuntu/Debian
+sudo apt install tlp
 
-#### 2. Build and Install
-```bash
-git clone <repository-url>
-cd ddogreen
-./build.sh
-sudo make install -C build
-sudo ddogreen --install    # Install and start system service
+# Fedora/RHEL
+sudo dnf install tlp
 ```
 
 ### Windows Installation
 
-#### 1. Install Requirements
-- **Visual Studio** or **MinGW-w64** with C++17 support
-- **CMake** (3.16 or later)
-- **Git** for cloning the repository
-
-#### 2. Build and Install
-```cmd
-git clone <repository-url>
-cd ddogreen
-mkdir build
-cd build
-cmake ..
-cmake --build . --config Release
-```
-
-#### 3. Install as Windows Service
-```cmd
-# Run as Administrator
-ddogreen.exe --install    # Install and start Windows service
-```
+#### Quick Install (Recommended)
+1. Download `ddogreen-windows.zip` from [releases](https://github.com/abkulakli/ddogreen/releases/latest)
+2. Extract to `C:\Program Files\ddogreen`
+3. Open Command Prompt as Administrator
+4. Run: `ddogreen.exe --install`
 
 That's it! ddogreen is now running and will automatically manage your power settings.
+
+## Check if It's Working
+
+### Service Status
+
+#### Linux
+```bash
+sudo systemctl status ddogreen
+```
+
+#### Windows
+```cmd
+sc query ddogreen
+```
+
+### See What It's Doing
+
+#### Linux
+```bash
+sudo tail -f /var/log/ddogreen.log
+```
+
+#### Windows
+```cmd
+type C:\Windows\System32\ddogreen.log
+```
+
+You'll see messages like:
+```
+[2025-07-21 15:30:45] System became idle - switching to power saving mode
+[2025-07-21 15:45:12] System became active - switching to high performance mode
+```
+
+### Check Your Current Power Mode
+
+#### Linux
+```bash
+sudo tlp-stat -s
+```
+
+#### Windows
+```cmd
+powercfg /getactivescheme
+```
+
+## Your Energy Impact
+
+### Individual Benefits
+- **Daily savings**: Reduced energy consumption per laptop
+- **Annual impact**: Significant reduction in electricity usage
+- **Environmental benefit**: Lower carbon footprint from reduced power consumption
+
+### Cost Savings
+- **Lower electricity bills** from reduced power consumption
+- Extended laptop lifespan from better thermal management
+
+## Troubleshooting
+
+### Linux
+
+**Service won't start?**
+- Make sure TLP is installed: `which tlp`
+- Check service status: `sudo systemctl status ddogreen`
+- Verify logs: `sudo tail /var/log/ddogreen.log`
+
+**Not switching modes?**
+- Check the logs: `sudo tail /var/log/ddogreen.log`
+- Verify TLP is working: `sudo tlp-stat`
+- Ensure you have admin privileges
+
+### Windows
+
+**Service won't start?**
+- Make sure you ran the install command as Administrator
+- Check service status: `sc query ddogreen`
+- Verify power plans are available: `powercfg /list`
+
+**Not switching modes?**
+- Check the logs: `type C:\Windows\System32\ddogreen.log`
+- Verify power plans: `powercfg /getactivescheme`
+- Ensure you have admin privileges
+
+## Uninstall
+
+### Linux
+```bash
+sudo ddogreen --uninstall
+sudo apt remove ddogreen        # For DEB install
+# or
+sudo rpm -e ddogreen           # For RPM install
+```
+
+### Windows
+```cmd
+# Run as Administrator
+ddogreen.exe --uninstall
+# Then uninstall via Programs and Features
+```
+
+## Advanced Usage
+
+### Manual Control
+If you want to test ddogreen interactively:
+
+#### Linux
+```bash
+sudo ddogreen                  # See live activity
+sudo ddogreen --daemon         # Run silently
+```
+
+#### Windows
+```cmd
+ddogreen.exe                   # See live activity
+ddogreen.exe --daemon          # Run silently
+```
+
+### Command Line Options
+```
+Usage: ddogreen [OPTIONS]
+Options:
+  -h, --help             Show this help message
+  -v, --version          Show version information
+  -i, --install          Install system service
+  -u, --uninstall        Uninstall system service
+  -d, --daemon           Run as daemon/service
+```
+
+---
+
+**Make your laptop more sustainable with zero effort - on Linux and Windows!**
+
+*Every laptop running ddogreen helps reduce global energy consumption.*
+
+## Platform Support
+
+- ✅ **Linux** - Full support with TLP integration
+- ✅ **Windows** - Full support with Power Plans integration  
+- 🚧 **macOS** - Architecture ready, implementation pending
+
+## Technical Details
+
+### Simple and Safe
+- **No configuration needed** - works automatically with smart defaults
+- **Minimal resource usage** - checks system load once per minute
+- **Safe** - only changes power modes, nothing else
+- **Cross-platform** - same intelligent logic on all platforms
+
+### How It Monitors
+- Watches your system's load average to detect when you're busy vs idle
+- Uses smart thresholds with hysteresis to prevent rapid switching
+- Automatically adapts to your work patterns
+
+For developers and contributors, see the project's memory bank documentation for technical implementation details.
 
 ## Command Line Options
 
