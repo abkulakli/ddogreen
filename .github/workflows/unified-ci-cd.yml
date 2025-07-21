@@ -67,8 +67,16 @@ jobs:
     - name: Verify build output
       run: |
         ls -la build/
-        test -f build/ddogreen
-        ./build/ddogreen --version
+        # Build script creates build/linux/release/ structure
+        find build -name "ddogreen" -type f
+        DDOGREEN_EXEC=$(find build -name "ddogreen" -type f | head -1)
+        if [[ -n "$DDOGREEN_EXEC" ]]; then
+          echo "Found ddogreen executable at: $DDOGREEN_EXEC"
+          $DDOGREEN_EXEC --version
+        else
+          echo "ERROR: ddogreen executable not found"
+          exit 1
+        fi
 
   # Step 3: Package Building (only on main branch, tags, or PRs)
   build-packages:
