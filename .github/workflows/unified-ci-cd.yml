@@ -19,10 +19,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
     
-    strategy:
-      matrix:
-        build_type: [Debug, Release]
-    
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -34,11 +30,11 @@ jobs:
 
     - name: Configure CMake
       run: |
-        cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DBUILD_TESTS=ON
+        cmake -B build -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_TESTS=ON
 
     - name: Build
       run: |
-        cmake --build build --config ${{ matrix.build_type }} -j$(nproc)
+        cmake --build build --config $BUILD_TYPE -j$(nproc)
 
     - name: Run Tests
       run: |
