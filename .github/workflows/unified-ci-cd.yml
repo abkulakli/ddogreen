@@ -128,7 +128,7 @@ jobs:
         path: build/ddogreen
 
   # Step 4: Package Validation (Sequential)
-  validate-packages:
+  validate-deb:
     needs: build-packages
     runs-on: ubuntu-latest
     
@@ -141,20 +141,10 @@ jobs:
       with:
         name: ddogreen-deb
 
-    - name: Download RPM package
-      uses: actions/download-artifact@v4
-      with:
-        name: ddogreen-rpm
-
-    - name: Download TGZ package
-      uses: actions/download-artifact@v4
-      with:
-        name: ddogreen-tgz
-
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y tlp rpm
+        sudo apt-get install -y tlp
 
     - name: Test DEB package
       run: |
@@ -186,22 +176,31 @@ jobs:
         ! which ddogreen || echo "WARNING: ddogreen still found after removal"
         ! test -f /usr/bin/ddogreen || echo "WARNING: binary still exists after removal"
 
-    - name: Cleanup after DEB test
+  validate-rpm:
+    needs: build-packages
+    runs-on: ubuntu-latest
+    container: 
+      image: fedora:latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download RPM package
+      uses: actions/download-artifact@v4
+      with:
+        name: ddogreen-rpm
+
+    - name: Install system dependencies
       run: |
-        # Ensure complete cleanup before RPM test
-        sudo systemctl stop ddogreen.service || true
-        sudo systemctl disable ddogreen.service || true
-        sudo rm -f /etc/systemd/system/ddogreen.service
-        sudo rm -f /usr/bin/ddogreen /usr/local/bin/ddogreen
-        sudo rm -rf /etc/ddogreen
-        sudo systemctl daemon-reload
+        dnf install -y tlp systemd
 
     - name: Test RPM package
       run: |
         echo "=== Testing RPM Package Installation ==="
         
-        # Install package using rpm (ignore dependencies for testing)
-        sudo rpm -i --nodeps *.rpm
+        # Install package using dnf (proper way on Fedora)
+        dnf install -y *.rpm
         
         # Verify installation
         echo "Checking if ddogreen is installed..."
@@ -209,32 +208,43 @@ jobs:
         ddogreen --version
         
         # Check if files are in correct locations
-        test -f /usr/bin/ddogreen
+        test -f /usr/local/bin/ddogreen || test -f /usr/bin/ddogreen
         test -f /usr/share/ddogreen/ddogreen.conf.default
         
         # Test executable functionality
-        sudo ddogreen --help
+        ddogreen --help
         
         # Check RPM package info
         rpm -qi ddogreen
         
         echo "=== Testing RPM Package Removal ==="
         # Remove package
-        sudo rpm -e ddogreen
+        dnf remove -y ddogreen
         
         # Verify removal
         ! which ddogreen || echo "WARNING: ddogreen still found after removal"
-        ! test -f /usr/bin/ddogreen || echo "WARNING: binary still exists after removal"
+        ! test -f /usr/bin/ddogreen || echo "WARNING: binary still exists at /usr/bin/ddogreen after removal"
+        ! test -f /usr/local/bin/ddogreen || echo "WARNING: binary still exists at /usr/local/bin/ddogreen after removal"
 
-    - name: Cleanup after RPM test
+  validate-tgz:
+    needs: build-packages
+    runs-on: ubuntu-latest
+    container: 
+      image: archlinux:latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download TGZ package
+      uses: actions/download-artifact@v4
+      with:
+        name: ddogreen-tgz
+
+    - name: Install system dependencies
       run: |
-        # Ensure complete cleanup before TGZ test
-        sudo systemctl stop ddogreen.service || true
-        sudo systemctl disable ddogreen.service || true
-        sudo rm -f /etc/systemd/system/ddogreen.service
-        sudo rm -f /usr/bin/ddogreen /usr/local/bin/ddogreen
-        sudo rm -rf /etc/ddogreen
-        sudo systemctl daemon-reload
+        pacman -Syu --noconfirm
+        pacman -S --noconfirm tlp systemd bash coreutils findutils
 
     - name: Test TGZ package  
       run: |
@@ -266,11 +276,9 @@ jobs:
         test -f /usr/local/bin/ddogreen
         test -d /etc/ddogreen
         
-        # Check service status
+        # Test service functionality (with systemd support)
+        ddogreen --help
         sudo systemctl status ddogreen --no-pager || true
-        
-        # Test service functionality
-        sudo ddogreen --help
         
         echo "=== Testing TGZ Package Removal ==="
         # Uninstall using install script
@@ -283,7 +291,7 @@ jobs:
   # Step 5: Create Release (only on tags)
   create-release:
     if: startsWith(github.ref, 'refs/tags/v') && github.event_name == 'push'
-    needs: [test, build-packages, validate-packages]
+    needs: [test, build-packages, validate-deb, validate-rpm, validate-tgz]
     runs-on: ubuntu-latest
     
     steps:
