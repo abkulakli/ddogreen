@@ -18,7 +18,7 @@ jobs:
   # Step 1: Basic CI Testing
   test:
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -56,44 +56,55 @@ jobs:
         ./build/ddogreen --help
         ./build/ddogreen --version
 
-  # Step 2: Build Scripts Testing
-  test-build-scripts:
+  # Step 2: CMake Presets Testing
+  test-cmake-presets:
     needs: test
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Install cross-compilation dependencies
+    - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential cmake gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64
+        sudo apt-get install -y build-essential cmake
 
-    - name: Test build script
+    - name: Test debug preset
       run: |
-        chmod +x build.sh
-        ./build.sh
+        echo "=== Testing Debug Preset ==="
+        cmake --preset debug
+        cmake --build --preset debug
 
-    - name: Verify build output
+        echo "=== Verifying debug build ==="
+        ls -la build/debug/
+        test -f build/debug/ddogreen
+        ./build/debug/ddogreen --version
+
+    - name: Test release preset
       run: |
-        ls -la build/
-        # Build script creates build/linux/release/ structure
-        find build -name "ddogreen" -type f
-        DDOGREEN_EXEC=$(find build -name "ddogreen" -type f | head -1)
-        if [[ -n "$DDOGREEN_EXEC" ]]; then
-          echo "Found ddogreen executable at: $DDOGREEN_EXEC"
-          $DDOGREEN_EXEC --version
-        else
-          echo "ERROR: ddogreen executable not found"
-          exit 1
-        fi
+        echo "=== Testing Release Preset ==="
+        cmake --preset release
+        cmake --build --preset release
+
+        echo "=== Verifying release build ==="
+        ls -la build/release/
+        test -f build/release/ddogreen
+        ./build/release/ddogreen --version
+
+    - name: Test preset tests
+      run: |
+        echo "=== Running Debug Tests ==="
+        ctest --preset debug-tests
+
+        echo "=== Running Release Tests ==="
+        ctest --preset release-tests
 
   # Step 3: Package Building (only on main branch, tags, or PRs)
   build-packages:
-    needs: [test, test-build-scripts]
+    needs: [test, test-cmake-presets]
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -103,7 +114,7 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y build-essential cmake rpm dpkg-dev
 
-    - name: Configure CMake
+    - name: Configure and Build with CMake Presets
       run: |
         # Extract version from git tag if this is a tag build, otherwise use development version
         if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
@@ -111,52 +122,53 @@ jobs:
           # Remove 'v' prefix if present (e.g., v0.2.4 -> 0.2.4)
           VERSION="${VERSION#v}"
           echo "Building tagged version: $VERSION"
-          cmake -B build -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DPROJECT_VERSION_OVERRIDE="$VERSION"
+          # Configure release preset with version override
+          cmake --preset release -DPROJECT_VERSION_OVERRIDE="$VERSION"
         else
           echo "Building development version: 0.0.0"
-          cmake -B build -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+          # Configure release preset with default version
+          cmake --preset release
         fi
 
-    - name: Build
-      run: |
-        cmake --build build --config $BUILD_TYPE -j$(nproc)
+        # Build using release preset
+        cmake --build --preset release
 
     - name: Create packages
       run: |
-        cd build
+        cd build/release
         cpack -G DEB
-        cpack -G RPM  
+        cpack -G RPM
         cpack -G TGZ
 
     - name: Upload DEB package
       uses: actions/upload-artifact@v4
       with:
         name: ddogreen-deb
-        path: build/*.deb
+        path: build/release/*.deb
 
     - name: Upload RPM package
       uses: actions/upload-artifact@v4
       with:
         name: ddogreen-rpm
-        path: build/*.rpm
+        path: build/release/*.rpm
 
     - name: Upload TGZ package
       uses: actions/upload-artifact@v4
       with:
         name: ddogreen-tgz
-        path: build/*.tar.gz
+        path: build/release/*.tar.gz
 
     - name: Upload binary
       uses: actions/upload-artifact@v4
       with:
         name: ddogreen-binary-linux
-        path: build/ddogreen
+        path: build/release/ddogreen
 
   # Step 4: Package Validation (Sequential)
   validate-deb:
     needs: build-packages
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -174,38 +186,38 @@ jobs:
     - name: Test DEB package
       run: |
         echo "=== Testing DEB Package Installation ==="
-        
+
         # Install package
         sudo dpkg -i *.deb || sudo apt-get install -f -y
-        
+
         # Verify installation
         echo "Checking if ddogreen is installed..."
         which ddogreen || command -v ddogreen
         ddogreen --version
-        
+
         # Check if files are in correct locations
         test -f /usr/bin/ddogreen
         test -f /usr/share/ddogreen/ddogreen.conf.default
-        
+
         # Test service functionality (don't start daemon in CI)
         sudo ddogreen --help
-        
+
         # Verify service was installed automatically by DEB package
         echo "Verifying service installation..."
         test -f /etc/systemd/system/ddogreen.service
         echo "Service file created successfully by package installation"
-        
+
         # Validate service file syntax (if systemd-analyze is available)
         if command -v systemd-analyze >/dev/null 2>&1; then
             systemd-analyze verify /etc/systemd/system/ddogreen.service && echo "Service file syntax is valid"
         else
             echo "systemd-analyze not available, skipping service file validation"
         fi
-        
+
         echo "=== Testing DEB Package Removal ==="
         # Remove package (DEB removal is handled by package manager)
         sudo apt-get remove -y ddogreen
-        
+
         # Verify removal
         ! which ddogreen 2>/dev/null && ! command -v ddogreen 2>/dev/null || echo "WARNING: ddogreen still found after removal"
         ! test -f /usr/bin/ddogreen || echo "WARNING: binary still exists after removal"
@@ -213,7 +225,7 @@ jobs:
   validate-rpm:
     needs: build-packages
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -231,15 +243,15 @@ jobs:
     - name: Test RPM package structure
       run: |
         echo "=== Testing RPM Package Structure ==="
-        
+
         # Extract RPM contents without installing
         rpm2cpio *.rpm | cpio -idmv
-        
+
         # Verify expected files exist in extracted contents
         echo "Checking extracted RPM contents:"
         find . -name "ddogreen" -type f
         find . -name "*.conf*" -type f
-        
+
         # Test binary functionality
         DDOGREEN_BIN=$(find . -name "ddogreen" -type f | head -1)
         if [[ -n "$DDOGREEN_BIN" ]]; then
@@ -251,13 +263,13 @@ jobs:
             echo "ERROR: ddogreen binary not found in RPM"
             exit 1
         fi
-        
+
         echo "RPM package structure validation completed"
 
   validate-tgz:
     needs: build-packages
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -272,55 +284,55 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y tlp
 
-    - name: Test TGZ package  
+    - name: Test TGZ package
       run: |
         echo "=== Testing TGZ Package Installation ==="
-        
+
         # Extract package
         tar -xzf *.tar.gz
         cd ddogreen-*/
-        
+
         # List contents to verify structure
         echo "Package contents:"
         find . -type f | sort
-        
+
         # Verify required files exist
         test -f install.sh
         test -x install.sh
         # Binary should be in bin/ directory (CPack structure)
         test -f bin/ddogreen || test -f ddogreen
-        
+
         # Install using install script
         sudo ./install.sh --install
-        
+
         # Verify installation
         echo "Checking if ddogreen is installed..."
         which ddogreen || command -v ddogreen
         ddogreen --version
-        
+
         # Check if files are in correct locations
         test -f /usr/local/bin/ddogreen
         test -d /etc/ddogreen
-        
+
         # Test service functionality
         ddogreen --help
-        
+
         # Verify service file was created by install script
         echo "Verifying service installation..."
         test -f /etc/systemd/system/ddogreen.service
         echo "Service file created successfully by install script"
-        
+
         # Validate service file syntax (if systemd-analyze is available)
         if command -v systemd-analyze >/dev/null 2>&1; then
             systemd-analyze verify /etc/systemd/system/ddogreen.service && echo "Service file syntax is valid"
         else
             echo "systemd-analyze not available, skipping service file validation"
         fi
-        
+
         echo "=== Testing TGZ Package Removal ==="
         # Uninstall using install script (TGZ packages use install.sh --uninstall)
         sudo ./install.sh --uninstall
-        
+
         # Verify removal
         ! which ddogreen 2>/dev/null && ! command -v ddogreen 2>/dev/null || echo "WARNING: ddogreen still found after removal"
         ! test -f /usr/local/bin/ddogreen || echo "WARNING: binary still exists after removal"
@@ -328,9 +340,9 @@ jobs:
   # Step 5: Create Release (only on tags)
   create-release:
     if: startsWith(github.ref, 'refs/tags/v') && github.event_name == 'push'
-    needs: [test, build-packages, validate-deb, validate-rpm, validate-tgz]
+    needs: [test, test-cmake-presets, build-packages, validate-deb, validate-rpm, validate-tgz]
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -341,21 +353,21 @@ jobs:
     - name: Prepare versioned release files
       run: |
         mkdir -p release-files
-        
+
         # Extract version from tag
         VERSION="${GITHUB_REF#refs/tags/}"
         echo "Creating release files for version: $VERSION"
-        
+
         # Copy and rename files with version
         cp ddogreen-deb/*.deb "release-files/ddogreen-${VERSION}-linux.deb"
         cp ddogreen-rpm/*.rpm "release-files/ddogreen-${VERSION}-linux.rpm"
         cp ddogreen-tgz/*.tar.gz "release-files/ddogreen-${VERSION}-linux.tar.gz"
         cp ddogreen-binary-linux/ddogreen "release-files/ddogreen-${VERSION}-linux-x64"
-        
+
         # Create checksums
         cd release-files
         sha256sum * > checksums.txt
-        
+
         echo "=== Release Files ==="
         ls -lah
 
@@ -369,23 +381,23 @@ jobs:
         prerelease: false
         body: |
           ## ddogreen ${{ github.ref_name }}
-          
+
           ### Installation Options
-          
+
           #### Debian/Ubuntu (DEB Package)
           ```bash
           wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/ddogreen-${{ github.ref_name }}-linux.deb
           sudo dpkg -i ddogreen-${{ github.ref_name }}-linux.deb
           sudo apt install -f  # Fix dependencies if needed
           ```
-          
+
           #### RHEL/CentOS/Fedora (RPM Package)
           ```bash
           wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/ddogreen-${{ github.ref_name }}-linux.rpm
           sudo rpm -i ddogreen-${{ github.ref_name }}-linux.rpm
           # or: sudo dnf install ddogreen-${{ github.ref_name }}-linux.rpm
           ```
-          
+
           #### Generic Linux (TGZ Package)
           ```bash
           wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/ddogreen-${{ github.ref_name }}-linux.tar.gz
@@ -393,19 +405,19 @@ jobs:
           cd ddogreen-*/
           sudo ./install.sh --install
           ```
-          
+
           #### Standalone Binary
           ```bash
           wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/ddogreen-${{ github.ref_name }}-linux-x64
           chmod +x ddogreen-${{ github.ref_name }}-linux-x64
           sudo ./ddogreen-${{ github.ref_name }}-linux-x64 --help
           ```
-          
+
           ### Requirements
           - Linux with systemd
           - TLP installed (`sudo apt install tlp` / `sudo dnf install tlp`)
           - Root privileges for installation
-          
+
           ### Service Management
           ```bash
           sudo systemctl status ddogreen      # Check status
@@ -413,10 +425,10 @@ jobs:
           sudo systemctl start ddogreen      # Start service
           sudo journalctl -u ddogreen -f     # View logs
           ```
-          
+
           ### Verify Installation
           All packages automatically install and start the service. The service will manage your system's power automatically with no configuration required.
-          
+
           **Note**: DEB and TGZ packages are fully tested in CI. RPM package structure is validated but not installation-tested.
       env:
         GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
