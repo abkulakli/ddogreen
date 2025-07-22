@@ -15,50 +15,8 @@ env:
   BUILD_TYPE: Release
 
 jobs:
-  # Step 1: Basic CI Testing
-  test:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y build-essential cmake libgtest-dev
-
-    - name: Configure CMake
-      run: |
-        # Extract version from git tag if this is a tag build, otherwise use development version
-        if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
-          VERSION="${GITHUB_REF#refs/tags/}"
-          # Remove 'v' prefix if present (e.g., v0.2.4 -> 0.2.4)
-          VERSION="${VERSION#v}"
-          echo "Building tagged version: $VERSION"
-          cmake -B build -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_TESTS=ON -DPROJECT_VERSION_OVERRIDE="$VERSION"
-        else
-          echo "Building development version: 0.0.0"
-          cmake -B build -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_TESTS=ON
-        fi
-
-    - name: Build
-      run: |
-        cmake --build build --config $BUILD_TYPE -j$(nproc)
-
-    - name: Run Tests
-      run: |
-        cd build
-        ctest --output-on-failure --verbose
-
-    - name: Test executable
-      run: |
-        ./build/ddogreen --help
-        ./build/ddogreen --version
-
-  # Step 2: CMake Presets Testing
-  test-cmake-presets:
-    needs: test
+  # Step 1: Build Application
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -70,39 +28,77 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y build-essential cmake
 
-    - name: Test debug preset
+    - name: Configure CMake
+      run: |
+        # Extract version from git tag if this is a tag build, otherwise use development version
+        if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+          VERSION="${GITHUB_REF#refs/tags/}"
+          # Remove 'v' prefix if present (e.g., v0.2.4 -> 0.2.4)
+          VERSION="${VERSION#v}"
+          echo "Building tagged version: $VERSION"
+          cmake --preset release -DPROJECT_VERSION_OVERRIDE="$VERSION"
+        else
+          echo "Building development version: 0.0.0"
+          cmake --preset release
+        fi
+
+    - name: Build
+      run: |
+        cmake --build --preset release
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ddogreen-build
+        path: |
+          build/release/ddogreen
+          build/release/tests/test_config
+
+  # Step 2: Test Application
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential cmake libgtest-dev
+
+    - name: Test with standard CMake (backward compatibility)
+      run: |
+        echo "=== Testing Standard CMake Build ==="
+        cmake -B build-test -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON
+        cmake --build build-test -j$(nproc)
+        
+        echo "=== Running Standard CMake Tests ==="
+        cd build-test
+        ctest --output-on-failure --verbose
+
+    - name: Test with CMake presets (current workflow)
       run: |
         echo "=== Testing Debug Preset ==="
         cmake --preset debug
         cmake --build --preset debug
+        ctest --preset debug-tests
 
-        echo "=== Verifying debug build ==="
-        ls -la build/debug/
-        test -f build/debug/ddogreen
-        ./build/debug/ddogreen --version
-
-    - name: Test release preset
-      run: |
         echo "=== Testing Release Preset ==="
         cmake --preset release
         cmake --build --preset release
-
-        echo "=== Verifying release build ==="
-        ls -la build/release/
-        test -f build/release/ddogreen
-        ./build/release/ddogreen --version
-
-    - name: Test preset tests
-      run: |
-        echo "=== Running Debug Tests ==="
-        ctest --preset debug-tests
-
-        echo "=== Running Release Tests ==="
         ctest --preset release-tests
 
-  # Step 3: Package Building (only on main branch, tags, or PRs)
-  build-packages:
-    needs: [test, test-cmake-presets]
+    - name: Test executable functionality
+      run: |
+        echo "=== Testing Binary Functionality ==="
+        ./build/release/ddogreen --help
+        ./build/release/ddogreen --version
+
+  # Step 3: Package Building
+  package:
+    needs: [build, test]
     runs-on: ubuntu-latest
 
     steps:
@@ -114,7 +110,17 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y build-essential cmake rpm dpkg-dev
 
-    - name: Configure and Build with CMake Presets
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: ddogreen-build
+        path: build/release/
+
+    - name: Make binary executable
+      run: |
+        chmod +x build/release/ddogreen
+
+    - name: Configure CMake for packaging
       run: |
         # Extract version from git tag if this is a tag build, otherwise use development version
         if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
@@ -122,16 +128,13 @@ jobs:
           # Remove 'v' prefix if present (e.g., v0.2.4 -> 0.2.4)
           VERSION="${VERSION#v}"
           echo "Building tagged version: $VERSION"
-          # Configure release preset with version override
+          # Configure release preset with version override for packaging
           cmake --preset release -DPROJECT_VERSION_OVERRIDE="$VERSION"
         else
           echo "Building development version: 0.0.0"
           # Configure release preset with default version
           cmake --preset release
         fi
-
-        # Build using release preset
-        cmake --build --preset release
 
     - name: Create packages
       run: |
@@ -166,7 +169,7 @@ jobs:
 
   # Step 4: Package Validation (Sequential)
   validate-deb:
-    needs: build-packages
+    needs: package
     runs-on: ubuntu-latest
 
     steps:
@@ -223,7 +226,7 @@ jobs:
         ! test -f /usr/bin/ddogreen || echo "WARNING: binary still exists after removal"
 
   validate-rpm:
-    needs: build-packages
+    needs: package
     runs-on: ubuntu-latest
 
     steps:
@@ -267,7 +270,7 @@ jobs:
         echo "RPM package structure validation completed"
 
   validate-tgz:
-    needs: build-packages
+    needs: package
     runs-on: ubuntu-latest
 
     steps:
@@ -338,9 +341,9 @@ jobs:
         ! test -f /usr/local/bin/ddogreen || echo "WARNING: binary still exists after removal"
 
   # Step 5: Create Release (only on tags)
-  create-release:
+  release:
     if: startsWith(github.ref, 'refs/tags/v') && github.event_name == 'push'
-    needs: [test, test-cmake-presets, build-packages, validate-deb, validate-rpm, validate-tgz]
+    needs: [build, test, package, validate-deb, validate-rpm, validate-tgz]
     runs-on: ubuntu-latest
 
     steps:
