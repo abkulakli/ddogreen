@@ -19,7 +19,6 @@
 #include <thread>
 #include <chrono>
 #include <cstdio>
-#include <unistd.h>
 #include <cstdlib>
 
 void printUsage(const char* programName) {

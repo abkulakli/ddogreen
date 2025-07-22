@@ -1,11 +1,39 @@
 # Active Context - DDOGreen
 
 ## Current Work Focus
-**Project Status**: Cross-platform packaging enhancement completed
+**Project Status**: Platform abstraction refinement completed
 **Last Updated**: July 22, 2025
-**Current State**: Windows MSI packaging via GitHub Actions implemented
+**Current State**: Cross-platform main.cpp cleanup completed
 
-## Recent Implementation: Windows MSI Packaging Support - COMPLETED
+## Recent Implementation: Platform Abstraction Refinement - COMPLETED
+
+### Completed Task: Removed Linux-specific unistd.h from main.cpp
+- **Issue Resolved**: main.cpp included unistd.h which is Linux-only, breaking Windows portability
+- **Problem Solved**: Unnecessary platform-specific header in core application layer violated clean architecture
+- **Goal Achieved**: True platform-agnostic main.cpp with all platform dependencies properly abstracted
+
+### Implementation Summary
+- **Header Cleanup**: Removed unnecessary `#include <unistd.h>` from main.cpp
+- **Architecture Verification**: Confirmed main.cpp uses no unistd.h functions directly
+- **Platform Separation**: Verified unistd.h usage is properly contained in Linux/macOS platform implementations
+- **Windows Compatibility**: Ensured main.cpp can compile cleanly on Windows without conditional compilation
+
+### Technical Implementation Details
+- **Files Modified**: `src/main.cpp` - removed unistd.h include
+- **Platform Headers Verified**: 
+  - Linux/macOS implementations: Properly use `#include <unistd.h>`
+  - Windows implementations: Properly use `#include <windows.h>`
+  - Main application: Only standard C++ headers
+- **Build Verification**: Debug build completed successfully after change
+- **Architecture Compliance**: Zero platform-specific code in main application layer maintained
+
+### Cross-Platform Architecture Status
+- **Clean Separation**: Platform-specific code isolated to src/platform/{linux,windows,macos}/
+- **Interface Abstractions**: All platform operations go through IPlatformUtils, IPowerManager, etc.
+- **Conditional Compilation**: Only used in platform factory and platform implementations
+- **Header Management**: Platform-specific headers contained within their respective implementations
+
+## Previous Implementation: Windows MSI Packaging Support - COMPLETED
 
 ### Completed Task: GitHub Actions Windows MSI Package Generation
 - **Issue Resolved**: Added comprehensive Windows MSI packaging to GitHub Actions CI/CD pipeline
