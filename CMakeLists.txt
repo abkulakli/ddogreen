@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-# Set version from command line argument or default to local development version
+# Set version from command line argument or default to development version
 if(NOT DEFINED PROJECT_VERSION_OVERRIDE)
     set(PROJECT_VERSION_OVERRIDE "0.0.0")
 endif()
