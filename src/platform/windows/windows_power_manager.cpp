@@ -5,12 +5,9 @@
 #include <sstream>
 #include <cstdlib>
 #include <stdexcept>
-
-#ifdef _WIN32
 #include <windows.h>
 #include <iostream>
 #include <cstdio>
-#endif
 
 /**
  * Windows-specific power manager implementation
@@ -144,7 +141,6 @@ private:
     bool executeCommand(const std::string& command) {
         Logger::debug("Executing command: " + command);
         
-#ifdef _WIN32
         // Use Windows system() call
         const int result = system(command.c_str());
         const bool success = (result == 0);
@@ -156,11 +152,6 @@ private:
         }
         
         return success;
-#else
-        // On non-Windows platforms, just log what would happen (for cross-compilation)
-        Logger::info("CROSS-PLATFORM: Would execute on Windows: " + command);
-        return true; // Assume success for cross-compilation
-#endif
     }
     
     /**
@@ -171,7 +162,6 @@ private:
     std::string executeCommandWithOutput(const std::string& command) {
         Logger::debug("Executing command with output: " + command);
         
-#ifdef _WIN32
         std::string result;
         
         // Use _popen to execute command and capture output
@@ -194,19 +184,6 @@ private:
         
         Logger::debug("Command output captured successfully");
         return result;
-#else
-        // On non-Windows platforms, return mock output (for cross-compilation)
-        Logger::info("CROSS-PLATFORM: Would execute on Windows: " + command);
-        
-        // Return mock output for testing
-        if (command.find("/getactivescheme") != std::string::npos) {
-            return "Power Scheme GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c  (High performance)";
-        } else if (command.find("/list") != std::string::npos) {
-            return "Existing Power Schemes (* Active)\nGUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c  (High performance)";
-        }
-        
-        return "Mock Windows command output";
-#endif
     }
 };
 
