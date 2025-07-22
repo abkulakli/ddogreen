@@ -44,7 +44,7 @@ jobs:
 
     - name: Build
       run: |
-        cmake --build --preset release
+        cmake --build --preset release --parallel
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
@@ -87,7 +87,7 @@ jobs:
 
     - name: Build (Windows)
       run: |
-        cmake --build build --config Release
+        cmake --build build --config Release --parallel
 
     - name: Upload Windows build artifacts
       uses: actions/upload-artifact@v4
@@ -114,8 +114,8 @@ jobs:
       run: |
         echo "=== Testing Standard CMake Build ==="
         cmake -B build-test -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON
-        cmake --build build-test -j$(nproc)
-
+        cmake --build build-test --parallel
+        
         echo "=== Running Standard CMake Tests ==="
         cd build-test
         ctest --output-on-failure --verbose
@@ -124,12 +124,12 @@ jobs:
       run: |
         echo "=== Testing Debug Preset ==="
         cmake --preset debug
-        cmake --build --preset debug
+        cmake --build --preset debug --parallel
         ctest --preset debug-tests
 
         echo "=== Testing Release Preset ==="
         cmake --preset release
-        cmake --build --preset release
+        cmake --build --preset release --parallel
         ctest --preset release-tests
 
     - name: Test executable functionality
@@ -274,6 +274,7 @@ jobs:
     - name: Create Windows packages
       run: |
         cd build
+        cmake --build . --config Release --parallel
         cpack -G NSIS
         cpack -G ZIP
 
