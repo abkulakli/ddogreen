@@ -72,4 +72,11 @@ public:
      * @return message explaining how to run with required privileges
      */
     virtual std::string getPrivilegeEscalationMessage() const = 0;
+
+    /**
+     * Resolve a relative path to an absolute path in a platform-specific way
+     * @param relativePath the relative path to resolve
+     * @return absolute path, or original path if resolution fails
+     */
+    virtual std::string resolveAbsolutePath(const std::string& relativePath) const = 0;
 };

@@ -10,16 +10,65 @@
 - **Service Framework**: systemd (Linux), Windows Service Manager (Windows)
 - **Logging**: Custom implementation with logrotate integration
 
+### Cross-Platform Build System (Updated July 2025)
+
+#### Unified Dual-Platform Build Commands  
+```bash
+# Unified cross-platform build commands
+./build.sh                     # Build both Linux and Windows release binaries
+./build.sh --debug             # Build both Linux and Windows debug binaries  
+./build.sh --package           # Build + package both Linux and Windows
+./build.sh --clean             # Clean both platform build directories
+./build.sh --clean --debug     # Clean then build debug for both platforms
+```
+
+#### Cross-Compilation Requirements
+```bash
+# Windows cross-compilation dependencies
+sudo apt install mingw-w64 mingw-w64-tools
+
+# Windows installer creation
+sudo apt install nsis
+
+# Build verification
+file build/linux/release/ddogreen      # ELF 64-bit executable (~164K)
+file build/windows/release/ddogreen.exe # PE32+ executable (~2.6M)
+```
+
+#### Platform-Specific Build Directories
+```
+build/
+├── linux/
+│   ├── release/ddogreen (164K native binary)
+│   └── debug/ddogreen (debug symbols)
+└── windows/
+    ├── release/ddogreen.exe (2.6M cross-compiled)
+    └── debug/ddogreen.exe (debug version)
+```
+
+#### Cross-Platform Packaging Output
+```bash
+# Linux packages (native compilation)
+build/linux/release/
+├── ddogreen-linux.deb (64K)
+├── ddogreen-linux.rpm (76K)  
+└── ddogreen-linux.tar.gz (64K)
+
+# Windows packages (cross-compilation)
+build/windows/release/
+├── ddogreen-windows.exe (NSIS installer)
+└── ddogreen-windows.zip (portable package)
+```
+
 ### Build System
 
 #### Simplified Build Script (Updated July 2025)
 ```bash
-# Essential build commands
-./build.sh                     # Standard release build
-./build.sh --debug             # Debug build
-./build.sh --clean             # Clean build directory only
-./build.sh --clean --release   # Clean then build release
-./build.sh --clean --debug     # Clean then build debug
+# Unified cross-platform build commands  
+./build.sh                     # Standard release build (both platforms)
+./build.sh --debug             # Debug build (both platforms)
+./build.sh --clean             # Clean build directories only
+./build.sh --package           # Build and package both platforms
 ```
 
 #### Build Requirements
@@ -43,29 +92,42 @@
 
 ### Dependencies
 
-#### Development Dependencies
+#### Cross-Platform Development Dependencies
 ```bash
-# Ubuntu/Debian
+# Ubuntu/Debian (Linux + Windows cross-compilation)
 sudo apt update
-sudo apt install build-essential cmake tlp libgtest-dev
+sudo apt install build-essential cmake tlp libgtest-dev mingw-w64 nsis
 
-# Fedora/RHEL
-sudo dnf install gcc-c++ cmake tlp gtest-devel
+# Fedora/RHEL (Linux + Windows cross-compilation)  
+sudo dnf install gcc-c++ cmake tlp gtest-devel mingw64-gcc-c++ mingw64-winpthreads-static nsis
 
-# Arch Linux
-sudo pacman -S base-devel cmake tlp gtest
+# Arch Linux (Linux + Windows cross-compilation)
+sudo pacman -S base-devel cmake tlp gtest mingw-w64-gcc nsis
 ```
 
-#### Windows Development
+#### Windows Development Dependencies
 - **Visual Studio 2019+** or **MinGW-w64** with C++17 support
 - **CMake** 3.16 or later
 - **Git** for version control
 - **vcpkg** (optional, for dependency management)
 
-#### macOS Development
+#### macOS Development Dependencies
 ```bash
 # Using Homebrew
 brew install cmake googletest
+```
+
+#### Cross-Compilation Dependencies (Linux Host → Windows Target)
+```bash
+# MinGW-w64 cross-compiler
+sudo apt install mingw-w64 mingw-w64-tools
+
+# NSIS for Windows installer creation
+sudo apt install nsis
+
+# Verification commands
+x86_64-w64-mingw32-gcc --version    # Check MinGW compiler
+makensis                            # Check NSIS installer
 ```
 
 #### Build Dependencies
@@ -83,10 +145,10 @@ sudo dnf install gcc-c++ cmake
 - **systemd**: For service management (standard on modern Linux distributions)
 
 #### Explicitly NO Dependencies
-- ❌ X11 libraries (libx11-dev, libxss-dev)
-- ❌ GUI frameworks (Qt, GTK)
-- ❌ External C++ libraries (Boost, etc.)
-- ❌ Scripting languages (Python, Shell beyond basic scripts)
+- X11 libraries (libx11-dev, libxss-dev)
+- GUI frameworks (Qt, GTK)
+- External C++ libraries (Boost, etc.)
+- Scripting languages (Python, Shell beyond basic scripts)
 
 ## Development Environment Setup
 

@@ -74,7 +74,7 @@ src/
 
 #### Braces and Formatting
 ```cpp
-// ✅ CORRECT - Allman style braces
+// CORRECT - Allman style braces
 class ActivityMonitor
 {
 public:
@@ -91,7 +91,7 @@ private:
     bool m_isRunning = false;
 };
 
-// ✅ CORRECT - Function formatting
+// CORRECT - Function formatting
 bool hasRequiredPrivileges() const
 {
     return geteuid() == 0;
@@ -141,14 +141,14 @@ int calculateCpuUsage()
 
 #### Platform Abstraction Rules
 ```cpp
-// ✅ CORRECT - Platform-agnostic application layer
+// CORRECT - Platform-agnostic application layer
 auto platformUtils = PlatformFactory::createPlatformUtils();
 if (!platformUtils->hasRequiredPrivileges()) {
     std::cerr << platformUtils->getPrivilegeEscalationMessage() << std::endl;
     return 1;
 }
 
-// ❌ WRONG - Platform-specific code in application layer
+// WRONG - Platform-specific code in application layer
 #ifdef _WIN32
     if (!CheckTokenMembership(...)) { /* Windows code */ }
 #else
@@ -158,7 +158,7 @@ if (!platformUtils->hasRequiredPrivileges()) {
 
 #### Interface Design
 ```cpp
-// ✅ CORRECT - Complete platform abstraction
+// CORRECT - Complete platform abstraction
 class IPlatformUtils
 {
 public:
@@ -168,7 +168,7 @@ public:
     virtual bool isAvailable() const = 0;
 };
 
-// ❌ WRONG - Leaking platform-specific types
+// WRONG - Leaking platform-specific types
 class IPlatformUtils
 {
 public:
@@ -185,7 +185,7 @@ public:
 - **Logging**: Log all errors with appropriate severity
 
 ```cpp
-// ✅ CORRECT - Error handling pattern
+// CORRECT - Error handling pattern
 bool performOperation()
 {
     if (!prerequisiteCheck())
@@ -207,7 +207,7 @@ bool performOperation()
 
 #### Resource Management
 ```cpp
-// ✅ CORRECT - RAII pattern
+// CORRECT - RAII pattern
 class FileManager
 {
 public:
@@ -236,13 +236,13 @@ private:
 
 #### Smart Pointers
 ```cpp
-// ✅ CORRECT - Use smart pointers
+// CORRECT - Use smart pointers
 std::unique_ptr<IPowerManager> createPowerManager()
 {
     return std::make_unique<LinuxPowerManager>();
 }
 
-// ❌ WRONG - Raw pointers for ownership
+// WRONG - Raw pointers for ownership
 IPowerManager* createPowerManager()
 {
     return new LinuxPowerManager();  // Memory leak risk
@@ -251,7 +251,7 @@ IPowerManager* createPowerManager()
 
 #### Container Usage
 ```cpp
-// ✅ CORRECT - Standard containers
+// CORRECT - Standard containers
 std::vector<std::string> getLogEntries() const;
 std::unordered_map<std::string, int> getCounters() const;
 

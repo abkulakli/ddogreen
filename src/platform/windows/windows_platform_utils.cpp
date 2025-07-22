@@ -119,6 +119,36 @@ public:
     std::string getPrivilegeEscalationMessage() const override {
         return "This program requires administrator privileges. Please run as administrator.";
     }
+
+    /**
+     * Resolve a relative path to an absolute path using GetFullPathName
+     * @param relativePath the relative path to resolve
+     * @return absolute path, or original path if resolution fails
+     */
+    std::string resolveAbsolutePath(const std::string& relativePath) const override {
+        // If already absolute (starts with drive letter or UNC path), return as-is
+        if (relativePath.length() >= 2 && 
+            ((relativePath[1] == ':') || (relativePath[0] == '\\' && relativePath[1] == '\\'))) {
+            return relativePath;
+        }
+
+        // Get current working directory and combine with relative path
+        char currentDir[MAX_PATH];
+        if (GetCurrentDirectoryA(MAX_PATH, currentDir) == 0) {
+            return relativePath; // Fallback to original path
+        }
+
+        std::string tempPath = std::string(currentDir) + "\\" + relativePath;
+
+        // Use GetFullPathName to resolve the path
+        char resolved[MAX_PATH];
+        if (GetFullPathNameA(tempPath.c_str(), MAX_PATH, resolved, nullptr)) {
+            return std::string(resolved);
+        }
+
+        // If GetFullPathName fails, return the simple concatenation as fallback
+        return tempPath;
+    }
 };
 
 // Factory function to create Windows platform utilities

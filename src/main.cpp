@@ -90,25 +90,11 @@ int main(int argc, char* argv[]) {
 
     // Always convert relative config paths to absolute paths for consistency
     // This prevents issues with working directory changes and provides clear path resolution
-    if (!args.configPath.empty() && args.configPath[0] != '/') {
-        char* cwd = getcwd(nullptr, 0);
-        if (cwd) {
-            std::string tempPath = std::string(cwd) + "/" + args.configPath;
-            free(cwd);
-            
-            // Use realpath to resolve all . and .. components and get canonical path
-            char* resolvedPath = realpath(tempPath.c_str(), nullptr);
-            if (resolvedPath) {
-                args.configPath = std::string(resolvedPath);
-                free(resolvedPath);
-                Logger::info("Converted relative config path to absolute: " + args.configPath);
-            } else {
-                // If realpath fails, use the simple concatenation as fallback
-                args.configPath = tempPath;
-                Logger::warning("Could not resolve path components, using: " + args.configPath);
-            }
-        } else {
-            Logger::warning("Failed to get current working directory, using config path as-is");
+    if (!args.configPath.empty()) {
+        std::string resolvedPath = platformUtils->resolveAbsolutePath(args.configPath);
+        if (resolvedPath != args.configPath) {
+            args.configPath = resolvedPath;
+            Logger::info("Converted relative config path to absolute: " + args.configPath);
         }
     }
 

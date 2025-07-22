@@ -18,24 +18,25 @@
 
 ### Cross-Platform Architecture
 ```
-Application Layer (main.cpp, daemon.cpp)
-├── Platform Abstraction Layer
-│   ├── IPowerManager
-│   ├── ISystemMonitor  
-│   ├── IServiceManager
-│   └── IPlatformUtils
+Application Layer (main.cpp, daemon.cpp) - ZERO platform-specific code
+├── Platform Abstraction Layer  
+│   ├── IPowerManager (power control abstraction)
+│   ├── ISystemMonitor (load monitoring abstraction)
+│   ├── IServiceManager (service control abstraction)
+│   └── IPlatformUtils (path resolution, privilege checking)
 └── Platform Implementations
-    ├── Linux (TLP integration)
-    ├── Windows (Power Plans)
-    └── macOS (future)
+    ├── Linux (TLP, /proc/loadavg, systemd, realpath)
+    ├── Windows (Power Plans, Performance Counters, SCM, GetFullPathName)
+    └── macOS (pmset, system APIs, launchd, realpath)
 ```
 
 ### Architectural Principles
-- **No platform-specific code** in application layer
+- **ZERO platform-specific code** in application layer (achieved)
 - **Interface-based design** for all platform operations
-- **Factory pattern** for platform selection
+- **Factory pattern** for platform selection at runtime
 - **RAII** for resource management
 - **Compile-time platform detection** for optimal binaries
+- **Path resolution abstraction** for cross-platform file handling
 
 ### Platform-Specific Implementation Details
 
@@ -44,18 +45,21 @@ Application Layer (main.cpp, daemon.cpp)
 - **System Monitoring**: `/proc/loadavg` reading
 - **Service Management**: systemd integration
 - **Privilege Checking**: `geteuid()` for root access
+- **Path Resolution**: `realpath()` for canonical paths with error handling
 
 #### Windows Implementation
 - **Power Management**: Power Plans via `powercfg`
 - **System Monitoring**: Performance Counters
 - **Service Management**: Windows Service Control Manager
 - **Privilege Checking**: Windows Token API
+- **Path Resolution**: `GetFullPathName()` for Windows-compatible path resolution
 
 #### macOS Implementation (Future)
 - **Power Management**: `pmset` integration planned
 - **System Monitoring**: System framework APIs
 - **Service Management**: launchd integration
 - **Privilege Checking**: Authorization Services
+- **Path Resolution**: `realpath()` (same as Linux)
 
 ## Memory Bank Organization Guidelines
 
@@ -599,21 +603,21 @@ if (!setPerformanceMode()) {
 
 #### 1. Platform-Specific Code in Application Layer
 ```cpp
-// ❌ NEVER - Platform ifdefs in main.cpp or application layer
+// NEVER - Platform ifdefs in main.cpp or application layer
 #ifdef _WIN32
     // Windows-specific code
 #else
     // Linux-specific code
 #endif
 
-// ❌ NEVER - Platform-specific includes in main.cpp
+// NEVER - Platform-specific includes in main.cpp
 #include <windows.h>
 #include <unistd.h>
 ```
 
 #### 2. Direct Platform Operations in Application Layer
 ```cpp
-// ❌ NEVER - Direct platform calls in main.cpp
+// NEVER - Direct platform calls in main.cpp
 if (geteuid() != 0) { /* Linux-specific */ }
 if (!CheckTokenMembership(...)) { /* Windows-specific */ }
 system("cp file dest"); // Platform-specific commands
@@ -621,16 +625,16 @@ system("cp file dest"); // Platform-specific commands
 
 #### 3. Hard-Coded Platform Paths in Application Layer
 ```cpp
-// ❌ NEVER - Hard-coded paths in main.cpp
+// NEVER - Hard-coded paths in main.cpp
 std::string logPath = "/var/log/ddogreen.log";  // Linux-specific
 std::string installPath = "/usr/local/bin/ddogreen";  // Linux-specific
 ```
 
-### ✅ ALWAYS Do These (Correct Patterns):
+### ALWAYS Do These (Correct Patterns):
 
 #### 1. Platform Abstraction for ALL Platform Operations
 ```cpp
-// ✅ ALWAYS - Use platform abstraction
+// ALWAYS - Use platform abstraction
 auto platformUtils = PlatformFactory::createPlatformUtils();
 if (!platformUtils->hasRequiredPrivileges()) {
     std::cerr << platformUtils->getPrivilegeEscalationMessage() << std::endl;
@@ -639,7 +643,7 @@ if (!platformUtils->hasRequiredPrivileges()) {
 
 #### 2. Platform Delegation for Complex Operations
 ```cpp
-// ✅ ALWAYS - Platform implementations handle complexity
+// ALWAYS - Platform implementations handle complexity
 auto serviceManager = PlatformFactory::createServiceManager();
 serviceManager->installService(name, path, description);
 // Platform implementation handles all required platform-specific operations
@@ -647,7 +651,7 @@ serviceManager->installService(name, path, description);
 
 #### 3. Platform-Agnostic Application Logic
 ```cpp
-// ✅ ALWAYS - main.cpp knows nothing about platforms
+// ALWAYS - main.cpp knows nothing about platforms
 ParsedArgs args = platformUtils->parseCommandLine(argc, argv);
 std::string logPath = platformUtils->getDefaultLogPath();
 std::string pidPath = platformUtils->getDefaultPidPath();
@@ -790,13 +794,13 @@ This architectural discipline ensures maintainable, testable, and extensible cro
 ### Writing Guidelines:
 
 #### **Use Correct Language**:
-- ✅ "Component **responsibility**", "Component **purpose**", "Component **role**"
-- ✅ "Pattern **structure**", "Pattern **benefits**", "Pattern **application**"
-- ❌ "File operations moved", "Implementation handles", "Platform does X"
+- "Component **responsibility**", "Component **purpose**", "Component **role**"
+- "Pattern **structure**", "Pattern **benefits**", "Pattern **application**"
+- NOT: "File operations moved", "Implementation handles", "Platform does X"
 
 #### **Focus on Architecture, Not Operations**:
-- ✅ "ServiceManager abstracts platform-specific service management"
-- ❌ "ServiceManager handles file copying, directory creation, permission setting"
+- GOOD: "ServiceManager abstracts platform-specific service management"
+- NOT: "ServiceManager handles file copying, directory creation, permission setting"
 
 #### **Separate Concerns Properly**:
 - **Patterns Section**: How components interact, architectural relationships

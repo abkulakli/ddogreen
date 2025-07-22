@@ -123,6 +123,38 @@ public:
     std::string getPrivilegeEscalationMessage() const override {
         return "This program requires root privileges. Please run with sudo.";
     }
+
+    /**
+     * Resolve a relative path to an absolute path using realpath
+     * @param relativePath the relative path to resolve
+     * @return absolute path, or original path if resolution fails
+     */
+    std::string resolveAbsolutePath(const std::string& relativePath) const override {
+        // If already absolute, return as-is
+        if (!relativePath.empty() && relativePath[0] == '/') {
+            return relativePath;
+        }
+
+        // Get current working directory
+        char* cwd = getcwd(nullptr, 0);
+        if (!cwd) {
+            return relativePath; // Fallback to original path
+        }
+
+        std::string tempPath = std::string(cwd) + "/" + relativePath;
+        free(cwd);
+
+        // Use realpath to resolve all . and .. components and get canonical path
+        char* resolvedPath = realpath(tempPath.c_str(), nullptr);
+        if (resolvedPath) {
+            std::string result(resolvedPath);
+            free(resolvedPath);
+            return result;
+        }
+
+        // If realpath fails, return the simple concatenation as fallback
+        return tempPath;
+    }
 };
 
 // Factory function to create macOS platform utilities
