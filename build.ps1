@@ -4,7 +4,10 @@
 # Set error action preference to stop on errors
 $ErrorActionPreference = "Stop"
 
-Write-Host "Building ddogreen - Intelligent Green Power Management" -ForegroundColor Green
+# Enhanced build script for ddogreen
+# Cross-platform build system for the Intelligent Green Power Management daemon
+
+Write-Host "Building DDOGreen - Intelligent Green Power Management" -ForegroundColor Green
 
 # Check if CMake is available
 try {

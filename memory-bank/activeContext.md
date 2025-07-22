@@ -1,11 +1,22 @@
-# Active Context - ddogreen
+# Active Context - DDOGreen
 
 ## Current Work Focus
 **Project Status**: COMPLETE AND PRODUCTION-READY
 **Last Updated**: July 22, 2025
 **Current State**: Maintenance mode - all features implemented and tested
 
-## Current Context: GitHub Actions Build Script Fix
+## Current Context: Product Name Branding Update
+
+### Latest Update: Consistent Product Name Branding Applied
+- **Change**: Updated product name display from "ddogreen" to "DDOGreen" in user-facing messages
+- **Scope**: Version output, service descriptions, log messages, and build script messages
+- **Technical Names**: All filenames, directories, and technical references remain "ddogreen" (lowercase)
+- **Result**: Clear distinction between product branding (DDOGreen) and technical implementation (ddogreen)
+- **Files Updated**:
+  - `src/main.cpp`: Version output, startup messages, service messages
+  - `packaging/linux/*/`: Service descriptions in installer scripts
+  - `build.ps1`: Build script branding message
+- **Verification**: `./build/ddogreen --version` now shows "DDOGreen version 0.2.4"
 
 ### Latest Fix: Build Script CI Dependencies Added
 - **Issue**: `test-build-scripts` job failing in GitHub Actions due to missing MinGW cross-compiler

@@ -1,5 +1,5 @@
 /*
- * ddogreen - Intelligent Green Power Management for Sustainable Computing
+ * DDOGreen - Intelligent Green Power Management for Sustainable Computing
  *
  * Automatically manages TLP power settings based on system load monitoring
  *
@@ -41,7 +41,7 @@ void printUsage(const char* programName) {
 }
 
 void printVersion() {
-    std::cout << "ddogreen version " << DDOGREEN_VERSION << "\n"
+    std::cout << "DDOGreen version " << DDOGREEN_VERSION << "\n"
               << "Intelligent Green Power Management for Sustainable Computing\n"
               << "Copyright (c) 2025 DDOSoft Sustainability Solutions (www.ddosoft.com)\n";
 }
@@ -84,7 +84,7 @@ int main(int argc, char* argv[]) {
     Logger::init(logPath, !args.runAsDaemon);
 
     // Log version information
-    Logger::info("Starting ddogreen - Intelligent Green Power Management");
+    Logger::info("Starting DDOGreen - Intelligent Green Power Management");
     Logger::info("Version: " + std::string(DDOGREEN_VERSION));
     Logger::info("Copyright (c) 2025 DDOSoft Sustainability Solutions");
 
@@ -167,7 +167,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    Logger::info("ddogreen service started successfully");
+    Logger::info("DDOGreen service started successfully");
     Logger::info("Version: " + std::string(DDOGREEN_VERSION));
     Logger::info("Copyright (c) 2025 DDOSoft Sustainability Solutions (www.ddosoft.com)");
 
@@ -177,7 +177,7 @@ int main(int argc, char* argv[]) {
     }
 
     // Cleanup
-    Logger::info("Shutting down ddogreen service");
+    Logger::info("Shutting down DDOGreen service");
     activityMonitor.stop();
     Daemon::cleanup();
 
