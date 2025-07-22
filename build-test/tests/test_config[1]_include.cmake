@@ -1,0 +1,5 @@
+if(EXISTS "/home/runner/work/ddogreen/ddogreen/build-test/tests/test_config[1]_tests.cmake")
+  include("/home/runner/work/ddogreen/ddogreen/build-test/tests/test_config[1]_tests.cmake")
+else()
+  add_test(test_config_NOT_BUILT test_config_NOT_BUILT)
+endif()
