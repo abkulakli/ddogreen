@@ -167,7 +167,7 @@ Logger::warning("TLP not available, using mock power manager");
 1. **Create platform directory**: `src/platform/newplatform/`
 2. **Implement interfaces**:
    - `NewPlatformPowerManager.cpp`
-   - `NewPlatformServiceManager.cpp`
+   - `NewPlatformDaemon.cpp`
    - `NewPlatformSystemMonitor.cpp`
    - `NewPlatformUtils.cpp`
 3. **Update factory**: Add platform detection in `platform_factory.cpp`

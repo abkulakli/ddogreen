@@ -22,8 +22,8 @@ Application Layer (main.cpp, daemon.cpp) - ZERO platform-specific code
 ├── Platform Abstraction Layer  
 │   ├── IPowerManager (power control abstraction)
 │   ├── ISystemMonitor (load monitoring abstraction)
-│   ├── IServiceManager (service control abstraction)
-│   └── IPlatformUtils (path resolution, privilege checking)
+│   ├── IPlatformUtils (path resolution, privilege checking)
+│   └── IDaemon (service lifecycle management)
 └── Platform Implementations
     ├── Linux (TLP, /proc/loadavg, systemd, realpath)
     ├── Windows (Power Plans, Performance Counters, SCM, GetFullPathName)
@@ -119,16 +119,9 @@ monitoring_frequency=10
 - **Implementation**: Platform-specific power control (Linux: TLP, Windows: powercfg)
 - **Encapsulation**: Hides platform-specific power management details from application code
 
-#### ServiceManager (Platform Abstraction)
-- **Purpose**: Cross-platform service management
-- **Responsibility**: Abstract service installation, uninstallation, and lifecycle management
-- **Interface**: Provides uniform service operations across platforms
-- **Implementation**: Platform-specific service management (systemd, SCM, launchd)
-- **Encapsulation**: Hides platform-specific service details from application code
-
 #### Platform Abstraction Layer
 - **Purpose**: Provides cross-platform support for all platform-specific operations
-- **Generic Interfaces**: IPowerManager, ISystemMonitor, IServiceManager, IPlatformUtils
+- **Generic Interfaces**: IPowerManager, ISystemMonitor, IPlatformUtils, IDaemon
 - **Platform Implementations**: Platform-specific code in dedicated directories
 - **Compile-Time Selection**: Only target platform code included in binaries
 - **Zero Runtime Overhead**: All platform decisions made at compile time
@@ -185,15 +178,6 @@ public:
     virtual ParsedArgs parseCommandLine(int argc, char* argv[]) const = 0;
     virtual std::string getDefaultInstallPath() const = 0;
     virtual std::string getPrivilegeEscalationMessage() const = 0;
-};
-
-// Abstractions encapsulate all platform complexity:
-class IServiceManager {
-public:
-    virtual bool installService(const std::string& serviceName,
-                               const std::string& executablePath,
-                               const std::string& description) = 0;
-    // Platform implementation handles all required operations internally
 };
 ```
 
@@ -268,13 +252,13 @@ class ActivityMonitor {
 
 ### Platform Abstraction Implementation
 - **IPlatformUtils Interface**: Abstracts privilege checking, executable path detection, command line parsing
-- **Enhanced Service Managers**: Handle file operations (copying, directory creation, permissions) internally
+- **Enhanced Platform Layer**: Handles file operations (copying, directory creation, permissions) via platform abstractions
 - **Complete Platform Delegation**: All platform-specific operations moved from main.cpp to platform layer
 - **File Organization**: Platform-specific code isolated in `src/platform/[platform]/` directories
 - **Zero Application Layer Coupling**: main.cpp contains no platform-specific includes or logic
 
-### Service Installation Enhancement
-- **Linux Implementation**: Service manager handles executable installation to `/usr/local/bin/`
+### Service Integration Implementation
+- **Daemon Lifecycle Management**: IDaemon interface handles service registration and lifecycle
 - **File Operations**: Platform implementations manage directory creation, file copying, permission setting
 - **Path Management**: Platform-specific paths encapsulated in platform utilities
 - **Cleanup Operations**: Platform implementations handle complete uninstallation cleanup
@@ -460,8 +444,8 @@ if (!platformUtils->hasRequiredPrivileges()) {
 #### 2. Platform Delegation for Complex Operations
 ```cpp
 // ALWAYS - Platform implementations handle complexity
-auto serviceManager = PlatformFactory::createServiceManager();
-serviceManager->installService(name, path, description);
+auto daemon = PlatformFactory::createDaemon();
+daemon->installService(name, path, description);
 // Platform implementation handles all required platform-specific operations
 ```
 
@@ -615,8 +599,8 @@ This architectural discipline ensures maintainable, testable, and extensible cro
 - NOT: "File operations moved", "Implementation handles", "Platform does X"
 
 #### **Focus on Architecture, Not Operations**:
-- GOOD: "ServiceManager abstracts platform-specific service management"
-- NOT: "ServiceManager handles file copying, directory creation, permission setting"
+- GOOD: "Daemon interface abstracts platform-specific service lifecycle management"
+- NOT: "Daemon interface handles file copying, directory creation, permission setting"
 
 #### **Separate Concerns Properly**:
 - **Patterns Section**: How components interact, architectural relationships

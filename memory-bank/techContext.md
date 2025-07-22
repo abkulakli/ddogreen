@@ -47,9 +47,9 @@ build/
 
 ### Build System
 
-#### Simplified Build Script (Updated July 2025)
+#### Current Build System (Updated July 2025)
 ```bash
-# Current build system uses CMake presets (no build.sh)
+# CMake presets workflow
 cmake --preset debug                # Debug build configuration
 cmake --build --preset debug        # Build debug executable
 cmake --preset release              # Release build configuration  
@@ -168,7 +168,7 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 #### Platform Testing
 ```bash
 # Standard build process
-./build.sh                  # Build for current platform
+cmake --preset debug && cmake --build --preset debug    # Build for current platform
 # Platform abstraction automatically detected and compiled
 ```
 
@@ -392,9 +392,9 @@ install(FILES systemd/ddogreen.service DESTINATION /etc/systemd/system)
 ```
 
 ### Build Scripts
-- **build.sh**: Primary build script using CMake
-- **install.sh**: Complete installation with dependency checking
-- **uninstall.sh**: Clean removal of all installed components
+- **build.ps1**: PowerShell build script for Windows development
+- **CMakePresets.json**: Defines debug and release build configurations
+- **VS Code Tasks**: Integrated build, test, and debug workflows
 
 ## Code Organization
 

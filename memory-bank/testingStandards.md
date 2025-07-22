@@ -361,8 +361,10 @@ endif()
 
 ### Running Tests
 ```bash
-# Quick test run with provided script
-./test.sh
+# Using CMake presets (recommended)
+cmake --preset debug
+cmake --build --preset debug
+ctest --preset debug-tests
 
 # Manual build and test
 mkdir -p build

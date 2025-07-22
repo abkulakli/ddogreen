@@ -34,7 +34,7 @@ The completed application delivers on all original goals plus platform expansion
 ### Cross-Platform User Experience
 ```
 Linux Installation: 
-  ./build.sh --package → sudo dpkg -i ddogreen-linux.deb
+  cmake --preset release && cmake --build --preset release && cpack → sudo dpkg -i ddogreen-linux.deb
 Windows Installation:
   Download ddogreen-windows.exe → Run installer
   

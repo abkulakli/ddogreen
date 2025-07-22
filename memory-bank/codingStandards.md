@@ -35,7 +35,7 @@ This document establishes comprehensive coding standards for the ddogreen projec
 - **Header files**: Use `.h` extension, no `.hpp`
 - **Source files**: Use `.cpp` extension
 - **File names**: Use snake_case (e.g., `activity_monitor.h`, `linux_power_manager.cpp`)
-- **Interface headers**: Prefix with `i` (e.g., `ipower_manager.h`, `iservice_manager.h`)
+- **Interface headers**: Prefix with `i` (e.g., `ipower_manager.h`, `idaemon.h`)
 - **Platform implementations**: Include platform name (e.g., `linux_power_manager.cpp`)
 
 #### Directory Structure
@@ -296,9 +296,9 @@ ColumnLimit: 100
 #### Build Requirements
 ```bash
 # All builds must pass without warnings
-./build.sh --strict                    # Enable all warnings as errors
-./build.sh --sanitize                  # Enable address/thread sanitizers
-./build.sh --static-analysis           # Run static analysis tools
+cmake --preset debug -DCMAKE_CXX_FLAGS="-Werror"    # Enable all warnings as errors
+cmake --preset debug -DENABLE_SANITIZERS=ON         # Enable address/thread sanitizers
+cmake --preset debug -DENABLE_STATIC_ANALYSIS=ON    # Run static analysis tools
 ```
 
 #### Continuous Integration
