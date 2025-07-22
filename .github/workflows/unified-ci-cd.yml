@@ -542,7 +542,18 @@ jobs:
   # Step 5: Create Release (only on tags)
   release:
     if: startsWith(github.ref, 'refs/tags/v') && github.event_name == 'push'
-    needs: [build-linux, test-linux, package-linux, validate-deb, validate-rpm, validate-tgz, build-windows, test-windows, package-windows, validate-windows-installer, validate-windows-zip]
+    needs:
+      - build-linux
+      - test-linux
+      - package-linux
+      - validate-deb
+      - validate-rpm
+      - validate-tgz
+      - build-windows
+      - test-windows
+      - package-windows
+      - validate-windows-installer
+      - validate-windows-zip
     runs-on: ubuntu-latest
 
     steps:
