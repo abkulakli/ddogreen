@@ -5,9 +5,19 @@
 **Last Updated**: July 22, 2025
 **Current State**: Maintenance mode - all features implemented and tested
 
-## Current Context: CI/CD Workflow Cleanup Complete ✅
+## Current Context: Release Version Fixed ✅
 
-### Latest Fix: TGZ Package Uninstallation Simplified
+### Latest Fix: Release Packages Now Show Correct Version
+- **Issue**: Release packages (v0.2.4) were showing local development version `0.0.0` instead of actual release version
+- **Root Cause**: CI/CD workflow was not passing the git tag version to CMake during package building
+- **Solution**: Updated build-packages step to extract version from git tag and pass to CMake via `-DPROJECT_VERSION_OVERRIDE`
+- **Implementation**: 
+  - Extract version from `GITHUB_REF` environment variable for tag builds
+  - Remove 'v' prefix from version tags (e.g., v0.2.4 → 0.2.4)
+  - Pass version to CMake which embeds it in the binary via `DDOGREEN_VERSION` define
+- **Result**: Release packages now correctly display their version when running `ddogreen --version`
+
+### Previous Fix: TGZ Package Uninstallation Simplified
 - **Issue**: TGZ package uninstallation failed in CI due to interactive prompt asking to remove configuration directory
 - **Root Cause**: `install.sh --uninstall` was prompting for user confirmation in non-interactive CI environment
 - **Solution**: Simplified uninstallation to always remove configuration directory without prompts

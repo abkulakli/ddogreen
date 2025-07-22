@@ -90,7 +90,17 @@ jobs:
 
     - name: Configure CMake
       run: |
-        cmake -B build -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+        # Extract version from git tag if this is a tag build, otherwise use 0.0.0
+        if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+          VERSION="${GITHUB_REF#refs/tags/}"
+          # Remove 'v' prefix if present (e.g., v0.2.4 -> 0.2.4)
+          VERSION="${VERSION#v}"
+          echo "Building with version: $VERSION"
+          cmake -B build -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DPROJECT_VERSION_OVERRIDE="$VERSION"
+        else
+          echo "Building with default version: 0.0.0"
+          cmake -B build -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+        fi
 
     - name: Build
       run: |
