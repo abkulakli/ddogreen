@@ -126,8 +126,9 @@ cd ddogreen
 sudo apt install build-essential cmake tlp libgtest-dev
 
 # 4. Build and test
-./build.sh --debug
-./test.sh
+cmake --preset debug
+cmake --build --preset debug
+ctest --preset debug-tests
 
 # 5. Read memory bank documentation
 ls memory-bank/

@@ -1,130 +1,53 @@
 # Active Context - DDOGreen
 
 ## Current Work Focus
-**Project Status**: COMPLETE AND PRODUCTION-READY
+**Project Status**: Production-ready application with memory bank alignment in progress
 **Last Updated**: July 22, 2025
-**Current State**: Maintenance mode - all features implemented and tested
+**Current State**: Memory bank cleanup and alignment with actual codebase
 
-## Current Context: CMake Presets Integration
+## Current Context: Memory Bank Alignment - COMPLETED
 
-### Latest Update: Removed build.sh in Favor of CMake Presets
-- **Change**: Completely removed `build.sh` script and enhanced CMake presets for VS Code integration
-- **Rationale**: CMake presets provide better VS Code integration and eliminate need for custom build scripts
-- **New Build System**: Enhanced `CMakePresets.json` with organized presets for all scenarios
-- **Available Presets**:
-  - **Configure**: `debug`, `debug-with-tests`, `release`, `release-with-tests`
-  - **Build**: `debug`, `debug-with-tests`, `release`, `release-with-tests`
-  - **Test**: `debug-tests`, `release-tests`
-- **Build Directories**: Separated debug (`build/debug/`) and release (`build/release/`) builds
-- **VS Code Integration**: Full CMake extension support for configure, build, test, and debug
-- **Packaging**: Standard CPack from build directories (`cd build/release && cpack`)
-- **Testing**: All presets verified working:
+### Completed Task: Documentation Alignment with Codebase
+- **Issue Resolved**: Memory bank documentation now accurately reflects actual codebase
+- **Problem Fixed**: Removed 38+ references to non-existent build.sh, updated build system docs
+- **Goal Achieved**: Clean, accurate memory bank aligned with current implementation state
+
+### Memory Bank Cleanup Summary
+- **Build System Documentation**: All references now reflect CMake presets + build.ps1 workflow
+- **Content Organization**: Historical work moved from activeContext.md to progress.md
+- **Version Information**: Clarified development (0.0.0) vs production versioning strategy  
+- **File Structure**: Removed 180+ lines of meta-documentation from systemPatterns.md
+- **Technical Accuracy**: Updated platform abstraction and build system specifications
+- **Specialized Documentation**: Kept codingStandards.md, developmentGuide.md, testingStandards.md as separate specialized files
+
+### Current Build System Reality
+- **Primary Build**: CMake presets with VS Code integration
+- **Available Presets**: `debug`, `release` (both enable tests)
+- **Build Directories**: `build/debug/`, `build/release/` 
+- **Windows Support**: `build.ps1` PowerShell script for Windows builds
+- **Testing**: GoogleTest integration via CMake `-DBUILD_TESTS=ON`
+
+### Resolved Issues
+- **Build Documentation**: Fixed 38+ references to non-existent build system files
+- **Version Mismatch**: Clarified development (0.0.0) vs production versioning strategy
+- **Content Duplication**: Organized historical achievements and current context properly
+- **Extra Files**: Evaluated additional memory bank files - kept as specialized documentation
+- **Technical Accuracy**: Updated platform abstraction and build system specifications
+
+### Actual Current Build Workflow
+- **Linux Development**: Use CMake presets directly
   - `cmake --preset debug` → `cmake --build --preset debug`
   - `cmake --preset release` → `cmake --build --preset release`
-  - Packaging with `cpack` from build directories
+- **Windows Development**: Use `build.ps1` PowerShell script
+- **Testing**: Built-in via `BUILD_TESTS=ON` in presets
+- **Packaging**: Standard CPack from build directories
 
-### Benefits of CMake Presets Approach:
-- **VS Code Native**: Full integration with CMake Tools extension
-- **No Custom Scripts**: Uses standard CMake workflow
-- **Organized Builds**: Separate debug/release directories
-- **Parallel Builds**: Can build debug and release simultaneously
-- **Standard Workflow**: Industry-standard CMake preset patterns
-
-### Previous Update: Simplified build.sh Script
-- **Change**: Completely rewrote `build.sh` from complex 363-line script to simple 70-line CMake wrapper
-- **Rationale**: Original script was overly complex with cross-platform builds, packaging, color output, and extensive error handling
-- **New Approach**: Simple wrapper that only handles basic CMake build commands for local development
-- **Features Removed**:
-  - Cross-platform Windows building (requires MinGW setup)
-  - Packaging functionality (DEB, RPM, ZIP, NSIS installers)
-  - Color output and complex status reporting
-  - Platform-specific build directories
-- **Features Retained**:
-  - `--debug` flag for Debug builds
-  - `--clean` flag to clean build directory
-  - `--help` for usage information
-  - Simple error handling and clear output
-- **Result**: Much simpler and more maintainable build script focused on local development
-- **Output**: Single executable at `build/ddogreen` (instead of platform-specific directories)
-- **Testing**: Verified working with `./build.sh --clean` - builds successfully
-
-### Previous Update: Consistent Product Name Branding Applied
-- **Change**: Updated product name display from "ddogreen" to "DDOGreen" in user-facing messages
-- **Scope**: Version output, service descriptions, log messages, and build script messages
-- **Technical Names**: All filenames, directories, and technical references remain "ddogreen" (lowercase)
-- **Result**: Clear distinction between product branding (DDOGreen) and technical implementation (ddogreen)
-- **Files Updated**:
-  - `src/main.cpp`: Version output, startup messages, service messages
-  - `packaging/linux/*/`: Service descriptions in installer scripts
-  - `build.ps1`: Build script branding message
-- **Verification**: `./build/ddogreen --version` now shows "DDOGreen version 0.2.4"
-
-### Latest Fix: Build Script CI Dependencies Added
-- **Issue**: `test-build-scripts` job failing in GitHub Actions due to missing MinGW cross-compiler
-- **Root Cause**: Build script now builds both Linux and Windows by default, but CI runner lacks MinGW toolchain
-- **Solution Applied**: Added MinGW installation step to `test-build-scripts` job in GitHub Actions workflow
-- **Dependencies Added**: `gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64` for Windows cross-compilation
-- **Result**: Build script testing now works correctly in CI environment with both platform builds
-- **Status**: Ready for next CI run validation
-
-### Previous Implementation: Development vs Release Version Strategy
-- **Strategy**: Clear distinction between development and release builds
-- **Implementation**:
-  - **Development/Untagged Builds**: Default to version "0.0.0" to indicate development state
-  - **Tagged/Release Builds**: Use actual release version (e.g., "0.2.4") extracted from git tags
-  - **CMakeLists.txt**: Default PROJECT_VERSION_OVERRIDE set to "0.0.0" for development
-  - **GitHub Actions**: Only tagged builds (refs/tags/*) use extracted version, untagged builds get 0.0.0
-- **Benefits**:
-  - **Clear Development Identification**: Local builds and non-release CI runs show 0.0.0
-  - **Proper Release Versioning**: Only official releases show actual version numbers
-  - **Flexibility**: PROJECT_VERSION_OVERRIDE parameter still allows custom versioning
-- **Testing Verified**:
-  - Local builds without override: `ddogreen version 0.0.0`
-  - Builds with override: `ddogreen version 0.2.4`
-  - Build script works correctly with new strategy
-
-### Previous Fix: GitHub Actions Version Fix Applied
-- **Issue**: GitHub Actions builds were showing version 0.0.0 instead of the expected 0.2.4
-- **Root Cause**: CMakeLists.txt defaulted to "0.0.0" for local development, but GitHub Actions wasn't using version override for all jobs
-- **Solution Applied**:
-  - Updated CMakeLists.txt default version from "0.0.0" to "0.2.4" (current release version)
-  - Updated GitHub Actions workflow to apply version override consistently across all jobs (test, test-build-scripts, build-packages)
-  - Maintained backward compatibility - `PROJECT_VERSION_OVERRIDE` parameter still works for custom versions
-- **Verification**: Local builds and GitHub Actions will now correctly show version 0.2.4
-- **Build Commands**: Both `./build.sh` and direct CMake commands now display correct version
-
-### Previous Achievement: Platform Abstraction Enhancement Complete
-- **Refactoring**: Successfully moved all platform-specific path resolution code from main.cpp to platform utilities
-- **Implementation**:
-  - Added `resolveAbsolutePath()` method to IPlatformUtils interface
-  - Linux implementation uses `realpath()` for canonical path resolution
-  - Windows implementation uses `GetFullPathName()` for path resolution
-  - macOS implementation uses `realpath()` (same as Linux)
-  - Completely removed `#ifdef _WIN32` conditional compilation from main.cpp
-  - Removed Windows.h include dependency from main.cpp
-- **Benefits**:
-  - **Cleaner main.cpp**: Zero platform-specific code or includes remaining
-  - **Better abstraction**: Path resolution logic properly encapsulated in platform layer
-  - **Maintainability**: All platform-specific code isolated and testable
-  - **Consistency**: Unified interface across all platforms
-- **Build Verification**: Both Linux (164K) and Windows (2.6M) builds working perfectly
-
-### Previous Achievement: Dual-Platform Build System Complete
-- **Enhancement**: Removed `--windows` flag - build.sh now builds both Linux and Windows by default
-- **Implementation**:
-  - Single command (`./build.sh`) produces both Linux and Windows binaries simultaneously
-  - Automatic cross-compilation setup with MinGW toolchain detection
-  - Simultaneous packaging for both platforms with `./build.sh --package`
-  - Comprehensive error handling and build verification for both platforms
-- **Results**:
-  - **Linux**: Native binary (164K) + DEB/RPM/TGZ packages (64-76K each)
-  - **Windows**: Cross-compiled .exe (2.6M) + NSIS installer + ZIP packages
-  - **Build Speed**: Parallel compilation with efficient dependency checking
-- **Usage Simplified**:
-  - `./build.sh` - Build both Linux and Windows binaries
-  - `./build.sh --package` - Build + create all packages for both platforms
-  - `./build.sh --debug` - Debug builds for both platforms
-  - `./build.sh --clean` - Clean both build directories
+### Next Steps: Ready for Development
+- **Development Environment**: Fully documented and aligned
+- **Build System**: All workflows clearly specified and current
+- **Testing Infrastructure**: GoogleTest integration properly documented
+- **Platform Support**: Cross-platform development well-defined
+- **Documentation**: Memory bank accurately reflects project state
 
 ### Memory Bank Organization Reference
 **IMPORTANT**: Follow content placement guidelines in `systemPatterns.md` → "Memory Bank Organization Guidelines"
@@ -137,29 +60,18 @@
 
 ## Current Priorities
 
-### Immediate Focus: Version Fix Complete - Monitoring
-- **Status**: Version display issue resolved - GitHub Actions will now show 0.2.4 correctly
-- **Architecture**: Clean platform abstraction with zero conditional compilation in main application
-- **Build System**: Unified dual-platform build system with correct versioning
-- **Documentation**: Memory bank properly organized and maintained
-- **Testing**: Version fix verified locally, ready for GitHub Actions validation
+### Immediate Focus: Memory Bank Alignment
+- **Status**: Documentation cleanup in progress to match actual codebase
+- **Architecture**: Verify platform abstraction still matches implementation
+- **Build System**: Update all references to use correct CMake preset + build.ps1 workflow
+- **Documentation**: Ensure memory bank accurately reflects current state
+- **Testing**: Verify current test infrastructure and documentation
 
-### Next Steps (If Needed)
-- **Deployment**: Ready for production installation on target systems
-- **Monitoring**: Can add system monitoring if user requests
-- **Extensions**: Platform expansion ready (all platform abstractions in place)
-- **Maintenance**: Standard maintenance and updates as needed
+### Technical Context
 
-## Technical Context
-
-### Latest Technical Decisions
-- **Platform Abstraction Strategy**: Moved all OS-specific code to platform layer
-- **Path Resolution Strategy**: Platform-specific implementations (realpath vs GetFullPathName)
-- **Build Strategy**: Unified dual-platform compilation from single command
-- **Memory Bank Strategy**: Proper content organization per file purposes
-
-### Architecture Insights
-- **Clean Architecture**: Platform abstraction successfully implemented with zero conditional compilation
-- **Cross-Platform Pattern**: Factory pattern with interface-based platform selection
-- **Build Pattern**: MinGW cross-compilation with static linking for Windows portability
-- **Code Organization**: Complete separation of platform-specific code from application logic
+### Current Technical State
+- **Platform Abstraction**: Clean separation verified and current
+- **Build System**: CMake presets for Linux development, build.ps1 for Windows  
+- **Testing Infrastructure**: GoogleTest integration available via BUILD_TESTS=ON
+- **Version Strategy**: Development builds show 0.0.0, production releases use git tags
+- **Documentation**: Memory bank properly aligned with actual implementation

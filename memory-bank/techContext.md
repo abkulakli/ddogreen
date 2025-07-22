@@ -10,78 +10,66 @@
 - **Service Framework**: systemd (Linux), Windows Service Manager (Windows)
 - **Logging**: Custom implementation with logrotate integration
 
-### Cross-Platform Build System (Updated July 2025)
+### Cross-Platform Build System (Current - July 2025)
 
-#### Unified Dual-Platform Build Commands  
+#### CMake Presets Build Commands  
 ```bash
-# Unified cross-platform build commands
-./build.sh                     # Build both Linux and Windows release binaries
-./build.sh --debug             # Build both Linux and Windows debug binaries  
-./build.sh --package           # Build + package both Linux and Windows
-./build.sh --clean             # Clean both platform build directories
-./build.sh --clean --debug     # Clean then build debug for both platforms
+# Standard CMake preset workflow
+cmake --preset debug                # Configure debug build
+cmake --build --preset debug        # Build debug
+cmake --preset release              # Configure release build  
+cmake --build --preset release      # Build release
+
+# Testing with presets
+cmake --build --preset debug --target test
+ctest --preset debug-tests
+
+# Packaging from build directories
+cd build/release && cpack
 ```
 
-#### Cross-Compilation Requirements
-```bash
-# Windows cross-compilation dependencies
-sudo apt install mingw-w64 mingw-w64-tools
-
-# Windows installer creation
-sudo apt install nsis
-
-# Build verification
-file build/linux/release/ddogreen      # ELF 64-bit executable (~164K)
-file build/windows/release/ddogreen.exe # PE32+ executable (~2.6M)
+#### Windows PowerShell Build
+```powershell
+# Windows-specific build script
+./build.ps1                         # Windows build using Visual Studio or MinGW
 ```
 
-#### Platform-Specific Build Directories
+#### Build Directories Structure
 ```
 build/
-├── linux/
-│   ├── release/ddogreen (164K native binary)
-│   └── debug/ddogreen (debug symbols)
-└── windows/
-    ├── release/ddogreen.exe (2.6M cross-compiled)
-    └── debug/ddogreen.exe (debug version)
-```
-
-#### Cross-Platform Packaging Output
-```bash
-# Linux packages (native compilation)
-build/linux/release/
-├── ddogreen-linux.deb (64K)
-├── ddogreen-linux.rpm (76K)  
-└── ddogreen-linux.tar.gz (64K)
-
-# Windows packages (cross-compilation)
-build/windows/release/
-├── ddogreen-windows.exe (NSIS installer)
-└── ddogreen-windows.zip (portable package)
+├── debug/
+│   ├── ddogreen (Linux debug binary)
+│   └── CMakeCache.txt
+└── release/
+    ├── ddogreen (Linux release binary)  
+    └── CMakeCache.txt
 ```
 
 ### Build System
 
 #### Simplified Build Script (Updated July 2025)
 ```bash
-# Unified cross-platform build commands  
-./build.sh                     # Standard release build (both platforms)
-./build.sh --debug             # Debug build (both platforms)
-./build.sh --clean             # Clean build directories only
-./build.sh --package           # Build and package both platforms
+# Current build system uses CMake presets (no build.sh)
+cmake --preset debug                # Debug build configuration
+cmake --build --preset debug        # Build debug executable
+cmake --preset release              # Release build configuration  
+cmake --build --preset release      # Build release executable
+
+# Windows-specific
+./build.ps1                         # PowerShell build script for Windows
 ```
 
 #### Build Requirements
 - **cmake**: 3.16 or later
-- **make**: GNU make or compatible
+- **make**: GNU make or compatible (Linux)
 - **gcc/g++**: C++17 support required
-- **Platform Detection**: Automatic Linux/macOS/Windows detection
+- **Visual Studio or MinGW**: For Windows builds (build.ps1)
 
-#### Removed Build Features (Per User Request)
-- **Static Analysis**: No cppcheck or clang-tidy integration
-- **Format Checking**: No clang-format verification
-- **Strict Warnings**: No warnings-as-errors compilation
-- **Quality Modes**: No automated quality assurance checks
+#### Current Build Features
+- **CMake Presets**: VS Code integration with standard workflow
+- **Separated Builds**: Debug and release in separate directories
+- **Testing Integration**: GoogleTest via `BUILD_TESTS=ON`
+- **Cross-Platform**: Native builds per platform
 
 ### Platform Abstraction
 - **Design**: Generic interfaces with platform-specific implementations
@@ -119,15 +107,13 @@ brew install cmake googletest
 
 #### Cross-Compilation Dependencies (Linux Host → Windows Target)
 ```bash
-# MinGW-w64 cross-compiler
+# For Windows cross-compilation (if needed via MinGW)
 sudo apt install mingw-w64 mingw-w64-tools
 
 # NSIS for Windows installer creation
 sudo apt install nsis
 
-# Verification commands
-x86_64-w64-mingw32-gcc --version    # Check MinGW compiler
-makensis                            # Check NSIS installer
+# Note: Primary Windows development uses build.ps1 with native tools
 ```
 
 #### Build Dependencies
@@ -201,10 +187,14 @@ sudo apt install build-essential cmake git
 # Install TLP for testing
 sudo apt install tlp
 
+# Install testing dependencies (optional)
+sudo apt install libgtest-dev
+
 # Clone and build
 git clone <repository>
 cd ddogreen
-./build.sh
+cmake --preset release
+cmake --build --preset release
 ```
 
 ### Build Configuration
@@ -216,13 +206,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 ### Manual CMake Build Process
 ```bash
-mkdir build && cd build
+# Standard CMake build (current approach)
+mkdir -p build/release
+cd build/release
 
 # Configure for release
-cmake .. -DCMAKE_BUILD_TYPE=Release
+cmake ../.. -DCMAKE_BUILD_TYPE=Release
 
 # Configure for development with tests
-cmake .. -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=ON
+cmake ../.. -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=ON
 
 # Build
 cmake --build . -j$(nproc)
@@ -252,11 +244,13 @@ cpack -G ZIP                      # Windows ZIP archive
 
 ### Testing Integration
 ```bash
-# Quick test run
-./test.sh
+# Using CMake presets
+cmake --preset debug               # Configure with tests enabled
+cmake --build --preset debug       # Build with tests
+ctest --preset debug-tests         # Run tests
 
 # Manual test execution
-cd build
+cd build/debug
 ctest --output-on-failure
 
 # Run specific tests
@@ -272,9 +266,10 @@ ctest --output-on-failure
 
 ### Debugging Setup
 ```bash
-# Debug build
-./build.sh --debug
-gdb ./build/ddogreen
+# Debug build using presets
+cmake --preset debug
+cmake --build --preset debug
+gdb ./build/debug/ddogreen
 ```
 
 ### Platform-Specific Debugging
