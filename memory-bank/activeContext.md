@@ -5,9 +5,33 @@
 **Last Updated**: July 22, 2025
 **Current State**: Maintenance mode - all features implemented and tested
 
-## Current Context: GitHub Actions Version Fix Applied
+## Current Context: GitHub Actions Build Script Fix
 
-### Latest Fix: Version Display Issue Resolved  
+### Latest Fix: Build Script CI Dependencies Added
+- **Issue**: `test-build-scripts` job failing in GitHub Actions due to missing MinGW cross-compiler
+- **Root Cause**: Build script now builds both Linux and Windows by default, but CI runner lacks MinGW toolchain
+- **Solution Applied**: Added MinGW installation step to `test-build-scripts` job in GitHub Actions workflow
+- **Dependencies Added**: `gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64` for Windows cross-compilation
+- **Result**: Build script testing now works correctly in CI environment with both platform builds
+- **Status**: Ready for next CI run validation
+
+### Previous Implementation: Development vs Release Version Strategy
+- **Strategy**: Clear distinction between development and release builds
+- **Implementation**:
+  - **Development/Untagged Builds**: Default to version "0.0.0" to indicate development state
+  - **Tagged/Release Builds**: Use actual release version (e.g., "0.2.4") extracted from git tags
+  - **CMakeLists.txt**: Default PROJECT_VERSION_OVERRIDE set to "0.0.0" for development
+  - **GitHub Actions**: Only tagged builds (refs/tags/*) use extracted version, untagged builds get 0.0.0
+- **Benefits**:
+  - **Clear Development Identification**: Local builds and non-release CI runs show 0.0.0
+  - **Proper Release Versioning**: Only official releases show actual version numbers
+  - **Flexibility**: PROJECT_VERSION_OVERRIDE parameter still allows custom versioning
+- **Testing Verified**: 
+  - Local builds without override: `ddogreen version 0.0.0`
+  - Builds with override: `ddogreen version 0.2.4`
+  - Build script works correctly with new strategy
+
+### Previous Fix: GitHub Actions Version Fix Applied  
 - **Issue**: GitHub Actions builds were showing version 0.0.0 instead of the expected 0.2.4
 - **Root Cause**: CMakeLists.txt defaulted to "0.0.0" for local development, but GitHub Actions wasn't using version override for all jobs
 - **Solution Applied**:
