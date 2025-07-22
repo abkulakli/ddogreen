@@ -28,4 +28,10 @@ public:
      * @return true if monitoring is supported and working
      */
     virtual bool isAvailable() = 0;
+
+    /**
+     * Set the monitoring frequency for load average calculations
+     * @param frequencySeconds Monitoring frequency in seconds
+     */
+    virtual void setMonitoringFrequency(int frequencySeconds) = 0;
 };

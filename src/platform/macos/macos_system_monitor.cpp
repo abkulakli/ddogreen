@@ -66,6 +66,16 @@ public:
         return m_available;
     }
 
+    /**
+     * Set the monitoring frequency for load average calculations
+     * @param frequencySeconds Monitoring frequency in seconds
+     * Note: This is a mock implementation
+     */
+    void setMonitoringFrequency(int frequencySeconds) override {
+        Logger::debug("MOCK: macOS system monitor frequency set to " + std::to_string(frequencySeconds) + " seconds");
+        Logger::debug("MOCK: Would configure load average calculation frequency");
+    }
+
 private:
     /**
      * Get mock CPU core count

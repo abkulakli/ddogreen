@@ -21,7 +21,7 @@
  */
 class WindowsSystemMonitor : public ISystemMonitor {
 public:
-    WindowsSystemMonitor() : m_coreCount(0), m_available(false) {
+    WindowsSystemMonitor() : m_coreCount(0), m_available(false), m_monitoringFrequency(10) {
         Logger::info("Windows System Monitor initialized");
         
         // Initialize CPU monitoring
@@ -57,8 +57,12 @@ public:
         // Update our moving averages
         updateLoadAverages(currentLoad);
         
-        // Calculate average (60 samples at 1 sec each)
-        const double load1min = calculateAverage(m_loadHistory, 60);
+        // Calculate average for approximately 1 minute worth of samples
+        // Number of samples = 60 seconds / monitoring_frequency
+        const size_t samplesFor1Min = (m_monitoringFrequency <= 0) ? 1 : 
+                                      (60 / m_monitoringFrequency < 1) ? 1 : 
+                                      (60 / m_monitoringFrequency);
+        const double load1min = calculateAverage(m_loadHistory, samplesFor1Min);
         
         return load1min;
     }
@@ -77,6 +81,15 @@ public:
      */
     bool isAvailable() override {
         return m_available;
+    }
+
+    /**
+     * Set the monitoring frequency for load average calculations
+     * @param frequencySeconds Monitoring frequency in seconds
+     */
+    void setMonitoringFrequency(int frequencySeconds) override {
+        m_monitoringFrequency = frequencySeconds;
+        Logger::debug("Windows system monitor frequency set to " + std::to_string(frequencySeconds) + " seconds");
     }
 
 private:
@@ -192,8 +205,11 @@ private:
         // Add current load to history
         m_loadHistory.push(currentLoad);
         
-        // Keep only last minute of data (60 samples at 1 second intervals)
-        const size_t maxSamples = 60;
+        // Keep only enough samples for load average calculation
+        // We want approximately 1 minute of data: 60 seconds / monitoring_frequency
+        const size_t maxSamples = (m_monitoringFrequency <= 0) ? 1 : 
+                                  (60 / m_monitoringFrequency < 1) ? 1 : 
+                                  (60 / m_monitoringFrequency);
         while (m_loadHistory.size() > maxSamples) {
             m_loadHistory.pop();
         }
@@ -249,6 +265,7 @@ private:
     // Member variables
     int m_coreCount;
     bool m_available;
+    int m_monitoringFrequency;
     std::queue<double> m_loadHistory;
     
     PDH_HQUERY m_cpuQuery = nullptr;

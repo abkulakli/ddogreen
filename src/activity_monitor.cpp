@@ -108,6 +108,12 @@ void ActivityMonitor::setLoadThresholds(double highPerformanceThreshold, double 
 
 void ActivityMonitor::setMonitoringFrequency(int frequencySeconds) {
     m_monitoringFrequency = frequencySeconds;
+    
+    // Update the system monitor with the new frequency
+    if (m_systemMonitor && m_systemMonitor->isAvailable()) {
+        m_systemMonitor->setMonitoringFrequency(frequencySeconds);
+    }
+    
     Logger::info("Monitoring frequency set to " + std::to_string(frequencySeconds) + " seconds");
 }
 
