@@ -5,9 +5,50 @@
 **Last Updated**: July 22, 2025
 **Current State**: Maintenance mode - all features implemented and tested
 
-## Current Context: Product Name Branding Update
+## Current Context: CMake Presets Integration
 
-### Latest Update: Consistent Product Name Branding Applied
+### Latest Update: Removed build.sh in Favor of CMake Presets
+- **Change**: Completely removed `build.sh` script and enhanced CMake presets for VS Code integration
+- **Rationale**: CMake presets provide better VS Code integration and eliminate need for custom build scripts
+- **New Build System**: Enhanced `CMakePresets.json` with organized presets for all scenarios
+- **Available Presets**:
+  - **Configure**: `debug`, `debug-with-tests`, `release`, `release-with-tests`
+  - **Build**: `debug`, `debug-with-tests`, `release`, `release-with-tests`
+  - **Test**: `debug-tests`, `release-tests`
+- **Build Directories**: Separated debug (`build/debug/`) and release (`build/release/`) builds
+- **VS Code Integration**: Full CMake extension support for configure, build, test, and debug
+- **Packaging**: Standard CPack from build directories (`cd build/release && cpack`)
+- **Testing**: All presets verified working:
+  - `cmake --preset debug` → `cmake --build --preset debug`
+  - `cmake --preset release` → `cmake --build --preset release`
+  - Packaging with `cpack` from build directories
+
+### Benefits of CMake Presets Approach:
+- **VS Code Native**: Full integration with CMake Tools extension
+- **No Custom Scripts**: Uses standard CMake workflow
+- **Organized Builds**: Separate debug/release directories
+- **Parallel Builds**: Can build debug and release simultaneously
+- **Standard Workflow**: Industry-standard CMake preset patterns
+
+### Previous Update: Simplified build.sh Script
+- **Change**: Completely rewrote `build.sh` from complex 363-line script to simple 70-line CMake wrapper
+- **Rationale**: Original script was overly complex with cross-platform builds, packaging, color output, and extensive error handling
+- **New Approach**: Simple wrapper that only handles basic CMake build commands for local development
+- **Features Removed**:
+  - Cross-platform Windows building (requires MinGW setup)
+  - Packaging functionality (DEB, RPM, ZIP, NSIS installers)
+  - Color output and complex status reporting
+  - Platform-specific build directories
+- **Features Retained**:
+  - `--debug` flag for Debug builds
+  - `--clean` flag to clean build directory
+  - `--help` for usage information
+  - Simple error handling and clear output
+- **Result**: Much simpler and more maintainable build script focused on local development
+- **Output**: Single executable at `build/ddogreen` (instead of platform-specific directories)
+- **Testing**: Verified working with `./build.sh --clean` - builds successfully
+
+### Previous Update: Consistent Product Name Branding Applied
 - **Change**: Updated product name display from "ddogreen" to "DDOGreen" in user-facing messages
 - **Scope**: Version output, service descriptions, log messages, and build script messages
 - **Technical Names**: All filenames, directories, and technical references remain "ddogreen" (lowercase)
@@ -37,12 +78,12 @@
   - **Clear Development Identification**: Local builds and non-release CI runs show 0.0.0
   - **Proper Release Versioning**: Only official releases show actual version numbers
   - **Flexibility**: PROJECT_VERSION_OVERRIDE parameter still allows custom versioning
-- **Testing Verified**: 
+- **Testing Verified**:
   - Local builds without override: `ddogreen version 0.0.0`
   - Builds with override: `ddogreen version 0.2.4`
   - Build script works correctly with new strategy
 
-### Previous Fix: GitHub Actions Version Fix Applied  
+### Previous Fix: GitHub Actions Version Fix Applied
 - **Issue**: GitHub Actions builds were showing version 0.0.0 instead of the expected 0.2.4
 - **Root Cause**: CMakeLists.txt defaulted to "0.0.0" for local development, but GitHub Actions wasn't using version override for all jobs
 - **Solution Applied**:
@@ -54,14 +95,14 @@
 
 ### Previous Achievement: Platform Abstraction Enhancement Complete
 - **Refactoring**: Successfully moved all platform-specific path resolution code from main.cpp to platform utilities
-- **Implementation**: 
+- **Implementation**:
   - Added `resolveAbsolutePath()` method to IPlatformUtils interface
   - Linux implementation uses `realpath()` for canonical path resolution
-  - Windows implementation uses `GetFullPathName()` for path resolution  
+  - Windows implementation uses `GetFullPathName()` for path resolution
   - macOS implementation uses `realpath()` (same as Linux)
   - Completely removed `#ifdef _WIN32` conditional compilation from main.cpp
   - Removed Windows.h include dependency from main.cpp
-- **Benefits**: 
+- **Benefits**:
   - **Cleaner main.cpp**: Zero platform-specific code or includes remaining
   - **Better abstraction**: Path resolution logic properly encapsulated in platform layer
   - **Maintainability**: All platform-specific code isolated and testable
@@ -70,12 +111,12 @@
 
 ### Previous Achievement: Dual-Platform Build System Complete
 - **Enhancement**: Removed `--windows` flag - build.sh now builds both Linux and Windows by default
-- **Implementation**: 
+- **Implementation**:
   - Single command (`./build.sh`) produces both Linux and Windows binaries simultaneously
   - Automatic cross-compilation setup with MinGW toolchain detection
   - Simultaneous packaging for both platforms with `./build.sh --package`
   - Comprehensive error handling and build verification for both platforms
-- **Results**: 
+- **Results**:
   - **Linux**: Native binary (164K) + DEB/RPM/TGZ packages (64-76K each)
   - **Windows**: Cross-compiled .exe (2.6M) + NSIS installer + ZIP packages
   - **Build Speed**: Parallel compilation with efficient dependency checking
@@ -88,7 +129,7 @@
 ### Memory Bank Organization Reference
 **IMPORTANT**: Follow content placement guidelines in `systemPatterns.md` → "Memory Bank Organization Guidelines"
 - **activeContext.md**: Current work focus and immediate context only
-- **progress.md**: Completed achievements and milestones only  
+- **progress.md**: Completed achievements and milestones only
 - **systemPatterns.md**: Architecture, patterns, and technical specifications
 - **techContext.md**: Technology stack and development environment
 - **projectbrief.md**: Project scope and core requirements
@@ -96,7 +137,7 @@
 
 ## Current Priorities
 
-### Immediate Focus: Version Fix Complete - Monitoring  
+### Immediate Focus: Version Fix Complete - Monitoring
 - **Status**: Version display issue resolved - GitHub Actions will now show 0.2.4 correctly
 - **Architecture**: Clean platform abstraction with zero conditional compilation in main application
 - **Build System**: Unified dual-platform build system with correct versioning
