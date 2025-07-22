@@ -13,20 +13,24 @@
 - **Goal Achieved**: Cleaner, more readable Windows platform implementation code
 
 ### Implementation Summary
-- **Conditional Compilation Removal**: Removed all `#ifdef _WIN32` guards from Windows platform implementation
+- **Conditional Compilation Removal**: Removed all `#ifdef _WIN32` guards from Windows platform implementations
 - **Else Block Cleanup**: Removed all `#else` blocks that contained error messages or mock implementations
 - **Header Simplification**: Moved Windows-specific headers to unconditional includes at the top
 - **Code Cleanup**: Simplified member variable declarations by removing conditional compilation guards
+- **Multiple Files**: Applied cleanup to both `windows_system_monitor.cpp` and `windows_power_manager.cpp`
 
 ### Technical Implementation Details
-- **Files Modified**: `src/platform/windows/windows_system_monitor.cpp`
+- **Files Modified**: 
+  - `src/platform/windows/windows_system_monitor.cpp`
+  - `src/platform/windows/windows_power_manager.cpp`
 - **Changes Made**:
   - Removed `#ifdef _WIN32` guards from all method implementations
   - Removed `#else` blocks with error messages and mock fallbacks
   - Simplified header includes by removing conditional compilation
-  - Cleaned up member variable declarations
+  - Cleaned up member variable declarations (system monitor)
+  - Simplified command execution methods (power manager)
 - **Build Verification**: Debug build completed successfully after changes
-- **Functionality Verified**: Executable runs correctly and shows proper help output
+- **Functionality Verified**: Executable runs correctly and shows proper version information
 
 ### Code Quality Benefits
 - **Improved Readability**: Code is cleaner without unnecessary conditional compilation
