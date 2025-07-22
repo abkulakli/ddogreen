@@ -10,13 +10,10 @@
 #include <vector>
 #include <queue>
 #include <algorithm>
-
-#ifdef _WIN32
 #include <windows.h>
 #include <pdh.h>
 #include <pdhmsg.h>
 #pragma comment(lib, "pdh.lib")
-#endif
 
 /**
  * Windows-specific system monitor implementation
@@ -40,28 +37,22 @@ public:
     }
 
     virtual ~WindowsSystemMonitor() {
-#ifdef _WIN32
         // Cleanup PDH resources
         if (m_cpuQuery != nullptr) {
             PdhCloseQuery(m_cpuQuery);
         }
-#endif
     }
 
     /**
      * Get system load average
-     * Windows doesn't have native load averages, so we calculate from CPU usage
+     * Windows doesn't have native load averages, so we use processor queue length
      * @return load average
      */
     double getLoadAverage() override {
-        Logger::debug("Getting Windows system load average");
+        Logger::debug("Getting Windows system load average via processor queue length");
         
-        // Get current CPU usage percentage
-        const double cpuUsage = getCurrentCpuUsage();
-        
-        // Convert CPU usage percentage to load average equivalent
-        // Load average is typically: (CPU usage / 100) * core count
-        const double currentLoad = (cpuUsage / 100.0) * m_coreCount;
+        // Get current processor queue length (real load indicator)
+        const double currentLoad = getCurrentQueueLength();
         
         // Update our moving averages
         updateLoadAverages(currentLoad);
@@ -93,7 +84,6 @@ private:
      * Initialize CPU monitoring using Performance Counters
      */
     void initializeCpuMonitoring() {
-#ifdef _WIN32
         Logger::debug("Initializing Windows Performance Counters");
         
         // Create PDH query
@@ -112,6 +102,15 @@ private:
             return;
         }
         
+        // Add processor queue length counter (Windows equivalent of load average)
+        status = PdhAddCounterW(m_cpuQuery, L"\\System\\Processor Queue Length", 0, &m_queueCounter);
+        if (status != ERROR_SUCCESS) {
+            Logger::error("Failed to add processor queue length counter: " + std::to_string(status));
+            PdhCloseQuery(m_cpuQuery);
+            m_cpuQuery = nullptr;
+            return;
+        }
+        
         // Initialize with first sample (baseline)
         status = PdhCollectQueryData(m_cpuQuery);
         if (status != ERROR_SUCCESS) {
@@ -121,10 +120,7 @@ private:
             return;
         }
         
-        Logger::debug("Performance Counters initialized successfully");
-#else
-        Logger::info("CROSS-PLATFORM: Would initialize Windows Performance Counters");
-#endif
+        Logger::debug("Performance Counters (CPU usage and processor queue length) initialized successfully");
     }
     
     /**
@@ -132,33 +128,19 @@ private:
      * @return CPU usage as percentage (0.0 to 100.0)
      */
     double getCurrentCpuUsage() {
-#ifdef _WIN32
         if (m_cpuQuery == nullptr) {
             Logger::debug("CPU query not initialized, returning 0%");
             return 0.0;
         }
         
-        // PDH requires at least two calls with a delay to calculate CPU usage
-        // First call establishes baseline, second call calculates the percentage
-        
-        // First collection (baseline)
+        // Collect current CPU data
         PDH_STATUS status = PdhCollectQueryData(m_cpuQuery);
         if (status != ERROR_SUCCESS) {
-            Logger::debug("Failed to collect baseline CPU data: " + std::to_string(status));
+            Logger::debug("Failed to collect CPU data: " + std::to_string(status));
             return 0.0;
         }
         
-        // Wait at least 1 second for meaningful CPU calculation
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-        
-        // Second collection (actual measurement)
-        status = PdhCollectQueryData(m_cpuQuery);
-        if (status != ERROR_SUCCESS) {
-            Logger::debug("Failed to collect CPU measurement data: " + std::to_string(status));
-            return 0.0;
-        }
-        
-        // Get formatted value
+        // Get formatted CPU usage value
         PDH_FMT_COUNTERVALUE value;
         status = PdhGetFormattedCounterValue(m_cpuCounter, PDH_FMT_DOUBLE, NULL, &value);
         if (status != ERROR_SUCCESS) {
@@ -169,14 +151,37 @@ private:
         const double cpuUsage = value.doubleValue;
         
         return cpuUsage;
-#else
-        // Mock for cross-compilation
-        auto now = std::chrono::steady_clock::now().time_since_epoch();
-        auto seconds = std::chrono::duration_cast<std::chrono::seconds>(now).count();
-        double mockUsage = 10.0 + (seconds % 30) * 2.0; // Varies between 10% and 70%
-        Logger::debug("CROSS-PLATFORM: Mock CPU usage: " + std::to_string(mockUsage) + "%");
-        return mockUsage;
-#endif
+    }
+    
+    /**
+     * Get current processor queue length (Windows equivalent of load average)
+     * @return Number of threads waiting for CPU time
+     */
+    double getCurrentQueueLength() {
+        if (m_cpuQuery == nullptr) {
+            Logger::debug("CPU query not initialized, returning 0 queue length");
+            return 0.0;
+        }
+        
+        // Collect current performance data
+        PDH_STATUS status = PdhCollectQueryData(m_cpuQuery);
+        if (status != ERROR_SUCCESS) {
+            Logger::debug("Failed to collect queue length data: " + std::to_string(status));
+            return 0.0;
+        }
+        
+        // Get formatted queue length value
+        PDH_FMT_COUNTERVALUE value;
+        status = PdhGetFormattedCounterValue(m_queueCounter, PDH_FMT_DOUBLE, NULL, &value);
+        if (status != ERROR_SUCCESS) {
+            Logger::debug("Failed to get formatted queue length value: " + std::to_string(status));
+            return 0.0;
+        }
+        
+        const double queueLength = value.doubleValue;
+        Logger::debug("Current processor queue length: " + std::to_string(queueLength));
+        
+        return queueLength;
     }
     
     /**
@@ -230,20 +235,15 @@ private:
      * @return number of CPU cores
      */
     int getCpuCoreCountInternal() {
-#ifdef _WIN32
         Logger::debug("Getting CPU core count from Windows");
         
         SYSTEM_INFO sysInfo;
         GetSystemInfo(&sysInfo);
         
         const int coreCount = static_cast<int>(sysInfo.dwNumberOfProcessors);
+        Logger::debug("Windows CPU core count: " + std::to_string(coreCount));
         
         return coreCount;
-#else
-        // Mock for cross-compilation
-        Logger::debug("CROSS-PLATFORM: Mock CPU core count");
-        return 4; // Mock 4 cores
-#endif
     }
 
     // Member variables
@@ -251,10 +251,9 @@ private:
     bool m_available;
     std::queue<double> m_loadHistory;
     
-#ifdef _WIN32
     PDH_HQUERY m_cpuQuery = nullptr;
     PDH_HCOUNTER m_cpuCounter = nullptr;
-#endif
+    PDH_HCOUNTER m_queueCounter = nullptr;
 };
 
 // Factory function for creating Windows system monitor

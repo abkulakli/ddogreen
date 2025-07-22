@@ -1,11 +1,102 @@
 # Active Context - DDOGreen
 
 ## Current Work Focus
-**Project Status**: Platform abstraction refinement completed
+**Project Status**: Windows Platform Code Cleanup Completed
 **Last Updated**: July 22, 2025
-**Current State**: Cross-platform main.cpp cleanup completed
+**Current State**: Removed unnecessary conditional compilation from Windows platform implementation
 
-## Recent Implementation: Platform Abstraction Refinement - COMPLETED
+## Recent Implementation: Windows Platform Code Cleanup - COMPLETED
+
+### Completed Task: Removed Unnecessary Conditional Compilation from Windows Platform Files
+- **Issue Resolved**: Windows-specific platform files contained unnecessary `#ifdef _WIN32` guards and else blocks
+- **Problem Solved**: Redundant conditional compilation in platform-specific files that are only compiled on Windows
+- **Goal Achieved**: Cleaner, more readable Windows platform implementation code
+
+### Implementation Summary
+- **Conditional Compilation Removal**: Removed all `#ifdef _WIN32` guards from Windows platform implementation
+- **Else Block Cleanup**: Removed all `#else` blocks that contained error messages or mock implementations
+- **Header Simplification**: Moved Windows-specific headers to unconditional includes at the top
+- **Code Cleanup**: Simplified member variable declarations by removing conditional compilation guards
+
+### Technical Implementation Details
+- **Files Modified**: `src/platform/windows/windows_system_monitor.cpp`
+- **Changes Made**:
+  - Removed `#ifdef _WIN32` guards from all method implementations
+  - Removed `#else` blocks with error messages and mock fallbacks
+  - Simplified header includes by removing conditional compilation
+  - Cleaned up member variable declarations
+- **Build Verification**: Debug build completed successfully after changes
+- **Functionality Verified**: Executable runs correctly and shows proper help output
+
+### Code Quality Benefits
+- **Improved Readability**: Code is cleaner without unnecessary conditional compilation
+- **Platform-Specific Focus**: Code clearly represents Windows-only implementation
+- **Reduced Complexity**: No conditional compilation logic to maintain in platform files
+- **Consistency**: Aligns with platform abstraction architecture where platform-specific files are pure implementations
+
+## Previous Implementation: Build System Simplification - COMPLETED
+
+### Completed Task: Removed PowerShell Build Script in Favor of Direct CMake Usage
+- **Issue Resolved**: Redundant build.ps1 PowerShell script when CMake presets provide better build management
+- **Problem Solved**: Unnecessary wrapper script complexity when CMake provides native preset support
+- **Goal Achieved**: Simplified build process using standard CMake commands and presets
+
+### Implementation Summary
+- **Script Removal**: Completely removed `build.ps1` PowerShell wrapper script
+- **CMake Presets**: Project uses `CMakePresets.json` for standardized build configurations
+- **Direct CMake Usage**: Builds now use standard CMake commands with presets
+- **Build Verification**: Both debug and release builds tested and working correctly
+
+### Technical Implementation Details
+- **Files Removed**: `build.ps1` - PowerShell build wrapper script
+- **CMake Presets Available**:
+  - `debug` - Debug configuration with tests enabled
+  - `release` - Release configuration with tests enabled
+- **Build Commands**:
+  - Configure: `cmake --preset debug` or `cmake --preset release`
+  - Build: `cmake --build --preset debug` or `cmake --build --preset release`
+- **Build Output Locations**:
+  - Debug: `build/debug/Debug/ddogreen.exe`
+  - Release: `build/release/Debug/ddogreen.exe`
+
+### Build System Benefits
+- **Standard CMake**: Uses industry-standard CMake commands and presets
+- **Cross-Platform**: CMake presets work across different platforms and IDEs
+- **IDE Integration**: Better integration with VS Code, Visual Studio, and other CMake-aware IDEs
+- **Simplified Maintenance**: No custom script logic to maintain
+- **Package Generation**: CMake presets include package generation configurations
+
+## Previous Implementation: Windows Real CPU Queue Length Implementation - COMPLETED
+
+### Completed Task: Removed Mock Implementation and Added Real Processor Queue Length
+- **Issue Resolved**: Windows system monitor used mock/fake data instead of real processor queue monitoring
+- **Problem Solved**: CPU usage percentage conversion was inaccurate substitute for load average; mock implementation provided fake data
+- **Goal Achieved**: True Windows load average equivalent using processor queue length performance counters
+
+### Implementation Summary
+- **Mock Code Removal**: Completely removed all mock/fake implementations from Windows system monitor
+- **Real Queue Length**: Implemented `getCurrentQueueLength()` using Windows Performance Counter `\System\Processor Queue Length`
+- **Performance Enhancement**: Removed unnecessary 1-second sleep from CPU monitoring for better responsiveness
+- **Load Average Accuracy**: Direct use of processor queue length instead of CPU percentage conversion for accurate load measurement
+
+### Technical Implementation Details
+- **Files Modified**: `src/platform/windows/windows_system_monitor.cpp`
+- **New Performance Counter**: Added `\System\Processor Queue Length` counter for real queue monitoring
+- **Method Changes**:
+  - `initializeCpuMonitoring()`: Added processor queue length counter initialization
+  - `getCurrentQueueLength()`: New method for real processor queue length monitoring
+  - `getLoadAverage()`: Updated to use real queue length instead of CPU percentage
+  - `getCurrentCpuUsage()`: Removed 1-second sleep and mock implementation
+  - `getCpuCoreCountInternal()`: Removed mock fallback implementation
+- **Architecture Compliance**: Maintained platform abstraction while improving Windows-specific implementation quality
+
+### Windows Performance Counter Integration
+- **Primary Counter**: `\System\Processor Queue Length` - Direct equivalent to Linux load average
+- **Secondary Counter**: `\Processor(_Total)\% Processor Time` - Maintained for potential future use
+- **Performance Data Collection**: Single PDH query collecting both counters efficiently
+- **Error Handling**: Comprehensive error handling for all PDH operations with debug logging
+
+## Previous Implementation: Platform Abstraction Refinement - COMPLETED
 
 ### Completed Task: Removed Linux-specific unistd.h from main.cpp
 - **Issue Resolved**: main.cpp included unistd.h which is Linux-only, breaking Windows portability
@@ -64,7 +155,7 @@
 
 ### Cross-Platform Build System Status
 - **Linux Development**: CMake presets continue to work (`cmake --preset release`)
-- **Windows Development**: build.ps1 PowerShell script for native Windows builds  
+- **Windows Development**: CMake presets for native Windows builds (`cmake --preset debug|release`)
 - **Cross-Compilation**: MinGW toolchain verified for Windows builds from Linux
 - **Testing**: Both platform executables tested and validated
 
@@ -89,7 +180,7 @@
 ### Immediate Focus: Memory Bank Alignment
 - **Status**: Documentation cleanup in progress to match actual codebase
 - **Architecture**: Verify platform abstraction still matches implementation
-- **Build System**: Update all references to use correct CMake preset + build.ps1 workflow
+- **Build System**: Standard CMake presets workflow for all platforms
 - **Documentation**: Ensure memory bank accurately reflects current state
 - **Testing**: Verify current test infrastructure and documentation
 
@@ -97,7 +188,7 @@
 
 ### Current Technical State
 - **Platform Abstraction**: Clean separation verified and current
-- **Build System**: CMake presets for Linux development, build.ps1 for Windows  
+- **Build System**: CMake presets for cross-platform development
 - **Testing Infrastructure**: GoogleTest integration available via BUILD_TESTS=ON
 - **Version Strategy**: Development builds show 0.0.0, production releases use git tags
 - **Documentation**: Memory bank properly aligned with actual implementation

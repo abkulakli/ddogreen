@@ -28,20 +28,23 @@ ctest --preset debug-tests
 cd build/release && cpack
 ```
 
-#### Windows PowerShell Build
+#### Windows CMake Build
 ```powershell
-# Windows-specific build script
-./build.ps1                         # Windows build using Visual Studio or MinGW
+# Windows-specific CMake commands
+cmake --preset debug               # Configure debug build
+cmake --build --preset debug       # Build debug executable
+cmake --preset release             # Configure release build  
+cmake --build --preset release     # Build release executable
 ```
 
 #### Build Directories Structure
 ```
 build/
 ├── debug/
-│   ├── ddogreen (Linux debug binary)
+│   ├── Debug/ddogreen.exe (Windows debug binary)
 │   └── CMakeCache.txt
 └── release/
-    ├── ddogreen (Linux release binary)  
+    ├── Debug/ddogreen.exe (Windows release binary)  
     └── CMakeCache.txt
 ```
 
@@ -55,15 +58,16 @@ cmake --build --preset debug        # Build debug executable
 cmake --preset release              # Release build configuration  
 cmake --build --preset release      # Build release executable
 
-# Windows-specific
-./build.ps1                         # PowerShell build script for Windows
+# Cross-platform standard commands
+cmake --preset debug|release        # Configure build
+cmake --build --preset debug|release # Build executable
 ```
 
 #### Build Requirements
 - **cmake**: 3.16 or later
 - **make**: GNU make or compatible (Linux)
 - **gcc/g++**: C++17 support required
-- **Visual Studio or MinGW**: For Windows builds (build.ps1)
+- **Visual Studio or MinGW**: For Windows builds with CMake
 
 #### Current Build Features
 - **CMake Presets**: VS Code integration with standard workflow
@@ -113,7 +117,7 @@ sudo apt install mingw-w64 mingw-w64-tools
 # NSIS for Windows installer creation
 sudo apt install nsis
 
-# Note: Primary Windows development uses build.ps1 with native tools
+# Note: Primary Windows development uses CMake presets with native tools
 ```
 
 #### Build Dependencies
@@ -391,9 +395,9 @@ install(TARGETS ddogreen DESTINATION /usr/local/bin)
 install(FILES systemd/ddogreen.service DESTINATION /etc/systemd/system)
 ```
 
-### Build Scripts
-- **build.ps1**: PowerShell build script for Windows development
-- **CMakePresets.json**: Defines debug and release build configurations
+### Build Configuration
+- **CMakePresets.json**: Defines debug and release build configurations for cross-platform development
+- **Standard CMake**: Uses industry-standard CMake commands and presets for all platforms
 - **VS Code Tasks**: Integrated build, test, and debug workflows
 
 ## Code Organization
