@@ -7,7 +7,17 @@
 
 ## Current Context: CI/CD Workflow Cleanup Complete ✅
 
-### Latest Fix: CI/CD Workflow Updated for Service Manager Removal
+### Latest Fix: TGZ Package Uninstallation Simplified
+- **Issue**: TGZ package uninstallation failed in CI due to interactive prompt asking to remove configuration directory
+- **Root Cause**: `install.sh --uninstall` was prompting for user confirmation in non-interactive CI environment
+- **Solution**: Simplified uninstallation to always remove configuration directory without prompts
+- **Implementation**: 
+  - Removed interactive confirmation prompt entirely
+  - Always remove `/etc/ddogreen` directory during uninstallation
+  - Simplified argument parsing by removing `--force` flag
+- **Benefits**: Clean, predictable uninstallation behavior for both CI and manual use
+
+### Previous Fix: CI/CD Workflow Updated for Service Manager Removal
 - **Issue**: CI/CD workflow contained obsolete `sudo ddogreen --install` and `sudo ddogreen --uninstall` commands
 - **Root Cause**: These commands were removed when we eliminated the service manager abstraction layer
 - **Solution**: Updated `.github/workflows/unified-ci-cd.yml` to use proper installation methods:

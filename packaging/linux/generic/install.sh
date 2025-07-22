@@ -219,16 +219,10 @@ uninstall_ddogreen() {
     rm -f "$LOG_FILE"
     rm -f "$PID_FILE"
     
-    # Remove configuration directory (ask user first)
+    # Remove configuration directory
     if [[ -d "/etc/ddogreen" ]]; then
-        echo -n "Remove configuration directory /etc/ddogreen? [y/N]: "
-        read -r response
-        if [[ "$response" =~ ^[Yy]$ ]]; then
-            rm -rf "/etc/ddogreen"
-            print_info "Configuration directory removed."
-        else
-            print_info "Configuration directory preserved."
-        fi
+        rm -rf "/etc/ddogreen"
+        print_info "Configuration directory removed."
     fi
     
     print_success "ddogreen has been completely uninstalled."
@@ -277,9 +271,9 @@ Options:
   --help        Show this help message
 
 Examples:
-  sudo ./install.sh --install      # Install and start service
-  sudo ./install.sh --uninstall    # Stop and remove service
-  sudo ./install.sh --status       # Check current status
+  sudo ./install.sh --install         # Install and start service
+  sudo ./install.sh --uninstall       # Stop and remove service
+  sudo ./install.sh --status          # Check current status
 
 Requirements:
   - Linux with systemd
@@ -295,32 +289,55 @@ EOF
 }
 
 # Main script logic
-case "${1:-}" in
-    --install)
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --install)
+            ACTION="install"
+            shift
+            ;;
+        --uninstall)
+            ACTION="uninstall"
+            shift
+            ;;
+        --status)
+            ACTION="status"
+            shift
+            ;;
+        --help)
+            ACTION="help"
+            shift
+            ;;
+        *)
+            print_error "Unknown option: $1"
+            echo
+            show_usage
+            exit 1
+            ;;
+    esac
+done
+
+# Execute action
+case "${ACTION:-}" in
+    install)
         check_root
         check_systemd
         check_tlp
         install_ddogreen
         ;;
-    --uninstall)
+    uninstall)
         check_root
         check_systemd
         uninstall_ddogreen
         ;;
-    --status)
+    status)
         show_status
         ;;
-    --help)
+    help)
         show_usage
         ;;
     "")
         print_error "No option specified"
-        echo
-        show_usage
-        exit 1
-        ;;
-    *)
-        print_error "Unknown option: $1"
         echo
         show_usage
         exit 1
