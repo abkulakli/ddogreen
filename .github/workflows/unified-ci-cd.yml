@@ -26,7 +26,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential cmake libgtest-dev
+        sudo apt-get install -y build-essential cmake
 
     - name: Configure CMake
       run: |
@@ -108,14 +108,14 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential cmake libgtest-dev
+        sudo apt-get install -y build-essential cmake
 
     - name: Test with standard CMake (backward compatibility)
       run: |
         echo "=== Testing Standard CMake Build ==="
         cmake -B build-test -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON
         cmake --build build-test -j$(nproc)
-        
+
         echo "=== Running Standard CMake Tests ==="
         cd build-test
         ctest --output-on-failure --verbose
@@ -174,7 +174,7 @@ jobs:
     - name: Install packaging dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential cmake rpm dpkg-dev libgtest-dev
+        sudo apt-get install -y build-essential cmake rpm dpkg-dev
 
     - name: Download build artifacts
       uses: actions/download-artifact@v4
@@ -485,19 +485,19 @@ jobs:
     - name: Test Windows NSIS installer structure
       run: |
         Write-Host "=== Testing Windows NSIS Installer ==="
-        
+
         # List installer files
-        Get-ChildItem *.exe | ForEach-Object { 
+        Get-ChildItem *.exe | ForEach-Object {
           Write-Host "Found installer: $($_.Name)"
           Write-Host "Size: $($_.Length) bytes"
         }
-        
+
         # Note: We can't actually install and test on GitHub Actions Windows runner
         # due to admin restrictions, but we can verify the installer was created
         Write-Host "Windows installer validation completed - installer file created successfully"
 
   validate-windows-zip:
-    needs: package-windows  
+    needs: package-windows
     runs-on: windows-latest
 
     steps:
@@ -527,7 +527,7 @@ jobs:
         if ($executable) {
             Write-Host "Found ddogreen.exe: $executable"
             $exePath = Join-Path "extracted" $executable
-            
+
             # Test executable functionality
             Write-Host "Testing executable functionality..."
             & $exePath --help
@@ -662,7 +662,7 @@ jobs:
           - TLP installed (`sudo apt install tlp` / `sudo dnf install tlp`)
           - Root privileges for installation
 
-          #### Windows Requirements  
+          #### Windows Requirements
           - Windows 10/11 or Windows Server 2016+
           - Administrator privileges for service installation
           - PowerShell (pre-installed on modern Windows)
