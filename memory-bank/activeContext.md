@@ -5,9 +5,18 @@
 **Last Updated**: July 22, 2025
 **Current State**: Maintenance mode - all features implemented and tested
 
-## Current Context: Service Manager Code Cleanup Complete ✅
+## Current Context: CI/CD Workflow Cleanup Complete ✅
 
-### Recent Major Achievement: Complete Service Manager Removal
+### Latest Fix: CI/CD Workflow Updated for Service Manager Removal
+- **Issue**: CI/CD workflow contained obsolete `sudo ddogreen --install` and `sudo ddogreen --uninstall` commands
+- **Root Cause**: These commands were removed when we eliminated the service manager abstraction layer
+- **Solution**: Updated `.github/workflows/unified-ci-cd.yml` to use proper installation methods:
+  - **DEB packages**: Service installation/removal handled automatically by package manager scripts
+  - **TGZ packages**: Use `./install.sh --install` and `./install.sh --uninstall` commands
+- **Impact**: CI/CD pipeline now correctly tests the actual installation/removal methods used in production
+- **Verification**: All `ddogreen --install/--uninstall` references removed, only legitimate `--help` and `--version` remain
+
+### Previous Major Achievement: Complete Service Manager Removal
 - **Completed**: Successfully removed entire service manager abstraction layer (805+ lines of code)
 - **Impact**: Significantly simplified codebase while maintaining all functionality through package installers
 - **Testing**: Full build verification, all 24 unit tests passing, executable functionality verified

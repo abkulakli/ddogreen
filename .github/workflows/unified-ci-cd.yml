@@ -165,13 +165,10 @@ jobs:
         # Test service functionality (don't start daemon in CI)
         sudo ddogreen --help
         
-        # Test service installation (without starting)
-        echo "Testing service installation..."
-        sudo ddogreen --install
-        
-        # Verify service file was created
+        # Verify service was installed automatically by DEB package
+        echo "Verifying service installation..."
         test -f /etc/systemd/system/ddogreen.service
-        echo "Service file created successfully"
+        echo "Service file created successfully by package installation"
         
         # Validate service file syntax (if systemd-analyze is available)
         if command -v systemd-analyze >/dev/null 2>&1; then
@@ -180,11 +177,8 @@ jobs:
             echo "systemd-analyze not available, skipping service file validation"
         fi
         
-        # Clean up service for removal test
-        sudo ddogreen --uninstall
-        
         echo "=== Testing DEB Package Removal ==="
-        # Remove package
+        # Remove package (DEB removal is handled by package manager)
         sudo apt-get remove -y ddogreen
         
         # Verify removal
@@ -286,13 +280,10 @@ jobs:
         # Test service functionality
         ddogreen --help
         
-        # Test service installation (without starting)
-        echo "Testing service installation..."
-        sudo ddogreen --install
-        
-        # Verify service file was created
+        # Verify service file was created by install script
+        echo "Verifying service installation..."
         test -f /etc/systemd/system/ddogreen.service
-        echo "Service file created successfully"
+        echo "Service file created successfully by install script"
         
         # Validate service file syntax (if systemd-analyze is available)
         if command -v systemd-analyze >/dev/null 2>&1; then
@@ -302,8 +293,8 @@ jobs:
         fi
         
         echo "=== Testing TGZ Package Removal ==="
-        # Uninstall using ddogreen command
-        sudo ddogreen --uninstall
+        # Uninstall using install script (TGZ packages use install.sh --uninstall)
+        sudo ./install.sh --uninstall
         
         # Verify removal
         ! which ddogreen 2>/dev/null && ! command -v ddogreen 2>/dev/null || echo "WARNING: ddogreen still found after removal"
