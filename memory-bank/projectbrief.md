@@ -12,8 +12,8 @@
 - **Service Integration**: Full systemd (Linux) and SCM (Windows) service management
 - **Cross-Platform Architecture**: Platform abstraction layer complete with real implementations
 - **Windows Functionality**: Complete Windows power plan and service management implementation
-- **Build System**: Unified dual-platform build system producing both Linux and Windows binaries
-- **Quality Assurance**: Clean build, verified executables, ready for cross-platform deployment
+- **Build System**: CMake presets for development with PowerShell script for Windows
+- **Quality Assurance**: Clean build, verified executables, ready for deployment
 
 ## Core Objective: ACHIEVED - Cross-Platform with Clean Architecture
 Successfully created a robust power management daemon that:
