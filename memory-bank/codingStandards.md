@@ -177,6 +177,30 @@ public:
 };
 ```
 
+#### Monitoring Frequency Configuration Pattern
+```cpp
+// CORRECT - Dynamic load calculation adapting to monitoring frequency
+void setMonitoringFrequency(int frequencySeconds) override {
+    m_monitoringFrequency = frequencySeconds;
+    
+    // Calculate dynamic sample window: 60 seconds / frequency
+    const size_t samplesFor1Min = (m_monitoringFrequency <= 0) ? 1 : 
+                                  (60 / m_monitoringFrequency < 1) ? 1 : 
+                                  (60 / m_monitoringFrequency);
+    
+    // Update sample window for load averaging
+    updateSampleWindow(samplesFor1Min);
+    Logger::debug("Monitoring frequency set to " + std::to_string(frequencySeconds) + " seconds");
+}
+
+// WRONG - Fixed calculations ignoring configuration
+void setMonitoringFrequency(int frequencySeconds) override {
+    // Ignore frequency, always use 60 samples - NOT CORRECT
+    const size_t fixedSamples = 60;
+    updateSampleWindow(fixedSamples);
+}
+```
+
 ### 5. Error Handling Standards
 
 #### Exception Policy

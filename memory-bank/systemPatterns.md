@@ -49,10 +49,12 @@ Application Layer (main.cpp, daemon.cpp) - ZERO platform-specific code
 
 #### Windows Implementation
 - **Power Management**: Power Plans via `powercfg`
-- **System Monitoring**: Performance Counters
+- **System Monitoring**: Performance Counters (Processor Queue Length for load, CPU usage for reference)
 - **Service Management**: Windows Service Control Manager
 - **Privilege Checking**: Windows Token API
 - **Path Resolution**: `GetFullPathName()` for Windows-compatible path resolution
+- **Load Average Calculation**: Dynamic sampling based on configurable monitoring frequency
+- **Performance Counters**: PDH (Performance Data Helper) API for real-time system metrics
 
 #### macOS Implementation (Future)
 - **Power Management**: `pmset` integration planned
@@ -79,7 +81,8 @@ Application Layer (main.cpp, daemon.cpp) - ZERO platform-specific code
 
 ### Configuration File Format
 ```ini
-# /etc/ddogreen/ddogreen.conf
+# Linux: /etc/ddogreen/ddogreen.conf 
+# Windows: Custom path required (use --config option)
 high_performance_threshold=0.70
 power_save_threshold=0.30  
 monitoring_frequency=10
@@ -87,9 +90,11 @@ monitoring_frequency=10
 
 ### User Experience Design
 - **Number Formatting**: All outputs show exactly 2 decimal places consistently
-- **Monitoring Frequency**: Configurable (default 10 seconds for responsiveness)
+- **Configurable Monitoring Frequency**: User-settable from 1 second to 300 seconds (default 10 seconds)
+- **Adaptive Load Averaging**: Windows calculates 1-minute equivalent based on monitoring frequency
 - **Clear Logging**: Threshold information displayed in both percentage and absolute values
 - **Error Handling**: Single clear error messages, no redundant logging
+- **Cross-Platform Configuration**: Linux uses standard system paths, Windows requires custom path with --config
 
 ## Component Responsibilities
 

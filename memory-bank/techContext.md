@@ -78,26 +78,30 @@ cmake --build --preset debug|release # Build executable
 ### Platform Abstraction
 - **Design**: Generic interfaces with platform-specific implementations
 - **Compilation**: Compile-time platform selection using preprocessor directives
-- **Linux Support**: TLP integration, /proc filesystem, systemd services
-- **Windows Support**: Mock implementations (powercfg, Performance Counters, sc.exe)
+- **Linux Support**: TLP integration, /proc filesystem, systemd services, realpath
+- **Windows Support**: Power Plans, Performance Counters, SCM, GetFullPathName
 - **Binary Optimization**: Only target platform code included
+- **Real Implementation**: No mock code - all platforms have functional implementations
+- **Dynamic Load Calculation**: Windows calculates proper load averages using configurable frequency
 
-### Dependencies
+### Cross-Platform Runtime Dependencies
+```yaml
+Linux Runtime:
+  - TLP (ThinkPad Linux Advanced Power Management)
+  - systemd (service management)
+  - /proc filesystem (load average, CPU info)
 
-#### Cross-Platform Development Dependencies
-```bash
-# Ubuntu/Debian (Linux + Windows cross-compilation)
-sudo apt update
-sudo apt install build-essential cmake tlp libgtest-dev mingw-w64 nsis
+Windows Runtime:
+  - Windows Performance Toolkit (built-in)
+  - Windows Service Control Manager (built-in)
+  - powercfg command (built-in)
+  - PDH (Performance Data Helper) API (built-in)
 
-# Fedora/RHEL (Linux + Windows cross-compilation)  
-sudo dnf install gcc-c++ cmake tlp gtest-devel mingw64-gcc-c++ mingw64-winpthreads-static nsis
-
-# Arch Linux (Linux + Windows cross-compilation)
-sudo pacman -S base-devel cmake tlp gtest mingw-w64-gcc nsis
+macOS Runtime (Future):
+  - pmset command (built-in)
+  - launchd (service management, built-in)
+  - system APIs (load monitoring, built-in)
 ```
-
-#### Windows Development Dependencies
 - **Visual Studio 2019+** or **MinGW-w64** with C++17 support
 - **CMake** 3.16 or later
 - **Git** for version control
