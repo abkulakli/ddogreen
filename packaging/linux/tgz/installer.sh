@@ -262,7 +262,7 @@ show_usage() {
     cat << EOF
 ddogreen Generic Linux Installer
 
-Usage: sudo ./install.sh [OPTION]
+Usage: sudo ./installer.sh [OPTION]
 
 Options:
   --install     Install ddogreen service
@@ -271,9 +271,9 @@ Options:
   --help        Show this help message
 
 Examples:
-  sudo ./install.sh --install         # Install and start service
-  sudo ./install.sh --uninstall       # Stop and remove service
-  sudo ./install.sh --status          # Check current status
+  sudo ./installer.sh --install         # Install and start service
+  sudo ./installer.sh --uninstall       # Stop and remove service
+  sudo ./installer.sh --status          # Check current status
 
 Requirements:
   - Linux with systemd
