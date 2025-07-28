@@ -14,9 +14,10 @@ Modern laptops, especially ThinkPads, benefit greatly from intelligent power man
 
 ### Solution Delivered - All Objectives Achieved Plus Enhanced Monitoring
 ddogreen now provides the complete automated solution across multiple platforms with refined monitoring:
-- **Invisible Operation**: Users install once and never think about power management again
+- **Invisible Operation**: Users install once, configure thresholds, and never think about power management again
 - **Intelligent Decisions**: Automatically switches modes based on actual CPU activity patterns
 - **Configurable Monitoring**: User-configurable monitoring frequency (1-300 seconds) with proper load averaging
+- **Configurable Thresholds**: User-definable performance and power save thresholds via configuration file
 - **Reliable Performance**: System stays in performance mode when actively working
 - **Extended Battery**: Automatically switches to power saving mode during idle periods  
 - **Easy Monitoring**: Comprehensive logs show all system behavior and decisions
@@ -38,10 +39,12 @@ The completed application delivers on all original goals plus enhanced configura
 ```
 Linux Installation: 
   cmake --preset release && cmake --build --preset release && cpack → sudo dpkg -i ddogreen-linux.deb
+  Configuration: Edit /etc/ddogreen/ddogreen.conf for custom thresholds
 Windows Installation:
   Download ddogreen-windows.exe → Run installer
+  Configuration: Use --config option to specify custom configuration file
   
-Result: System automatically manages power on both platforms
+Result: System automatically manages power based on configured thresholds
 
 Monitoring: 
   Linux: sudo tail -f /var/log/ddogreen.log
@@ -58,7 +61,7 @@ Status:
 ### Achieved Business Value - Cross-Platform Success
 1. **Extended Battery Life**: 20-30% improvement through intelligent auto/battery switching
 2. **Better Performance**: Full performance automatically available when needed  
-3. **Zero Complexity**: No configuration, no manual management required
+3. **Simple Configuration**: Single configuration file with user-definable thresholds and monitoring frequency
 4. **Cross-Platform Deployment**: Works on Linux (TLP) and Windows (Power Plans)
 5. **Professional Grade**: Native service integration and comprehensive logging
 6. **Clean Architecture**: Maintainable codebase with proper platform abstraction

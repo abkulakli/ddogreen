@@ -23,12 +23,14 @@ Application Layer (main.cpp, daemon.cpp) - ZERO platform-specific code
 │   ├── IPowerManager (power control abstraction)
 │   ├── ISystemMonitor (load monitoring abstraction)
 │   ├── IPlatformUtils (path resolution, privilege checking)
-│   └── IDaemon (service lifecycle management)
+│   └── IDaemon (daemon lifecycle management - kept for signal handling)
 └── Platform Implementations
     ├── Linux (TLP, /proc/loadavg, systemd, realpath)
     ├── Windows (Power Plans, Performance Counters, SCM, GetFullPathName)
     └── macOS (pmset, system APIs, launchd, realpath)
 ```
+
+**Note**: IServiceManager abstraction layer was removed (service installation moved to package installers), but IDaemon interface was retained for daemon lifecycle and signal handling functionality.
 
 ### Architectural Principles
 - **ZERO platform-specific code** in application layer (achieved)
@@ -88,13 +90,20 @@ power_save_threshold=0.30
 monitoring_frequency=10
 ```
 
+### Configuration Requirements
+- **Required Configuration**: Configuration file must exist with valid settings
+- **Configurable Thresholds**: User-definable performance and power save thresholds
+- **Configurable Monitoring Frequency**: User-settable from 1 second to 300 seconds (default 10 seconds)
+- **Platform-Specific Paths**: Linux uses standard system paths, Windows requires custom path with --config
+- **Validation**: Complete parameter validation with clear error messages
+
 ### User Experience Design
 - **Number Formatting**: All outputs show exactly 2 decimal places consistently
 - **Configurable Monitoring Frequency**: User-settable from 1 second to 300 seconds (default 10 seconds)
 - **Adaptive Load Averaging**: Windows calculates 1-minute equivalent based on monitoring frequency
 - **Clear Logging**: Threshold information displayed in both percentage and absolute values
 - **Error Handling**: Single clear error messages, no redundant logging
-- **Cross-Platform Configuration**: Linux uses standard system paths, Windows requires custom path with --config
+- **Configuration Management**: Required configuration file with comprehensive validation
 
 ## Component Responsibilities
 
@@ -140,11 +149,12 @@ monitoring_frequency=10
 - **Thread Safety**: Safe for concurrent access
 
 #### Daemon
-- **Purpose**: System service lifecycle management
+- **Purpose**: Daemon lifecycle management and signal handling
 - **Daemonization**: Proper double-fork daemon process
 - **Signal Handling**: Graceful shutdown on SIGTERM, SIGINT
 - **PID Management**: Creates and manages PID file
 - **Security**: Drops unnecessary privileges where possible
+- **Note**: Service installation/uninstallation moved to package installers (IServiceManager removed)
 
 ## Key Design Patterns
 

@@ -5,7 +5,7 @@
 ### Core Technologies
 - **Language**: C++17 (Modern C++ features, standard library only)
 - **Build System**: CMake 3.16+ (Modern CMake practices)
-- **Target OS**: Linux primary, Windows support via platform abstraction
+- **Target OS**: Cross-platform with equal Linux and Windows support
 - **Architecture**: Cross-platform with compile-time platform selection
 - **Service Framework**: systemd (Linux), Windows Service Manager (Windows)
 - **Logging**: Custom implementation with logrotate integration
@@ -35,6 +35,9 @@ cmake --preset debug               # Configure debug build
 cmake --build --preset debug       # Build debug executable
 cmake --preset release             # Configure release build  
 cmake --build --preset release     # Build release executable
+
+# Windows packaging (MSI installer via NSIS)
+cd build/release && cpack          # Generate MSI installer package
 ```
 
 #### Build Directories Structure
@@ -74,6 +77,7 @@ cmake --build --preset debug|release # Build executable
 - **Separated Builds**: Debug and release in separate directories
 - **Testing Integration**: GoogleTest via `BUILD_TESTS=ON`
 - **Cross-Platform**: Native builds per platform
+- **Windows Packaging**: MSI installer generation via NSIS integration
 
 ### Platform Abstraction
 - **Design**: Generic interfaces with platform-specific implementations

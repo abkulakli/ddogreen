@@ -33,7 +33,7 @@ Successfully created a robust power management daemon that:
 ## Project Type: COMPLETED
 - **Language**: C++ (C++17 standard)
 - **Build System**: CMake 3.16+  
-- **Target Platform**: Linux primary, Windows support via platform abstraction
+- **Target Platform**: Cross-platform with equal Linux and Windows support
 - **Architecture**: Cross-platform system daemon/service with compile-time optimization
 - **Dependencies**: None (only standard C++ and platform-specific system calls)
 - **Deliverable**: Production-ready executable with full functionality
