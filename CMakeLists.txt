@@ -80,14 +80,18 @@ install(TARGETS ddogreen DESTINATION bin)
 
 # Install configuration file
 install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/config/ddogreen.conf.default"
-        DESTINATION share/ddogreen
+        DESTINATION data
         PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
 
-# Install generic installer script for TGZ package
+# Install installer scripts for ZIP packages
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/packaging/linux/tgz/installer.sh"
             DESTINATION .
             PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/packaging/windows/zip/installer.bat"
+            DESTINATION .
+            PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
 endif()
 
 # CPack configuration for platform-specific packages

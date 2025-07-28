@@ -101,8 +101,8 @@ install_ddogreen() {
     print_info "Setting up configuration..."
     mkdir -p /etc/ddogreen
     if [[ ! -f "/etc/ddogreen/ddogreen.conf" ]]; then
-        if [[ -f "share/ddogreen/ddogreen.conf.default" ]]; then
-            cp "share/ddogreen/ddogreen.conf.default" "/etc/ddogreen/ddogreen.conf"
+        if [[ -f "data/ddogreen.conf.default" ]]; then
+            cp "data/ddogreen.conf.default" "/etc/ddogreen/ddogreen.conf"
             chmod 644 "/etc/ddogreen/ddogreen.conf"
             print_success "Default configuration installed at /etc/ddogreen/ddogreen.conf"
         elif [[ -f "ddogreen.conf.default" ]]; then

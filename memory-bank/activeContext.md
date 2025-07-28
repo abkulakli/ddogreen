@@ -1,11 +1,41 @@
 # Active Context - DDOGreen
 
 ## Current Work Focus
-**Project Status**: Windows Platform Implementation Refinement Completed
+**Project Status**: ZIP Package Structure Standardization - COMPLETED
 **Last Updated**: July 28, 2025
-**Current State**: Production-ready cross-platform application with comprehensive Windows support
+**Current State**: Production-ready cross-platform application with standardized packaging
 
-## Recent Implementation: Windows Activity Monitor Frequency Support - COMPLETED
+## Recent Implementation: ZIP Package Structure Standardization - COMPLETED
+
+### Completed Task: Standardized Linux TGZ and Windows ZIP Package Structure
+- **Issue Resolved**: Inconsistent package structure between Linux TGZ and Windows ZIP packages
+- **Problem Solved**: Config files in different locations, missing installer scripts in Windows ZIP
+- **Goal Achieved**: Both packages now have identical structure with proper standardization
+
+### Implementation Summary
+- **Standardized Structure**: Both packages now use `bin/`, `data/`, `installer.{sh|bat}` layout
+- **Configuration Path**: Changed from `share/ddogreen/` to `data/` folder for consistency
+- **Installer Scripts**: Windows ZIP now includes `installer.bat` in root folder
+- **Cross-Platform Parity**: Linux TGZ and Windows ZIP packages have identical organization
+- **CMakeLists Updates**: Modified installation rules to enforce standardized structure
+
+### Package Structure (Now Standardized)
+```
+Linux TGZ / Windows ZIP:
+├── bin/
+│   └── ddogreen(.exe)           # Executable binary
+├── data/
+│   └── ddogreen.conf.default    # Default configuration file
+└── installer.{sh|bat}           # Platform-specific installer script
+```
+
+### Technical Implementation Details
+- **CMakeLists.txt**: Updated config destination from `share/ddogreen` to `data`
+- **Windows installer.bat**: Updated config search path to look in `data/` first
+- **Linux installer.sh**: Updated config search path to look in `data/` first
+- **Backwards Compatibility**: Both installers maintain fallback to old locations
+
+## Previous Implementation: Windows Activity Monitor Frequency Support - COMPLETED
 
 ### Completed Task: Enhanced Windows System Monitor with Configurable Monitoring Frequency
 - **Issue Resolved**: Windows system monitor used fixed 60-sample window regardless of monitoring frequency configuration

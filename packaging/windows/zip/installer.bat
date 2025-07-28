@@ -111,8 +111,8 @@ if not exist "%CONFIG_DIR%" (
 )
 
 if not exist "%CONFIG_FILE%" (
-    if exist "share\ddogreen\ddogreen.conf.default" (
-        copy "share\ddogreen\ddogreen.conf.default" "%CONFIG_FILE%" >nul
+    if exist "data\ddogreen.conf.default" (
+        copy "data\ddogreen.conf.default" "%CONFIG_FILE%" >nul
         call :print_success "Default configuration installed at %CONFIG_FILE%"
     ) else if exist "ddogreen.conf.default" (
         copy "ddogreen.conf.default" "%CONFIG_FILE%" >nul
