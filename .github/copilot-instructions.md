@@ -92,24 +92,34 @@ Create additional files/folders within `memory-bank/` when they help organize:
 ```
 1. Reference relevant memory bank context
 2. Execute requested task using established patterns
-3. Update documentation if significant changes made
-4. Document new insights or patterns discovered
-5. Update activeContext.md with current focus
-6. Note any changes to progress.md
+3. Automatically update documentation when significant changes are made
+4. Document new insights or patterns as they're discovered
+5. Naturally update activeContext.md with current focus
+6. Organically update progress.md when milestones are reached
 ```
 
 ## Documentation Updates
 
-Memory Bank updates occur when:
-1. Discovering new project patterns or insights
-2. After implementing significant changes
-3. When user requests with **"update memory bank"** (MUST review ALL files)
-4. When context needs clarification or correction
-5. At major project milestones
-6. When switching focus areas
+Memory Bank updates occur automatically and naturally when:
+1. Discovering new project patterns or insights during our work
+2. After implementing significant changes or features
+3. When context needs clarification or correction
+4. At major project milestones or completions
+5. When switching focus areas or starting new tasks
+6. When architectural decisions are made or refined
 
-### Update Process
-When **"update memory bank"** is requested:
+### Natural Update Process
+I will automatically update memory bank files during our conversation when:
+- We complete meaningful work that should be documented
+- I discover important patterns or architectural insights
+- Project context evolves or changes significantly
+- New technical decisions are made
+- We solve complex problems or overcome blockers
+
+I'll proactively mention when I'm updating files: *"Let me update the memory bank with what we just accomplished"* or *"I should document this new pattern we discovered."*
+
+### Manual Update Command (Optional)
+**"update memory bank"** remains available for comprehensive reviews:
 1. Review ALL memory bank files systematically
 2. Update current state in activeContext.md
 3. Document recent progress in progress.md
@@ -130,7 +140,7 @@ When **"update memory bank"** is requested:
 - Keep memory bank files concise but comprehensive
 - Focus on actionable information and decisions
 - Document the "why" behind technical choices
-- Update files when context changes significantly
+- Update files naturally as context changes
 
 ### Continuity Focus
 - Each session should feel like a continuation, not a restart
@@ -138,9 +148,15 @@ When **"update memory bank"** is requested:
 - Build upon established foundations
 - Avoid contradicting previous architectural decisions without explicit discussion
 
+### Organic Evolution
+- Memory bank evolves naturally during our work together
+- Updates happen seamlessly as part of development flow
+- Documentation stays current without requiring special commands
+- Context is preserved automatically across sessions
+
 ## Usage Commands
 
-- **"update memory bank"** - Triggers comprehensive review and update of all memory bank files
+- **"update memory bank"** - Optional comprehensive review and update of all memory bank files
 - **"check memory bank"** - Reviews current memory bank state without updates
 - **"memory bank status"** - Shows what's documented and what might need updates
 
@@ -150,8 +166,8 @@ If memory bank doesn't exist:
 1. Create `memory-bank/` directory
 2. Start with `projectbrief.md` based on workspace analysis
 3. Build other core files based on project discovery
-4. Maintain files throughout project lifecycle
+4. Maintain files throughout project lifecycle automatically
 
 REMEMBER: After every session reset, I begin completely fresh. The Memory Bank is my only link to previous work and context. It must be maintained with precision and clarity, as my effectiveness and ability to provide consistent, contextual assistance depends entirely on its accuracy and completeness.
 
-This system ensures that every conversation builds upon previous work, maintains project continuity, and respects established patterns and decisions.
+This system ensures that every conversation builds upon previous work, maintains project continuity, and respects established patterns and decisions through natural, automatic documentation updates.
