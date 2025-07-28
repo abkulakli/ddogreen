@@ -278,17 +278,54 @@ jobs:
         cpack -G NSIS
         cpack -G ZIP
 
+    - name: Create custom Windows ZIP with installer
+      run: |
+        # Extract version for naming
+        if ($env:GITHUB_REF -like "refs/tags/*") {
+          $VERSION = $env:GITHUB_REF -replace "refs/tags/", ""
+          $VERSION = $VERSION -replace "^v", ""
+        } else {
+          $VERSION = "0.0.0"
+        }
+        
+        # Create custom ZIP package directory
+        $customZipDir = "ddogreen-windows-custom"
+        New-Item -ItemType Directory -Path $customZipDir -Force
+        
+        # Copy executable to ZIP directory
+        Copy-Item "build\Release\ddogreen.exe" "$customZipDir\ddogreen.exe"
+        
+        # Copy configuration file if available
+        if (Test-Path "config\ddogreen.conf.default") {
+          Copy-Item "config\ddogreen.conf.default" "$customZipDir\ddogreen.conf.default"
+        }
+        
+        # Copy installer script
+        Copy-Item "packaging\windows\zip\installer.bat" "$customZipDir\installer.bat"
+        
+        # Create the custom ZIP package
+        $zipName = "ddogreen-$VERSION-windows-zip.zip"
+        Compress-Archive -Path "$customZipDir\*" -DestinationPath $zipName -Force
+        
+        Write-Host "Created custom Windows ZIP: $zipName"
+
     - name: Upload Windows NSIS installer
       uses: actions/upload-artifact@v4
       with:
         name: ddogreen-windows-installer
         path: build/*.exe
 
-    - name: Upload Windows ZIP package
+    - name: Upload Windows ZIP package (CMake)
+      uses: actions/upload-artifact@v4
+      with:
+        name: ddogreen-windows-zip-cmake
+        path: build/*.zip
+
+    - name: Upload Windows ZIP package (Custom)
       uses: actions/upload-artifact@v4
       with:
         name: ddogreen-windows-zip
-        path: build/*.zip
+        path: ddogreen-*-windows-zip.zip
 
     - name: Upload Windows binary
       uses: actions/upload-artifact@v4
@@ -536,6 +573,32 @@ jobs:
         } else {
             Write-Host "ERROR: ddogreen.exe not found in ZIP package"
             exit 1
+        }
+
+        # Look for installer.bat
+        $installer = Get-ChildItem -Recurse extracted -Name "installer.bat" | Select-Object -First 1
+        if ($installer) {
+            Write-Host "Found installer.bat: $installer"
+            $installerPath = Join-Path "extracted" $installer
+
+            # Test installer script functionality (without admin privileges)
+            Write-Host "Testing installer script help functionality..."
+            & cmd.exe /c "$installerPath --help"
+
+            # Test installer script status functionality
+            Write-Host "Testing installer script status functionality..."
+            & cmd.exe /c "$installerPath --status"
+        } else {
+            Write-Host "ERROR: installer.bat not found in ZIP package"
+            exit 1
+        }
+
+        # Look for configuration file
+        $configFile = Get-ChildItem -Recurse extracted -Name "ddogreen.conf.default" | Select-Object -First 1
+        if ($configFile) {
+            Write-Host "Found configuration template: $configFile"
+        } else {
+            Write-Host "WARNING: ddogreen.conf.default not found in ZIP package"
         }
 
         Write-Host "Windows ZIP package validation completed"
