@@ -284,32 +284,31 @@ goto :eof
 REM Parse command line arguments
 :parse_args
 set ACTION=
-set ARG_INDEX=0
 
-:parse_loop
-for %%A in (%*) do (
-    set /a ARG_INDEX+=1
-    if "%%A"=="--install" (
-        set ACTION=install
-        goto parse_loop
-    )
-    if "%%A"=="--uninstall" (
-        set ACTION=uninstall
-        goto parse_loop
-    )
-    if "%%A"=="--status" (
-        set ACTION=status
-        goto parse_loop
-    )
-    if "%%A"=="--help" (
-        set ACTION=help
-        goto parse_loop
-    )
-    call :print_error "Unknown option: %%A"
+REM Check if no arguments provided
+if "%~1"=="" (
+    call :print_error "No option specified"
     echo.
     call :show_usage
     exit /b 1
 )
+
+REM Parse first argument
+if "%~1"=="--install" (
+    set ACTION=install
+) else if "%~1"=="--uninstall" (
+    set ACTION=uninstall
+) else if "%~1"=="--status" (
+    set ACTION=status
+) else if "%~1"=="--help" (
+    set ACTION=help
+) else (
+    call :print_error "Unknown option: %~1"
+    echo.
+    call :show_usage
+    exit /b 1
+)
+
 goto execute_action
 REM Execute action
 :execute_action
