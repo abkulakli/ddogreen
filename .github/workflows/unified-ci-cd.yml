@@ -227,12 +227,6 @@ jobs:
         name: ddogreen-tgz
         path: build/release/*.tar.gz
 
-    - name: Upload binary
-      uses: actions/upload-artifact@v4
-      with:
-        name: ddogreen-binary-linux
-        path: build/release/ddogreen
-
   # Step 3b: Package Building (Windows)
   package-windows:
     needs: [build-windows, test-windows]
@@ -343,12 +337,6 @@ jobs:
       with:
         name: ddogreen-windows-zip
         path: ddogreen-*-windows-zip.zip
-
-    - name: Upload Windows binary
-      uses: actions/upload-artifact@v4
-      with:
-        name: ddogreen-binary-windows
-        path: build/Release/ddogreen.exe
 
   # Step 4: Package Validation (Sequential)
   validate-deb:
@@ -652,16 +640,14 @@ jobs:
         VERSION="${GITHUB_REF#refs/tags/}"
         echo "Creating release files for version: $VERSION"
 
-        # Copy and rename Linux files with version
+        # Copy and rename Linux package files with version
         cp ddogreen-deb/*.deb "release-files/ddogreen-${VERSION}-linux.deb"
         cp ddogreen-rpm/*.rpm "release-files/ddogreen-${VERSION}-linux.rpm"
         cp ddogreen-tgz/*.tar.gz "release-files/ddogreen-${VERSION}-linux.tar.gz"
-        cp ddogreen-binary-linux/ddogreen "release-files/ddogreen-${VERSION}-linux-x64"
 
-        # Copy and rename Windows files with version
+        # Copy and rename Windows package files with version
         cp ddogreen-windows-installer/*.exe "release-files/ddogreen-${VERSION}-windows-installer.exe"
         cp ddogreen-windows-zip/*.zip "release-files/ddogreen-${VERSION}-windows.zip"
-        cp ddogreen-binary-windows/ddogreen.exe "release-files/ddogreen-${VERSION}-windows-x64.exe"
 
         # Create checksums
         cd release-files
@@ -720,20 +706,6 @@ jobs:
           tar -xzf ddogreen-${{ github.ref_name }}-linux.tar.gz
           cd ddogreen-*/
           sudo ./installer.sh --install
-          ```
-
-          #### Standalone Binaries
-          ```bash
-          # Linux
-          wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/ddogreen-${{ github.ref_name }}-linux-x64
-          chmod +x ddogreen-${{ github.ref_name }}-linux-x64
-          sudo ./ddogreen-${{ github.ref_name }}-linux-x64 --help
-          ```
-
-          ```powershell
-          # Windows
-          Invoke-WebRequest -Uri "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/ddogreen-${{ github.ref_name }}-windows-x64.exe" -OutFile "ddogreen.exe"
-          .\ddogreen.exe --help
           ```
 
           ### Requirements
