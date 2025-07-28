@@ -295,9 +295,26 @@ jobs:
         # Copy executable to ZIP directory
         Copy-Item "build\Release\ddogreen.exe" "$customZipDir\ddogreen.exe"
         
-        # Copy configuration file if available
-        if (Test-Path "config\ddogreen.conf.default") {
-          Copy-Item "config\ddogreen.conf.default" "$customZipDir\ddogreen.conf.default"
+        # Search for the configuration file in multiple locations
+        $configPaths = @(
+          "config\ddogreen.conf.default",
+          ".\ddogreen.conf.default",
+          "packaging\config\ddogreen.conf.default"
+        )
+        
+        $configFile = $null
+        foreach ($path in $configPaths) {
+          if (Test-Path $path) {
+            $configFile = $path
+            break
+          }
+        }
+        
+        if ($configFile) {
+          Copy-Item $configFile "$customZipDir\ddogreen.conf.default"
+          Write-Host "Configuration file found and copied: $configFile"
+        } else {
+          Write-Warning "Configuration file not found in any of the expected locations."
         }
         
         # Copy installer script
