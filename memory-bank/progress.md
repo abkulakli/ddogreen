@@ -85,7 +85,7 @@
 ### Executable Simplification and Package Installer Enhancement
 - **Command Line Cleanup**: Removed `--install` and `--uninstall` options from main executable
 - **Service Logic Migration**: Moved service installation/uninstallation logic from C++ to package installers
-- **Generic Installer Enhancement**: Updated `packaging/linux/generic/install.sh` with direct systemd service creation
+- **Generic Installer Enhancement**: Updated `packaging/linux/tgz/installer.sh` with direct systemd service creation
 - **DEB Package Updates**: Enhanced postinst/postrm scripts with complete service management logic
 - **RPM Package Updates**: Updated post/postun/preun scripts with proper service lifecycle management
 - **Cross-Platform Consistency**: All Linux package types now use identical service installation approach
