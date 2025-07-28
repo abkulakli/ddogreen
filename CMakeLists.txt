@@ -85,7 +85,7 @@ install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/config/ddogreen.conf.default"
 
 # Install generic installer script for TGZ package
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/packaging/linux/generic/install.sh"
+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/packaging/linux/tgz/installer.sh"
             DESTINATION .
             PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 endif()

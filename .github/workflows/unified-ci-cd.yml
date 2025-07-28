@@ -429,13 +429,13 @@ jobs:
         find . -type f | sort
 
         # Verify required files exist
-        test -f install.sh
-        test -x install.sh
+        test -f installer.sh
+        test -x installer.sh
         # Binary should be in bin/ directory (CPack structure)
         test -f bin/ddogreen || test -f ddogreen
 
         # Install using install script
-        sudo ./install.sh --install
+        sudo ./installer.sh --install
 
         # Verify installation
         echo "Checking if ddogreen is installed..."
@@ -462,8 +462,8 @@ jobs:
         fi
 
         echo "=== Testing TGZ Package Removal ==="
-        # Uninstall using install script (TGZ packages use install.sh --uninstall)
-        sudo ./install.sh --uninstall
+        # Uninstall using install script (TGZ packages use installer.sh --uninstall)
+        sudo ./installer.sh --uninstall
 
         # Verify removal
         ! which ddogreen 2>/dev/null && ! command -v ddogreen 2>/dev/null || echo "WARNING: ddogreen still found after removal"
@@ -639,7 +639,7 @@ jobs:
           wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/ddogreen-${{ github.ref_name }}-linux.tar.gz
           tar -xzf ddogreen-${{ github.ref_name }}-linux.tar.gz
           cd ddogreen-*/
-          sudo ./install.sh --install
+          sudo ./installer.sh --install
           ```
 
           #### Standalone Binaries
