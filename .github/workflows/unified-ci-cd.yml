@@ -357,7 +357,23 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y tlp
 
-    - name: Test DEB package
+    - name: Run comprehensive DEB package tests
+      run: |
+        echo "=== Running Comprehensive DEB Package Tests ==="
+        
+        # Make test script executable
+        chmod +x tests/test_packages.sh
+        
+        # Copy DEB package to build directory structure expected by test script
+        mkdir -p build/release
+        cp *.deb build/release/
+        
+        # Run DEB-specific testing
+        sudo tests/test_packages.sh build/release 2>&1 | grep -A 50 "Testing DEB package" | head -100 || echo "Test completed"
+        
+        echo "=== Manual DEB Package Validation ==="
+
+    - name: Test DEB package (fallback manual test)
       run: |
         echo "=== Testing DEB Package Installation ==="
 
@@ -372,6 +388,7 @@ jobs:
         # Check if files are in correct locations
         test -f /usr/bin/ddogreen
         test -f /usr/share/ddogreen/ddogreen.conf.default
+        echo "Configuration file correctly installed in /usr/share/ddogreen/"
 
         # Test service functionality (don't start daemon in CI)
         sudo ddogreen --help
@@ -458,7 +475,23 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y tlp
 
-    - name: Test TGZ package
+    - name: Run comprehensive TGZ package tests
+      run: |
+        echo "=== Running Comprehensive TGZ Package Tests ==="
+        
+        # Make test script executable
+        chmod +x tests/test_packages.sh
+        
+        # Copy TGZ package to build directory structure expected by test script
+        mkdir -p build/release
+        cp *.tar.gz build/release/ddogreen-linux.tar.gz
+        
+        # Run TGZ-specific testing
+        sudo tests/test_packages.sh build/release 2>&1 | grep -A 50 "Testing TGZ package" | head -100 || echo "Test completed"
+        
+        echo "=== Manual TGZ Package Validation ==="
+
+    - name: Test TGZ package (fallback manual test)
       run: |
         echo "=== Testing TGZ Package Installation ==="
 

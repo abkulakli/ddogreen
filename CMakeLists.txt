@@ -79,9 +79,18 @@ endif()
 install(TARGETS ddogreen DESTINATION bin)
 
 # Install configuration file
-install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/config/ddogreen.conf.default"
-        DESTINATION data
-        PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
+# Use different paths based on the packaging generator
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    # For DEB and RPM packages: use standard FHS paths
+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/config/ddogreen.conf.default"
+            DESTINATION share/ddogreen
+            PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
+else()
+    # For Windows packages: use data directory
+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/config/ddogreen.conf.default"
+            DESTINATION data
+            PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
+endif()
 
 # Install installer scripts for ZIP packages
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
