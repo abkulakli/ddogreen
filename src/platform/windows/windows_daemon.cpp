@@ -3,6 +3,7 @@
 #include <memory>
 #include <windows.h>
 #include <io.h>
+#include <cstdio>
 
 class WindowsDaemon : public IDaemon {
 public:
@@ -12,9 +13,34 @@ public:
 };
 
 bool WindowsDaemon::daemonize() {
-    // On Windows, we don't need to fork/daemonize in the traditional Unix sense
-    // The service framework handles this for us
-    Logger::info("Running on Windows - service mode");
+    Logger::info("Daemonizing Windows process - detaching from console");
+    
+    // Detach from the parent console
+    if (!FreeConsole()) {
+        DWORD error = GetLastError();
+        if (error != ERROR_INVALID_PARAMETER) {  // ERROR_INVALID_PARAMETER means no console to detach from
+            Logger::error("Failed to detach from console. Error: " + std::to_string(error));
+            return false;
+        }
+        // If no console was attached, that's fine - we're already detached
+        Logger::debug("No console was attached - process already running detached");
+    } else {
+        Logger::debug("Successfully detached from parent console");
+    }
+    
+    // Redirect standard streams to null to fully disconnect
+    FILE* nullFile = nullptr;
+    if (freopen_s(&nullFile, "NUL", "r", stdin) != 0) {
+        Logger::warning("Failed to redirect stdin to NUL");
+    }
+    if (freopen_s(&nullFile, "NUL", "w", stdout) != 0) {
+        Logger::warning("Failed to redirect stdout to NUL");
+    }
+    if (freopen_s(&nullFile, "NUL", "w", stderr) != 0) {
+        Logger::warning("Failed to redirect stderr to NUL");
+    }
+    
+    Logger::info("Windows daemon detached successfully - running in background");
     return true;
 }
 
