@@ -19,10 +19,21 @@ case "$1" in
         
         # Install default configuration if it doesn't exist
         if [ ! -f /etc/ddogreen/ddogreen.conf ]; then
+            # Try multiple possible locations for the default config file
+            CONFIG_SOURCE=""
             if [ -f /usr/share/ddogreen/ddogreen.conf.default ]; then
-                cp /usr/share/ddogreen/ddogreen.conf.default /etc/ddogreen/ddogreen.conf
+                CONFIG_SOURCE="/usr/share/ddogreen/ddogreen.conf.default"
+            elif [ -f /usr/data/ddogreen.conf.default ]; then
+                CONFIG_SOURCE="/usr/data/ddogreen.conf.default"
+            fi
+            
+            if [ -n "$CONFIG_SOURCE" ]; then
+                cp "$CONFIG_SOURCE" /etc/ddogreen/ddogreen.conf
                 chmod 644 /etc/ddogreen/ddogreen.conf
-                echo "Default configuration installed at /etc/ddogreen/ddogreen.conf"
+                echo "Default configuration installed at /etc/ddogreen/ddogreen.conf (from $CONFIG_SOURCE)"
+            else
+                echo "Warning: Default configuration file not found in expected locations."
+                echo "Please manually create /etc/ddogreen/ddogreen.conf or reinstall the package."
             fi
         else
             echo "Existing configuration preserved at /etc/ddogreen/ddogreen.conf"
