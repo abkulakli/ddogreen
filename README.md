@@ -4,7 +4,12 @@ A smart sustainability-focused service that automatically optimizes your PC and 
 
 **Cross-Platform Support**: Works on Linux (with TLP) and Windows (with Power Plans)
 
-**Developed by DDOSoft Sustainability Solutions (www.ddosoft.com)**
+ddogreen - Power Management Service for Linux & Windows
+========================================================
+
+**An intelligent power management daemon that automatically optimizes your system's power settings based on CPU load monitoring**
+
+**Developed by DDOSoft Software Solutions (www.ddosoft.com)**
 
 ## Why Use ddogreen?
 

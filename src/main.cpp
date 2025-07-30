@@ -3,7 +3,7 @@
  *
  * Automatically manages TLP power settings based on system load monitoring
  *
- * Copyright (c) 2025 DDOSoft Sustainability Solutions (www.ddosoft.com)
+ * Copyright (c) 2025 DDOSoft Software Solutions (www.ddosoft.com)
  *
  * This program automatically switches between performance and power-saving modes
  * based on load average monitoring, providing
@@ -42,7 +42,7 @@ void printUsage(const char* programName) {
 void printVersion() {
     std::cout << "DDOGreen version " << DDOGREEN_VERSION << "\n"
               << "Intelligent Green Power Management for Sustainable Computing\n"
-              << "Copyright (c) 2025 DDOSoft Sustainability Solutions (www.ddosoft.com)\n";
+              << "Copyright (c) 2025 DDOSoft Software Solutions (www.ddosoft.com)\n";
 }
 
 int main(int argc, char* argv[]) {
@@ -85,7 +85,7 @@ int main(int argc, char* argv[]) {
     // Log version information
     Logger::info("Starting DDOGreen - Intelligent Green Power Management");
     Logger::info("Version: " + std::string(DDOGREEN_VERSION));
-    Logger::info("Copyright (c) 2025 DDOSoft Sustainability Solutions");
+    Logger::info("Copyright (c) 2025 DDOSoft Software Solutions");
 
     // Always convert relative config paths to absolute paths for consistency
     // This prevents issues with working directory changes and provides clear path resolution
@@ -168,7 +168,7 @@ int main(int argc, char* argv[]) {
 
     Logger::info("DDOGreen service started successfully");
     Logger::info("Version: " + std::string(DDOGREEN_VERSION));
-    Logger::info("Copyright (c) 2025 DDOSoft Sustainability Solutions (www.ddosoft.com)");
+    Logger::info("Copyright (c) 2025 DDOSoft Software Solutions (www.ddosoft.com)");
 
     // Main loop - just keep the process alive while monitoring runs in background
     while (Daemon::shouldRun()) {
