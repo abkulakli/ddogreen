@@ -97,44 +97,9 @@ endif()
 
 # CPack configuration for platform-specific packages
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    # Windows-specific packaging with NSIS
-    set(CPACK_GENERATOR "NSIS;ZIP")
+    # Windows-specific packaging with ZIP only
+    set(CPACK_GENERATOR "ZIP")
     set(CPACK_PACKAGE_FILE_NAME "ddogreen-windows")
-    
-    # NSIS-specific settings for Windows installer
-    set(CPACK_NSIS_DISPLAY_NAME "DDOGreen ${PROJECT_VERSION}")
-    set(CPACK_NSIS_PACKAGE_NAME "DDOGreen ${PROJECT_VERSION}")
-    set(CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES64")
-    set(CPACK_NSIS_ENABLE_UNINSTALL_BEFORE_INSTALL ON)
-    set(CPACK_NSIS_MODIFY_PATH ON)
-    set(CPACK_NSIS_EXECUTABLES_DIRECTORY "bin")
-    set(CPACK_NSIS_MUI_FINISHPAGE_RUN "ddogreen.exe")
-    set(CPACK_NSIS_URL_INFO_ABOUT "https://www.ddosoft.com")
-    set(CPACK_NSIS_CONTACT "support@ddosoft.com")
-    
-    # Icon and branding (optional, uses default NSIS icons if not found)
-    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/packaging/windows/ddogreen.ico")
-        set(CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}\\\\packaging\\\\windows\\\\ddogreen.ico")
-        set(CPACK_NSIS_MUI_UNIICON "${CMAKE_CURRENT_SOURCE_DIR}\\\\packaging\\\\windows\\\\ddogreen.ico")
-        set(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\ddogreen.exe")
-    endif()
-    
-    # License file (optional)
-    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
-        set(CPACK_NSIS_MENU_LINKS "LICENSE" "License")
-    endif()
-    
-    # Windows service installation commands
-    set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
-        ; Install Windows service
-        ExecWait '$INSTDIR\\\\bin\\\\ddogreen.exe --install-service' $0
-        DetailPrint 'Service installation exit code: $0'
-        ")
-    set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "
-        ; Uninstall Windows service
-        ExecWait '$INSTDIR\\\\bin\\\\ddogreen.exe --uninstall-service' $0
-        DetailPrint 'Service uninstallation exit code: $0'
-        ")
 else()
     # Linux packaging with DEB, RPM, and TGZ
     set(CPACK_GENERATOR "DEB;RPM;TGZ")

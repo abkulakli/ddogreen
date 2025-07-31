@@ -36,8 +36,8 @@ cmake --build --preset debug       # Build debug executable
 cmake --preset release             # Configure release build  
 cmake --build --preset release     # Build release executable
 
-# Windows packaging (NSIS installer + ZIP archive)
-cd build/release && cpack          # Generate NSIS installer + ZIP package
+# Windows packaging (ZIP archive)
+cd build/release && cpack          # Generate ZIP package
 ```
 
 #### Build Directories Structure (VERIFIED CURRENT)
@@ -60,7 +60,7 @@ install(FILES "${CMAKE_SOURCE_DIR}/config/ddogreen.conf.default"
 
 **Package Output Structure (STANDARDIZED)**:
 ```
-All Packages (Linux DEB/RPM/TGZ + Windows ZIP/NSIS):
+All Packages (Linux DEB/RPM/TGZ + Windows ZIP):
 ├── bin/ddogreen(.exe)                        # Executable binary
 ├── share/ddogreen/ddogreen.conf.default      # Configuration file (standardized location)
 └── installer.{sh|bat}                        # Platform-specific installer (TGZ/ZIP only)
@@ -98,10 +98,9 @@ cmake --build --preset debug|release # Build executable
 - **Separated Builds**: Debug and release in separate directories
 - **Testing Integration**: GoogleTest via `BUILD_TESTS=ON` (24 tests passing)
 - **Cross-Platform**: Native builds per platform
-- **Windows Packaging**: NSIS installer generation + ZIP archives
+- **Windows Packaging**: ZIP archives with custom installer scripts
 - **Service Installation**: Executable service options removed; package installers handle service setup
-  - **INCONSISTENCY NOTE**: CMakeLists.txt NSIS configuration still references removed `--install-service` options
-  - **Resolution Needed**: NSIS configuration should be updated to use package installer scripts instead
+  - **Windows Service Installation**: Uses custom installer.bat script for service management
 
 ### Platform Abstraction
 - **Design**: Generic interfaces with platform-specific implementations
@@ -146,8 +145,8 @@ brew install cmake googletest
 # For Windows cross-compilation (if needed via MinGW)
 sudo apt install mingw-w64 mingw-w64-tools
 
-# NSIS for Windows installer creation
-sudo apt install nsis
+# ZIP packaging for Windows (NSIS removed)
+sudo apt install zip
 
 # Note: Primary Windows development uses CMake presets with native tools
 ```
@@ -274,7 +273,7 @@ cpack -G RPM                      # Fedora/RHEL package
 cpack -G TGZ                      # Generic tarball
 
 # Windows packages
-cpack -G NSIS                     # Windows installer
+cpack -G ZIP                      # Windows ZIP package
 cpack -G ZIP                      # Windows ZIP archive
 ```
 

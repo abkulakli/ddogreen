@@ -65,12 +65,6 @@ jobs:
     - name: Setup MSVC
       uses: microsoft/setup-msbuild@v2
 
-    - name: Install NSIS
-      run: |
-        choco install nsis -y
-        # Add NSIS to PATH
-        echo "C:\Program Files (x86)\NSIS" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-
     - name: Configure CMake (Windows)
       run: |
         # Extract version from git tag if this is a tag build, otherwise use development version
@@ -239,12 +233,6 @@ jobs:
     - name: Setup MSVC
       uses: microsoft/setup-msbuild@v2
 
-    - name: Install NSIS
-      run: |
-        choco install nsis -y
-        # Add NSIS to PATH
-        echo "C:\Program Files (x86)\NSIS" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-
     - name: Download Windows build artifacts
       uses: actions/download-artifact@v4
       with:
@@ -269,7 +257,6 @@ jobs:
       run: |
         cd build
         cmake --build . --config Release --parallel
-        cpack -G NSIS
         cpack -G ZIP
 
     - name: Create custom Windows ZIP with installer
@@ -319,12 +306,6 @@ jobs:
         Compress-Archive -Path "$customZipDir\*" -DestinationPath $zipName -Force
         
         Write-Host "Created custom Windows ZIP: $zipName"
-
-    - name: Upload Windows NSIS installer
-      uses: actions/upload-artifact@v4
-      with:
-        name: ddogreen-windows-installer
-        path: build/*.exe
 
     - name: Upload Windows ZIP package (CMake)
       uses: actions/upload-artifact@v4
@@ -545,33 +526,6 @@ jobs:
         ! test -f /usr/local/bin/ddogreen || echo "WARNING: binary still exists after removal"
 
   # Step 4b: Windows Package Validation
-  validate-windows-installer:
-    needs: package-windows
-    runs-on: windows-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Download Windows installer
-      uses: actions/download-artifact@v4
-      with:
-        name: ddogreen-windows-installer
-
-    - name: Test Windows NSIS installer structure
-      run: |
-        Write-Host "=== Testing Windows NSIS Installer ==="
-
-        # List installer files
-        Get-ChildItem *.exe | ForEach-Object {
-          Write-Host "Found installer: $($_.Name)"
-          Write-Host "Size: $($_.Length) bytes"
-        }
-
-        # Note: We can't actually install and test on GitHub Actions Windows runner
-        # due to admin restrictions, but we can verify the installer was created
-        Write-Host "Windows installer validation completed - installer file created successfully"
-
   validate-windows-zip:
     needs: package-windows
     runs-on: windows-latest
@@ -654,7 +608,6 @@ jobs:
       - build-windows
       - test-windows
       - package-windows
-      - validate-windows-installer
       - validate-windows-zip
     runs-on: ubuntu-latest
 
@@ -679,7 +632,6 @@ jobs:
         cp ddogreen-tgz/*.tar.gz "release-files/ddogreen-${VERSION}-linux.tar.gz"
 
         # Copy and rename Windows package files with version
-        cp ddogreen-windows-installer/*.exe "release-files/ddogreen-${VERSION}-windows-installer.exe"
         cp ddogreen-windows-zip/*.zip "release-files/ddogreen-${VERSION}-windows.zip"
 
         # Create checksums
@@ -701,14 +653,6 @@ jobs:
           ## ddogreen ${{ github.ref_name }}
 
           ### Installation Options
-
-          #### Windows (MSI Installer)
-          ```powershell
-          # Download and run the installer
-          Invoke-WebRequest -Uri "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/ddogreen-${{ github.ref_name }}-windows-installer.exe" -OutFile "ddogreen-installer.exe"
-          .\ddogreen-installer.exe
-          # Follow the installation wizard
-          ```
 
           #### Windows (Portable ZIP)
           ```powershell

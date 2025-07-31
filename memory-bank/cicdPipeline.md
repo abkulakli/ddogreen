@@ -13,7 +13,7 @@ The ddogreen project uses a comprehensive GitHub Actions-based CI/CD pipeline (`
 
 ### Platform Support
 - **Linux**: Full build, test, and packaging (DEB, RPM, TGZ)
-- **Windows**: Full build, test, and packaging (NSIS installer, ZIP)
+- **Windows**: Full build, test, and packaging (ZIP)
 
 ## Pipeline Stages
 
@@ -32,7 +32,7 @@ The ddogreen project uses a comprehensive GitHub Actions-based CI/CD pipeline (`
 
 #### Windows Build (`build-windows`)  
 - **Runner**: `windows-latest`
-- **Dependencies**: MSVC, NSIS (for packaging)
+- **Dependencies**: MSVC
 - **Configuration**: Standard CMake with Release build type
 - **Version Handling**: Same logic as Linux (PowerShell implementation)
 - **Artifacts**: `ddogreen.exe` binary
@@ -64,11 +64,10 @@ The ddogreen project uses a comprehensive GitHub Actions-based CI/CD pipeline (`
   - `ddogreen-tgz`: Generic tarball
 
 #### Windows Packaging (`package-windows`)
-- **Package Types**: NSIS installer, ZIP
+- **Package Types**: ZIP
 - **Custom ZIP Creation**: Includes executable, config template, installer script
 - **Structure**: Standardized `share/ddogreen/` layout across platforms
 - **Artifacts**:
-  - `ddogreen-windows-installer`: NSIS installer
   - `ddogreen-windows-zip`: Custom ZIP with installer
 
 ### Stage 4: Package Validation
@@ -95,10 +94,6 @@ The ddogreen project uses a comprehensive GitHub Actions-based CI/CD pipeline (`
 
 #### Windows Package Validation
 
-**NSIS Installer Validation (`validate-windows-installer`)**
-- **Structure Verification**: Installer file creation and basic properties
-- **Note**: Cannot perform full installation testing due to GitHub Actions security restrictions
-
 **ZIP Package Validation (`validate-windows-zip`)**
 - **Content Verification**: Binary, config template, installer script presence
 - **Functional Testing**: Executable help/version commands
@@ -116,7 +111,6 @@ The ddogreen project uses a comprehensive GitHub Actions-based CI/CD pipeline (`
   - `ddogreen-{VERSION}-linux.deb`
   - `ddogreen-{VERSION}-linux.rpm` 
   - `ddogreen-{VERSION}-linux.tar.gz`
-  - `ddogreen-{VERSION}-windows-installer.exe`
   - `ddogreen-{VERSION}-windows.zip`
 - **Verification**: SHA256 checksums for all packages
 
@@ -174,7 +168,7 @@ The ddogreen project uses a comprehensive GitHub Actions-based CI/CD pipeline (`
 
 ### Update Requirements
 - **Runner Images**: GitHub-managed, automatically updated
-- **Dependencies**: Fixed versions where critical (NSIS, CMake)
+- **Dependencies**: Fixed versions where critical (CMake)
 - **Actions**: Uses stable action versions (`@v4`, `@v2`)
 
 ### Failure Analysis

@@ -73,14 +73,14 @@
             "name": "windows-debug-packages",
             "displayName": "Package: Windows Debug Packages",
             "configurePreset": "debug",
-            "generators": ["NSIS", "ZIP"],
+            "generators": ["ZIP"],
             "packageDirectory": "packages"
         },
         {
             "name": "windows-release-packages",
             "displayName": "Package: Windows Release Packages", 
             "configurePreset": "release",
-            "generators": ["NSIS", "ZIP"],
+            "generators": ["ZIP"],
             "packageDirectory": "packages"
         }
     ]

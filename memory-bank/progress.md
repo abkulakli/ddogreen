@@ -4,13 +4,43 @@
 > **Content Focus**: High-level "what was accomplished" and "when it was completed"
 > **Avoid**: Detailed implementation specs (→ systemPatterns.md), current work (→ activeContext.md), tech setup (→ techContext.md)
 
-## Project Status: CI/CD PIPELINE DOCUMENTATION COMPLETED
+## Project Status: CI/CD NSIS INSTALLER REMOVAL COMPLETED
 
 **Version**: Development (0.0.0 default, production releases use version tags)
 **Last Updated**: August 1, 2025  
-**Current State**: Production-ready application with **COMPLETE CI/CD PIPELINE DOCUMENTATION**
+**Current State**: Production-ready application with **SIMPLIFIED WINDOWS PACKAGING (ZIP-ONLY)**
 
-## Latest Achievement: Comprehensive CI/CD Pipeline Documentation
+## Latest Achievement: NSIS Installer Removal from CI/CD Pipeline
+
+### Windows Packaging Simplification
+- **NSIS Removal**: Completely removed NSIS installer from CI/CD pipeline
+- **Single Package Strategy**: Windows now uses ZIP-only packaging approach  
+- **Maintained Quality**: All validation and quality gates preserved for ZIP packages
+- **Simplified Dependencies**: Removed NSIS build dependencies from Windows jobs
+
+### CI/CD Pipeline Changes Made
+- **Build Jobs**: Removed NSIS installation from both Windows build and package jobs
+- **Package Creation**: Removed `cpack -G NSIS` from Windows packaging step
+- **Validation Pipeline**: Removed `validate-windows-installer` job entirely
+- **Release Artifacts**: Removed NSIS installer from release files and documentation
+- **Documentation**: Updated release installation instructions to reflect ZIP-only approach
+- **CMakeLists.txt**: Removed all NSIS CPack configuration, simplified to ZIP-only Windows packaging
+- **CMakePresets.json**: Removed NSIS generators from Windows package presets
+- **Memory Bank**: Updated all technical documentation to reflect ZIP-only Windows packaging
+
+### Technical Benefits Achieved
+- **Simplified Build**: Reduced Windows build dependencies and complexity
+- **Faster Pipeline**: Eliminated NSIS installer build and validation steps
+- **Maintained Functionality**: ZIP package provides same installation capabilities via installer.bat
+- **Quality Preserved**: All package content validation and functional testing maintained
+- **Service Support**: Windows SCM service integration preserved via custom installer script
+
+### Documentation Updates
+- **CI/CD Documentation**: Updated [`cicdPipeline.md`](cicdPipeline.md) to remove all NSIS references
+- **Platform Support**: Simplified to reflect ZIP-only Windows packaging approach
+- **Installation Guide**: Updated release documentation with ZIP-only installation instructions
+
+## Previous Achievement: Comprehensive CI/CD Pipeline Documentation
 
 ### GitHub Actions Workflow Analysis and Documentation
 - **Pipeline Review**: Complete analysis of `unified-ci-cd.yml` GitHub Actions workflow
@@ -21,7 +51,7 @@
 ### CI/CD Pipeline Quality Features Documented
 - **Multi-Platform Support**: Linux (Ubuntu) and Windows builds, testing, and packaging
 - **Comprehensive Quality Assurance**: Build → Test → Package → Validate → Release workflow
-- **Package Types**: DEB, RPM, TGZ for Linux; NSIS installer and ZIP for Windows
+- **Package Types**: DEB, RPM, TGZ for Linux; ZIP for Windows
 - **Real Validation**: Actual installation testing for DEB and TGZ packages
 - **Service Integration**: Validates systemd (Linux) and Windows SCM service setup
 - **Version Management**: Automatic version extraction from Git tags with proper artifact naming
