@@ -76,6 +76,34 @@ Create additional files/folders within `memory-bank/` when they help organize:
 - Security considerations
 - Performance optimization notes
 
+## Enhanced Documentation Research
+
+### Context7 Library Documentation
+I have access to Context7, which provides up-to-date documentation for libraries and frameworks. When working with external libraries or frameworks:
+
+1. **Library Research**: Use Context7 to get current documentation for any library mentioned in the project
+2. **API Reference**: Access comprehensive API documentation and examples
+3. **Best Practices**: Learn current patterns and recommended approaches
+4. **Version-Specific Info**: Get documentation for specific library versions when needed
+
+**Usage Pattern**:
+- First resolve library ID using `mcp_context7_resolve-library-id`
+- Then fetch documentation using `mcp_context7_get-library-docs`
+- Focus documentation requests on specific topics when possible
+
+### DeepWiki Repository Knowledge
+I have access to DeepWiki, which provides deep knowledge about GitHub repositories. When working with or referencing external repositories:
+
+1. **Repository Analysis**: Get comprehensive documentation about any GitHub repository
+2. **Architecture Understanding**: Learn how external projects are structured
+3. **Integration Patterns**: Understand how to integrate with external projects
+4. **Best Practices**: Learn from established open-source projects
+
+**Usage Pattern**:
+- Use `mcp_deepwiki_read_wiki_structure` to understand repository organization
+- Use `mcp_deepwiki_read_wiki_contents` for comprehensive documentation
+- Use `mcp_deepwiki_ask_question` for specific queries about repositories
+
 ## Core Workflows
 
 ### Session Start Workflow
@@ -85,17 +113,30 @@ Create additional files/folders within `memory-bank/` when they help organize:
 3. Read any additional context files
 4. Understand current project state
 5. Identify immediate priorities from activeContext.md
-6. Ready to assist with full context
+6. Use Context7/DeepWiki for any external library/repository context if needed
+7. Ready to assist with full context and enhanced documentation capabilities
 ```
 
 ### Task Execution Workflow
 ```
 1. Reference relevant memory bank context
-2. Execute requested task using established patterns
-3. Automatically update documentation when significant changes are made
-4. Document new insights or patterns as they're discovered
-5. Naturally update activeContext.md with current focus
-6. Organically update progress.md when milestones are reached
+2. Use Context7 for library documentation when working with external dependencies
+3. Use DeepWiki for repository analysis when integrating with external projects
+4. Execute requested task using established patterns and best practices
+5. Automatically update documentation when significant changes are made
+6. Document new insights, patterns, or external library learnings
+7. Naturally update activeContext.md with current focus
+8. Organically update progress.md when milestones are reached
+```
+
+### Enhanced Research Workflow
+```
+When encountering new libraries, frameworks, or integration requirements:
+1. Use Context7 to research library documentation and current best practices
+2. Use DeepWiki to analyze similar projects or integration targets
+3. Document findings in appropriate memory bank files
+4. Apply learned patterns to current project context
+5. Update techContext.md with new dependencies or integration patterns
 ```
 
 ## Documentation Updates
@@ -126,7 +167,8 @@ I'll proactively mention when I'm updating files: *"Let me update the memory ban
 4. Update systemPatterns.md with new architectural insights
 5. Clarify next steps and priorities
 6. Document any new learnings or patterns
-7. Ensure all files remain consistent and accurate
+7. Research external libraries/repositories if relevant to current context
+8. Ensure all files remain consistent and accurate
 
 ## Key Principles
 
@@ -135,12 +177,23 @@ I'll proactively mention when I'm updating files: *"Let me update the memory ban
 - Maintain consistency with established architectural decisions
 - Build upon existing code patterns and conventions
 - Respect project constraints and requirements
+- Use Context7 to verify current best practices for external libraries
+- Use DeepWiki to understand integration patterns from similar projects
 
 ### Documentation Discipline
 - Keep memory bank files concise but comprehensive
 - Focus on actionable information and decisions
 - Document the "why" behind technical choices
 - Update files naturally as context changes
+- Document external library patterns and integration learnings
+- Reference external documentation sources when helpful
+
+### Enhanced Research Practice
+- Leverage Context7 for authoritative library documentation
+- Use DeepWiki for learning from established open-source projects
+- Document external research findings in memory bank files
+- Apply external best practices to project context
+- Maintain awareness of current library versions and patterns
 
 ### Continuity Focus
 - Each session should feel like a continuation, not a restart

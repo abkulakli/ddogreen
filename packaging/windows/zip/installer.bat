@@ -111,18 +111,13 @@ if not exist "%CONFIG_DIR%" (
 )
 
 if not exist "%CONFIG_FILE%" (
-    if exist "data\ddogreen.conf.default" (
-        copy "data\ddogreen.conf.default" "%CONFIG_FILE%" >nul
-        call :print_success "Default configuration installed at %CONFIG_FILE%"
-    ) else if exist "ddogreen.conf.default" (
-        copy "ddogreen.conf.default" "%CONFIG_FILE%" >nul
-        call :print_success "Default configuration installed at %CONFIG_FILE%"
-    ) else if exist "ddogreen.conf" (
-        copy "ddogreen.conf" "%CONFIG_FILE%" >nul
+    if exist "share\ddogreen\ddogreen.conf.default" (
+        copy "share\ddogreen\ddogreen.conf.default" "%CONFIG_FILE%" >nul
         call :print_success "Default configuration installed at %CONFIG_FILE%"
     ) else (
-        call :print_warning "Configuration template not found in package"
-        call :print_warning "You may need to create %CONFIG_FILE% manually"
+        call :print_error "Configuration template not found at share\ddogreen\ddogreen.conf.default"
+        call :print_error "Package may be corrupted or incomplete"
+        exit /b 1
     )
 ) else (
     call :print_info "Existing configuration preserved at %CONFIG_FILE%"

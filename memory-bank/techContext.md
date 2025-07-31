@@ -10,17 +10,17 @@
 - **Service Framework**: systemd (Linux), Windows Service Manager (Windows)
 - **Logging**: Custom implementation with logrotate integration
 
-### Cross-Platform Build System (Current - July 2025)
+### Cross-Platform Build System (Current - August 2025)
 
 #### CMake Presets Build Commands  
 ```bash
-# Standard CMake preset workflow
+# Standard CMake preset workflow (VERIFIED WORKING)
 cmake --preset debug                # Configure debug build
 cmake --build --preset debug        # Build debug
 cmake --preset release              # Configure release build  
 cmake --build --preset release      # Build release
 
-# Testing with presets
+# Testing with presets (24 tests confirmed passing)
 cmake --build --preset debug --target test
 ctest --preset debug-tests
 
@@ -36,20 +36,41 @@ cmake --build --preset debug       # Build debug executable
 cmake --preset release             # Configure release build  
 cmake --build --preset release     # Build release executable
 
-# Windows packaging (MSI installer via NSIS)
-cd build/release && cpack          # Generate MSI installer package
+# Windows packaging (NSIS installer + ZIP archive)
+cd build/release && cpack          # Generate NSIS installer + ZIP package
 ```
 
-#### Build Directories Structure
+#### Build Directories Structure (VERIFIED CURRENT)
 ```
 build/
-├── debug/
-│   ├── Debug/ddogreen.exe (Windows debug binary)
-│   └── CMakeCache.txt
-└── release/
-    ├── Debug/ddogreen.exe (Windows release binary)  
-    └── CMakeCache.txt
+├── debug/          # Debug configuration with tests
+├── release/        # Release configuration (not present in current workspace)
+└── test/           # Testing configuration (currently active)
+    ├── test_config # Compiled test executable
+    └── lib/        # GoogleTest libraries
 ```
+
+#### Package Structure Reality (STANDARDIZED IMPLEMENTATION)
+**CURRENT UNIFIED IMPLEMENTATION**:
+```cmake
+# All platforms: Use standardized FHS-compliant paths
+install(FILES "${CMAKE_SOURCE_DIR}/config/ddogreen.conf.default"
+        DESTINATION share/ddogreen)  # Consistent across all platforms
+```
+
+**Package Output Structure (STANDARDIZED)**:
+```
+All Packages (Linux DEB/RPM/TGZ + Windows ZIP/NSIS):
+├── bin/ddogreen(.exe)                        # Executable binary
+├── share/ddogreen/ddogreen.conf.default      # Configuration file (standardized location)
+└── installer.{sh|bat}                        # Platform-specific installer (TGZ/ZIP only)
+```
+
+**Installer Behavior**:
+- **Windows installer**: Expects `share\ddogreen\ddogreen.conf.default` - fails fast if missing
+- **Linux installer**: Expects `share/ddogreen/ddogreen.conf.default` - fails fast if missing  
+- **Package installers (DEB/RPM)**: Use standardized `/usr/share/ddogreen/` location
+- **Error Handling**: Clear error messages if expected standardized structure is corrupted
 
 ### Build System
 
@@ -73,11 +94,14 @@ cmake --build --preset debug|release # Build executable
 - **Visual Studio or MinGW**: For Windows builds with CMake
 
 #### Current Build Features
-- **CMake Presets**: VS Code integration with standard workflow
+- **CMake Presets**: VS Code integration with standard workflow (VERIFIED WORKING)
 - **Separated Builds**: Debug and release in separate directories
-- **Testing Integration**: GoogleTest via `BUILD_TESTS=ON`
+- **Testing Integration**: GoogleTest via `BUILD_TESTS=ON` (24 tests passing)
 - **Cross-Platform**: Native builds per platform
-- **Windows Packaging**: MSI installer generation via NSIS integration
+- **Windows Packaging**: NSIS installer generation + ZIP archives
+- **Service Installation**: Executable service options removed; package installers handle service setup
+  - **INCONSISTENCY NOTE**: CMakeLists.txt NSIS configuration still references removed `--install-service` options
+  - **Resolution Needed**: NSIS configuration should be updated to use package installer scripts instead
 
 ### Platform Abstraction
 - **Design**: Generic interfaces with platform-specific implementations

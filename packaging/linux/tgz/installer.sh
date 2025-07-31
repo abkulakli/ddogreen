@@ -101,24 +101,15 @@ install_ddogreen() {
     print_info "Setting up configuration..."
     mkdir -p /etc/ddogreen
     if [[ ! -f "/etc/ddogreen/ddogreen.conf" ]]; then
-        # Try multiple possible locations for the config file
-        CONFIG_SOURCE=""
-        if [[ -f "data/ddogreen.conf.default" ]]; then
-            CONFIG_SOURCE="data/ddogreen.conf.default"
-        elif [[ -f "share/ddogreen/ddogreen.conf.default" ]]; then
-            CONFIG_SOURCE="share/ddogreen/ddogreen.conf.default"
-        elif [[ -f "ddogreen.conf.default" ]]; then
-            CONFIG_SOURCE="ddogreen.conf.default"
-        elif [[ -f "ddogreen.conf" ]]; then
-            CONFIG_SOURCE="ddogreen.conf"
-        fi
-        
-        if [[ -n "$CONFIG_SOURCE" ]]; then
-            cp "$CONFIG_SOURCE" "/etc/ddogreen/ddogreen.conf"
+        # Use standardized configuration location
+        if [[ -f "share/ddogreen/ddogreen.conf.default" ]]; then
+            cp "share/ddogreen/ddogreen.conf.default" "/etc/ddogreen/ddogreen.conf"
             chmod 644 "/etc/ddogreen/ddogreen.conf"
-            print_success "Default configuration installed at /etc/ddogreen/ddogreen.conf (from $CONFIG_SOURCE)"
+            print_success "Default configuration installed at /etc/ddogreen/ddogreen.conf"
         else
-            print_warning "Configuration template not found in package - you may need to create /etc/ddogreen/ddogreen.conf manually"
+            print_error "Configuration template not found at share/ddogreen/ddogreen.conf.default"
+            print_error "Package may be corrupted or incomplete"
+            exit 1
         fi
     else
         print_info "Existing configuration preserved at /etc/ddogreen/ddogreen.conf"
