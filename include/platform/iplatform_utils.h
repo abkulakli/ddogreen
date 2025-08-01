@@ -62,6 +62,12 @@ public:
     virtual std::string getDefaultPidPath() const = 0;
 
     /**
+     * Get the default configuration file path
+     * @return platform-specific configuration file path
+     */
+    virtual std::string getDefaultConfigPath() const = 0;
+
+    /**
      * Check if platform utilities are available
      * @return true if platform utilities are functional
      */

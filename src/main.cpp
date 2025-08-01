@@ -29,14 +29,7 @@ void printUsage(const char* programName) {
               << "  -h, --help             Show this help message\n"
               << "  -v, --version          Show version information\n"
               << "\n"
-              << "Configuration:\n"
-              << "  Default:   /etc/ddogreen/ddogreen.conf\n"
-              << "  Custom:    " << programName << " --config /path/to/config.conf\n"
-              << "\n"
-              << "Automatically switches between performance and power-saving modes based on system load.\n"
-              << "\n"
-              << "Installation:\n"
-              << "  Use your package manager or the provided installer scripts in the packaging/ directory.\n";
+              << "Automatically switches between performance and power-saving modes based on system load.\n";
 }
 
 void printVersion() {

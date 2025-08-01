@@ -105,6 +105,14 @@ public:
     }
 
     /**
+     * Get the default configuration file path for Windows
+     * @return C:\ProgramData\DDOSoft\ddogreen\ddogreen.conf
+     */
+    std::string getDefaultConfigPath() const override {
+        return "C:\\ProgramData\\DDOSoft\\ddogreen\\ddogreen.conf";
+    }
+
+    /**
      * Check if platform utilities are available
      * @return true (always available on Windows)
      */

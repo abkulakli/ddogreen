@@ -111,6 +111,14 @@ public:
     }
 
     /**
+     * Get the default configuration file path for Linux
+     * @return /etc/ddogreen/ddogreen.conf
+     */
+    std::string getDefaultConfigPath() const override {
+        return "/etc/ddogreen/ddogreen.conf";
+    }
+
+    /**
      * Check if platform utilities are available
      * @return true (always available on Linux)
      */

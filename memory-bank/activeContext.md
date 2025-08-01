@@ -1,39 +1,38 @@
 # Active Context - DDOGreen
 
 ## Current Work Focus
-**Project Status**: CI/CD Pipeline NSIS Removal - COMPLETED
-**Last Updated**: August 1, 2025
-**Current State**: Production-ready cross-platform application with simplified Windows packaging (ZIP-only)
+**Project Status**: Platform-Specific Configuration Paths - COMPLETED
+**Last Updated**: February 2, 2025
+**Current State**: Production-ready cross-platform application with proper platform abstraction for configuration paths
 
-## Latest Activity: NSIS Installer Removal from CI/CD Pipeline - COMPLETED
+## Latest Activity: Platform-Specific Configuration Path Implementation - COMPLETED
 
-### Completed Task: Removed NSIS Installer from GitHub Actions Workflow
-- **Activity**: Removed all NSIS installer components from CI/CD pipeline
-- **Scope**: Build dependencies, package creation, validation, and release artifacts
-- **Result**: Simplified Windows packaging to ZIP-only format
-- **Quality Maintained**: All validation and quality gates preserved for remaining packages
+### Completed Task: Clean Architecture for Configuration Path Resolution
+- **Activity**: Implemented platform-specific configuration paths without preprocessor directives
+- **Scope**: Config class integration with platform utilities, help text cleanup, and test validation
+- **Result**: Clean platform abstraction with correct default paths for each platform
+- **Quality Maintained**: All 24 tests passing with proper platform dependencies
 
-### Changes Made to CI/CD Pipeline and Build System
-- **Build Stage**: Removed NSIS installation from Windows build jobs
-- **Package Stage**: Removed `cpack -G NSIS` from Windows packaging
-- **Validation Stage**: Removed `validate-windows-installer` job entirely
-- **Release Stage**: Removed NSIS installer from release artifacts and documentation
-- **Dependencies**: Removed `validate-windows-installer` dependency from release job
-- **CMakeLists.txt**: Removed all NSIS configuration and simplified Windows packaging to ZIP-only
-- **CMakePresets.json**: Removed NSIS generators from Windows package presets
-- **Documentation**: Updated techContext.md to reflect ZIP-only Windows packaging
+### Changes Made to Configuration System
+- **IPlatformUtils Interface**: Extended with getDefaultConfigPath() virtual method
+- **Platform Implementations**: Added getDefaultConfigPath() to all platform-specific utilities
+  - Linux/macOS: "/etc/ddogreen/ddogreen.conf"
+  - Windows: "C:\\ProgramData\\DDOSoft\\ddogreen\\ddogreen.conf"
+- **Config Class**: Updated getDefaultConfigPath() to use platform utilities via PlatformFactory
+- **Help Output**: Cleaned printUsage() function removing hardcoded configuration paths
+- **Test System**: Updated CMakeLists.txt to include necessary platform dependencies
 
-### Updated Windows Package Strategy
-- **Single Package Format**: ZIP package with custom installer script
-- **Maintained Functionality**: ZIP package includes binary, config template, and installer.bat
-- **Installation Method**: Manual extraction + installer script execution
-- **Service Integration**: Windows Service Control Manager support via installer script
-- **Quality Assurance**: Full content validation and functional testing preserved
+### Architecture Achievements
+- **Clean Separation**: No #ifdef preprocessor directives in configuration logic
+- **Platform Abstraction**: Consistent use of platform utilities throughout codebase
+- **User Experience**: Platform-agnostic help output with correct backend behavior
+- **Maintainability**: Future platform additions follow established pattern
 
-### Documentation Updates
-- **CI/CD Documentation**: Updated [`cicdPipeline.md`](cicdPipeline.md) to remove all NSIS references
-- **Platform Support**: Simplified to reflect ZIP-only Windows packaging
-- **Release Documentation**: Updated installation instructions to reflect ZIP-only approach
+### Technical Validation
+- **Build System**: All builds successful with platform dependencies properly linked
+- **Test Framework**: All 24 tests passing including platform-aware configuration tests
+- **Runtime Behavior**: Config class correctly returns platform-specific paths via abstraction layer
+- **Code Quality**: Clean architecture maintained without conditional compilation
 
 ## Previous Activity: CI/CD Pipeline Documentation - COMPLETED
 

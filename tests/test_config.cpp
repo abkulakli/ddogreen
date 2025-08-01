@@ -63,13 +63,17 @@ TEST_F(TestConfig, test_constructor_initializes_values_to_zero)
     EXPECT_EQ(0.0, config->getPowerSaveThreshold());
 }
 
-// Test default config path
-TEST_F(TestConfig, test_get_default_config_path_returns_etc_path)
+// Test default config path (platform-specific)
+TEST_F(TestConfig, test_get_default_config_path_returns_platform_specific_path)
 {
     // Act
     std::string defaultPath = Config::getDefaultConfigPath();
     
-    // Assert
+    // Assert - Should return a non-empty path that contains ddogreen.conf
+    EXPECT_FALSE(defaultPath.empty());
+    EXPECT_TRUE(defaultPath.find("ddogreen.conf") != std::string::npos);
+    
+    // On Linux, it should be the /etc path (we can test this since we're running on Linux)
     EXPECT_EQ("/etc/ddogreen/ddogreen.conf", defaultPath);
 }
 

@@ -32,9 +32,36 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 # Create test executable
 add_executable(test_config
     test_config.cpp
+    test_config_platform.cpp
     ${CMAKE_SOURCE_DIR}/src/config.cpp
     ${CMAKE_SOURCE_DIR}/src/logger.cpp
+    ${CMAKE_SOURCE_DIR}/src/platform/platform_factory.cpp
+    ${CMAKE_SOURCE_DIR}/src/platform/idaemon.cpp
 )
+
+# Add platform-specific source files based on the current platform
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    target_sources(test_config PRIVATE
+        ${CMAKE_SOURCE_DIR}/src/platform/linux/linux_platform_utils.cpp
+        ${CMAKE_SOURCE_DIR}/src/platform/linux/linux_system_monitor.cpp
+        ${CMAKE_SOURCE_DIR}/src/platform/linux/linux_power_manager.cpp
+        ${CMAKE_SOURCE_DIR}/src/platform/linux/linux_daemon.cpp
+    )
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    target_sources(test_config PRIVATE
+        ${CMAKE_SOURCE_DIR}/src/platform/windows/windows_platform_utils.cpp
+        ${CMAKE_SOURCE_DIR}/src/platform/windows/windows_system_monitor.cpp
+        ${CMAKE_SOURCE_DIR}/src/platform/windows/windows_power_manager.cpp
+        ${CMAKE_SOURCE_DIR}/src/platform/windows/windows_daemon.cpp
+    )
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    target_sources(test_config PRIVATE
+        ${CMAKE_SOURCE_DIR}/src/platform/macos/macos_platform_utils.cpp
+        ${CMAKE_SOURCE_DIR}/src/platform/macos/macos_system_monitor.cpp
+        ${CMAKE_SOURCE_DIR}/src/platform/macos/macos_power_manager.cpp
+        ${CMAKE_SOURCE_DIR}/src/platform/macos/macos_daemon.cpp
+    )
+endif()
 
 # Link libraries
 target_link_libraries(test_config

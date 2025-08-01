@@ -1,5 +1,6 @@
 #include "config.h"
 #include "logger.h"
+#include "platform/platform_factory.h"
 #include <fstream>
 #include <sstream>
 #include <algorithm>
@@ -9,6 +10,11 @@ Config::Config() : m_monitoringFrequency(0), m_highPerformanceThreshold(0.0), m_
 }
 
 std::string Config::getDefaultConfigPath() {
+    auto platformUtils = PlatformFactory::createPlatformUtils();
+    if (platformUtils && platformUtils->isAvailable()) {
+        return platformUtils->getDefaultConfigPath();
+    }
+    // Fallback to Linux path if platform utilities are not available
     return "/etc/ddogreen/ddogreen.conf";
 }
 
@@ -20,14 +26,14 @@ bool Config::loadFromFile(const std::string& configPath) {
     }
 
     Logger::info("Loading configuration from: " + configPath);
-    
+
     std::string line;
     int lineNumber = 0;
     bool hasErrors = false;
 
     while (std::getline(file, line)) {
         lineNumber++;
-        
+
         // Skip empty lines and comments
         line = trim(line);
         if (line.empty() || line[0] == '#') {
@@ -76,7 +82,7 @@ std::string Config::trim(const std::string& str) const {
     if (start == std::string::npos) {
         return "";
     }
-    
+
     size_t end = str.find_last_not_of(" \t\r\n");
     return str.substr(start, end - start + 1);
 }
