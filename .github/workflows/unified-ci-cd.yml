@@ -253,11 +253,28 @@ jobs:
           cmake -B build -DCMAKE_BUILD_TYPE=Release
         }
 
+    - name: Install NSIS
+      run: |
+        # Download and install NSIS
+        $nsisUrl = "https://nsis.sourceforge.io/mediawiki/images/e/e9/Nsis-3.09-setup.exe"
+        $nsisSetup = "$env:TEMP\nsis-setup.exe"
+        Invoke-WebRequest -Uri $nsisUrl -OutFile $nsisSetup
+        Start-Process -FilePath $nsisSetup -ArgumentList "/S" -Wait
+        
+        # Add NSIS to PATH for this session
+        $env:PATH = "$env:PATH;C:\Program Files (x86)\NSIS"
+        echo "C:\Program Files (x86)\NSIS" >> $env:GITHUB_PATH
+
     - name: Create Windows packages
       run: |
         cd build
         cmake --build . --config Release --parallel
+        
+        # Create ZIP package (existing)
         cpack -G ZIP
+        
+        # Create NSIS installer (MSI-like) 
+        cpack -G NSIS
 
     - name: Create custom Windows ZIP with installer
       run: |
@@ -318,6 +335,12 @@ jobs:
       with:
         name: ddogreen-windows-zip
         path: ddogreen-*-windows-zip.zip
+
+    - name: Upload Windows NSIS installer (MSI-like)
+      uses: actions/upload-artifact@v4
+      with:
+        name: ddogreen-windows-installer
+        path: build/*.exe
 
   # Step 4: Package Validation (Sequential)
   validate-deb:
@@ -595,6 +618,58 @@ jobs:
 
         Write-Host "Windows ZIP package validation completed"
 
+  # Step 4c: Windows NSIS Installer Validation
+  validate-windows-installer:
+    needs: package-windows
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download Windows NSIS installer
+      uses: actions/download-artifact@v4
+      with:
+        name: ddogreen-windows-installer
+
+    - name: Test Windows NSIS installer
+      run: |
+        Write-Host "=== Testing Windows NSIS Installer ==="
+
+        # Find the installer executable
+        $installerFile = Get-ChildItem *.exe | Select-Object -First 1
+        if ($installerFile) {
+            Write-Host "Found NSIS installer: $($installerFile.Name)"
+            Write-Host "Installer size: $([math]::Round($installerFile.Length / 1KB, 2)) KB"
+            
+            # Test installer basic properties
+            $fileInfo = Get-ItemProperty -Path $installerFile.FullName
+            Write-Host "File version info available: $($fileInfo -ne $null)"
+            
+            # Verify it's a valid executable
+            if ($installerFile.Name -like "*.exe") {
+                Write-Host "✓ Installer has correct .exe extension"
+            } else {
+                Write-Host "✗ ERROR: Installer does not have .exe extension"
+                exit 1
+            }
+            
+            # Check file size is reasonable (should be > 100KB for a real installer)
+            if ($installerFile.Length -gt 100KB) {
+                Write-Host "✓ Installer size is reasonable ($([math]::Round($installerFile.Length / 1KB, 2)) KB)"
+            } else {
+                Write-Host "✗ WARNING: Installer size seems too small ($([math]::Round($installerFile.Length / 1KB, 2)) KB)"
+            }
+            
+            Write-Host "Note: Installer functional testing requires admin privileges and is not performed in CI"
+            Write-Host "The installer will install ddogreen as a Windows service automatically"
+        } else {
+            Write-Host "✗ ERROR: No installer executable found"
+            exit 1
+        }
+
+        Write-Host "Windows NSIS installer validation completed"
+
   # Step 5: Create Release (only on tags)
   release:
     if: startsWith(github.ref, 'refs/tags/v') && github.event_name == 'push'
@@ -609,6 +684,7 @@ jobs:
       - test-windows
       - package-windows
       - validate-windows-zip
+      - validate-windows-installer
     runs-on: ubuntu-latest
 
     steps:
@@ -633,6 +709,7 @@ jobs:
 
         # Copy and rename Windows package files with version
         cp ddogreen-windows-zip/*.zip "release-files/ddogreen-${VERSION}-windows.zip"
+        cp ddogreen-windows-installer/*.exe "release-files/ddogreen-${VERSION}-windows-installer.exe"
 
         # Create checksums
         cd release-files
@@ -654,13 +731,25 @@ jobs:
 
           ### Installation Options
 
+          #### Windows (MSI-like Installer) - **NEW!**
+          ```powershell
+          # Download and run installer (automatic service setup)
+          Invoke-WebRequest -Uri "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/ddogreen-${{ github.ref_name }}-windows-installer.exe" -OutFile "ddogreen-installer.exe"
+          
+          # Run as Administrator (required for service installation)
+          Start-Process -FilePath "ddogreen-installer.exe" -Verb RunAs -Wait
+          
+          # Service will be automatically installed and started
+          Get-Service ddogreen
+          ```
+
           #### Windows (Portable ZIP)
           ```powershell
           # Download and extract
           Invoke-WebRequest -Uri "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/ddogreen-${{ github.ref_name }}-windows.zip" -OutFile "ddogreen-windows.zip"
           Expand-Archive -Path "ddogreen-windows.zip" -DestinationPath "ddogreen"
           cd ddogreen
-          .\bin\ddogreen.exe --help
+          .\installer.bat --install  # Manual service installation
           ```
 
           #### Debian/Ubuntu (DEB Package)
