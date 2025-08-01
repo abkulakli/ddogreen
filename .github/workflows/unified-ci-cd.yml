@@ -255,82 +255,159 @@ jobs:
 
     - name: Install WIX Toolset
       run: |
-        Write-Host "=== Installing WIX Toolset 3.11.2 ==="
+        Write-Host "=== Detecting and Setting Up WIX Toolset ==="
         $ErrorActionPreference = "Stop"
         
-        # Try Chocolatey first (most reliable method)
-        Write-Host "Installing WIX Toolset via Chocolatey..."
-        try {
-            choco install wixtoolset --version 3.11.2 -y --no-progress
-            $wixPath = "C:\Program Files (x86)\WiX Toolset v3.11\bin"
-            Write-Host "✓ WIX Toolset installed via Chocolatey"
-        } catch {
-            Write-Warning "Chocolatey installation failed: $($_.Exception.Message)"
-            Write-Host "Trying direct download fallback..."
-            
-            # Fallback: Direct download method
-            $wixUrl = "https://github.com/wixtoolset/wix3/releases/download/wix3112rtm/wix311-binaries.zip"
-            $wixZip = "wix311-binaries.zip"
-            $wixPath = "C:\wix"
-            
+        # Function to test WIX tools
+        function Test-WixTools($path) {
+            $candleExe = Join-Path $path "candle.exe"
+            $lightExe = Join-Path $path "light.exe"
+            return (Test-Path $candleExe) -and (Test-Path $lightExe)
+        }
+        
+        # Function to get WIX version
+        function Get-WixVersion($path) {
             try {
-                # Download with retry logic
-                $maxRetries = 3
-                for ($i = 1; $i -le $maxRetries; $i++) {
-                    try {
-                        Write-Host "Download attempt $i of $maxRetries..."
-                        Invoke-WebRequest -Uri $wixUrl -OutFile $wixZip -TimeoutSec 60 -UseBasicParsing
-                        break
-                    } catch {
-                        if ($i -eq $maxRetries) {
-                            throw "Failed to download after $maxRetries attempts: $($_.Exception.Message)"
-                        }
-                        Start-Sleep -Seconds 5
-                    }
-                }
-                
-                # Extract WIX
-                Expand-Archive -Path $wixZip -DestinationPath $wixPath -Force
-                Write-Host "✓ WIX Toolset downloaded and extracted"
+                $candleExe = Join-Path $path "candle.exe"
+                $version = & $candleExe -? 2>&1 | Select-Object -First 1
+                return $version
             } catch {
-                Write-Error "❌ All installation methods failed: $($_.Exception.Message)"
-                exit 1
+                return "Unknown"
             }
         }
         
-        # Add to PATH and verify
+        $wixPath = $null
+        
+        # Step 1: Check if WIX tools are already in PATH
+        Write-Host "Checking if WIX tools are already in PATH..."
+        try {
+            $candleInPath = Get-Command candle.exe -ErrorAction SilentlyContinue
+            $lightInPath = Get-Command light.exe -ErrorAction SilentlyContinue
+            
+            if ($candleInPath -and $lightInPath) {
+                $wixPath = Split-Path $candleInPath.Source
+                Write-Host "✓ WIX tools found in PATH: $wixPath"
+                $version = Get-WixVersion $wixPath
+                Write-Host "  Version: $version"
+            }
+        } catch {
+            Write-Host "WIX tools not found in PATH"
+        }
+        
+        # Step 2: Search common installation directories if not found in PATH
+        if (-not $wixPath) {
+            Write-Host "Searching for WIX installations..."
+            $searchPaths = @(
+                "C:\Program Files (x86)\WiX Toolset v3.14\bin",
+                "C:\Program Files (x86)\WiX Toolset v3.11\bin",
+                "C:\Program Files\WiX Toolset v3.14\bin", 
+                "C:\Program Files\WiX Toolset v3.11\bin",
+                "C:\wix"
+            )
+            
+            # Also search for any WiX installation in Program Files
+            $programFiles = @("C:\Program Files (x86)", "C:\Program Files")
+            foreach ($pf in $programFiles) {
+                if (Test-Path $pf) {
+                    $wixDirs = Get-ChildItem $pf -Directory -Filter "*WiX*" -ErrorAction SilentlyContinue
+                    foreach ($dir in $wixDirs) {
+                        $binPath = Join-Path $dir.FullName "bin"
+                        if (Test-Path $binPath) {
+                            $searchPaths += $binPath
+                        }
+                    }
+                }
+            }
+            
+            foreach ($path in $searchPaths) {
+                if (Test-WixTools $path) {
+                    $wixPath = $path
+                    Write-Host "✓ WIX tools found at: $wixPath"
+                    $version = Get-WixVersion $wixPath
+                    Write-Host "  Version: $version"
+                    break
+                }
+            }
+        }
+        
+        # Step 3: Install WIX if not found anywhere
+        if (-not $wixPath) {
+            Write-Host "WIX not found, attempting installation..."
+            
+            # Try using existing chocolatey installation with force
+            try {
+                Write-Host "Attempting to use existing WIX installation with chocolatey..."
+                choco install wixtoolset --force -y --no-progress
+                
+                # Search again after installation
+                $searchPaths = @(
+                    "C:\Program Files (x86)\WiX Toolset v3.14\bin",
+                    "C:\Program Files (x86)\WiX Toolset v3.11\bin"
+                )
+                
+                foreach ($path in $searchPaths) {
+                    if (Test-WixTools $path) {
+                        $wixPath = $path
+                        Write-Host "✓ WIX tools found after installation: $wixPath"
+                        break
+                    }
+                }
+            } catch {
+                Write-Warning "Chocolatey installation failed: $($_.Exception.Message)"
+                
+                # Fallback: Direct download
+                Write-Host "Trying direct download..."
+                $wixUrl = "https://github.com/wixtoolset/wix3/releases/download/wix3112rtm/wix311-binaries.zip"
+                $wixZip = "wix311-binaries.zip"
+                $fallbackPath = "C:\wix"
+                
+                try {
+                    Invoke-WebRequest -Uri $wixUrl -OutFile $wixZip -TimeoutSec 60 -UseBasicParsing
+                    Expand-Archive -Path $wixZip -DestinationPath $fallbackPath -Force
+                    
+                    if (Test-WixTools $fallbackPath) {
+                        $wixPath = $fallbackPath
+                        Write-Host "✓ WIX tools installed via direct download: $wixPath"
+                    }
+                } catch {
+                    Write-Error "❌ Direct download failed: $($_.Exception.Message)"
+                }
+            }
+        }
+        
+        # Final verification
+        if (-not $wixPath) {
+            Write-Error "❌ Could not locate or install WIX Toolset"
+            exit 1
+        }
+        
+        # Add to PATH for future steps
         $env:PATH += ";$wixPath"
         Add-Content $env:GITHUB_PATH $wixPath
         Write-Host "✓ Added WIX to PATH: $wixPath"
         
-        # Verify installation
-        Write-Host "=== Verifying WIX Installation ==="
+        # Final verification
+        Write-Host "=== Final WIX Verification ==="
         $candleExe = Join-Path $wixPath "candle.exe"
         $lightExe = Join-Path $wixPath "light.exe"
         
         if (Test-Path $candleExe) {
-            Write-Host "✓ candle.exe found and accessible"
-            try {
-                $candleVersion = & $candleExe -? 2>&1 | Select-Object -First 1
-                Write-Host "  Version info: $candleVersion"
-            } catch {
-                Write-Warning "Could not get candle.exe version, but file exists"
-            }
+            Write-Host "✓ candle.exe verified at: $candleExe"
+            $version = Get-WixVersion $wixPath
+            Write-Host "  Version: $version"
         } else {
             Write-Error "❌ candle.exe not found at $candleExe"
-            Write-Host "Directory contents:"
-            Get-ChildItem $wixPath -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "  $($_.Name)" }
             exit 1
         }
         
         if (Test-Path $lightExe) {
-            Write-Host "✓ light.exe found and accessible"
+            Write-Host "✓ light.exe verified at: $lightExe"
         } else {
             Write-Error "❌ light.exe not found at $lightExe"
             exit 1
         }
         
-        Write-Host "✓ WIX Toolset installation verified successfully"
+        Write-Host "✓ WIX Toolset setup completed successfully"
 
     - name: Create Windows packages
       run: |
