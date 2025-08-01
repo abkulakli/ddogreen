@@ -79,10 +79,20 @@ endif()
 install(TARGETS ddogreen DESTINATION bin)
 
 # Install configuration file
-# Use share/ddogreen consistently across all platforms for better standardization
-install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/config/ddogreen.conf.default"
-        DESTINATION share/ddogreen
-        PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    # For Windows, install config file both in share/ddogreen (for consistency) and at root (for MSI)
+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/config/ddogreen.conf.default"
+            DESTINATION share/ddogreen
+            PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/config/ddogreen.conf.default"
+            DESTINATION .
+            PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
+else()
+    # Use share/ddogreen consistently for Linux platforms
+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/config/ddogreen.conf.default"
+            DESTINATION share/ddogreen
+            PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ)
+endif()
 
 # Install installer scripts for ZIP packages
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")

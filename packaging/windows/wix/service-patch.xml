@@ -4,28 +4,28 @@
   <CPackWiXFragment Id="#PRODUCT">
     <!-- Custom actions for service management -->
     <CustomAction Id="CreateConfigDir" Execute="deferred" Impersonate="no" 
-                  ExeCommand="cmd.exe /c &quot;if not exist &quot;%ProgramData%\DDOSoft\ddogreen&quot; mkdir &quot;%ProgramData%\DDOSoft\ddogreen&quot;&quot;" />
+                  ExeCommand='cmd.exe /c "if not exist &quot;[CommonAppDataFolder]DDOSoft\ddogreen&quot; mkdir &quot;[CommonAppDataFolder]DDOSoft\ddogreen&quot;"' />
     
     <CustomAction Id="CopyDefaultConfig" Execute="deferred" Impersonate="no"
-                  ExeCommand="cmd.exe /c &quot;if not exist &quot;%ProgramData%\DDOSoft\ddogreen\ddogreen.conf&quot; copy /Y &quot;[INSTALLDIR]share\ddogreen\ddogreen.conf.default&quot; &quot;%ProgramData%\DDOSoft\ddogreen\ddogreen.conf&quot;&quot;" />
+                  ExeCommand='cmd.exe /c "if not exist &quot;[CommonAppDataFolder]DDOSoft\ddogreen\ddogreen.conf&quot; copy /Y &quot;[INSTALLDIR]ddogreen.conf.default&quot; &quot;[CommonAppDataFolder]DDOSoft\ddogreen\ddogreen.conf&quot;"' />
     
     <CustomAction Id="InstallService" Execute="deferred" Impersonate="no"
-                  ExeCommand="sc.exe create ddogreen binPath= &quot;[INSTALLDIR]bin\ddogreen.exe --daemon --config %ProgramData%\DDOSoft\ddogreen\ddogreen.conf&quot; DisplayName= &quot;DDOGreen - Intelligent Green Power Management&quot; start= auto" />
+                  ExeCommand='sc.exe create ddogreen binPath= &quot;[INSTALLDIR]ddogreen.exe --daemon --config [CommonAppDataFolder]DDOSoft\ddogreen\ddogreen.conf&quot; DisplayName= &quot;DDOGreen - Intelligent Green Power Management&quot; start= auto' />
     
     <CustomAction Id="ConfigureService" Execute="deferred" Impersonate="no"
-                  ExeCommand="sc.exe description ddogreen &quot;Automatically manages Windows power plans based on system load monitoring for sustainable computing&quot;" />
+                  ExeCommand='sc.exe description ddogreen &quot;Automatically manages Windows power plans based on system load monitoring for sustainable computing&quot;' />
     
     <CustomAction Id="SetServiceRecovery" Execute="deferred" Impersonate="no"
-                  ExeCommand="sc.exe failure ddogreen reset= 86400 actions= restart/10000/restart/30000/restart/60000" />
+                  ExeCommand='sc.exe failure ddogreen reset= 86400 actions= restart/10000/restart/30000/restart/60000' />
     
     <CustomAction Id="StartService" Execute="deferred" Impersonate="no"
-                  ExeCommand="sc.exe start ddogreen" />
+                  ExeCommand='sc.exe start ddogreen' />
     
     <CustomAction Id="StopService" Execute="deferred" Impersonate="no"
-                  ExeCommand="sc.exe stop ddogreen" />
+                  ExeCommand='sc.exe stop ddogreen' />
     
     <CustomAction Id="RemoveService" Execute="deferred" Impersonate="no"
-                  ExeCommand="sc.exe delete ddogreen" />
+                  ExeCommand='sc.exe delete ddogreen' />
 
     <!-- Installation sequence -->
     <InstallExecuteSequence>
