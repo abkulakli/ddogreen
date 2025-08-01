@@ -255,29 +255,43 @@ jobs:
 
     - name: Install WIX Toolset
       run: |
-        # Install WIX Toolset 3.11 (CPack compatible version)
-        Write-Host "Installing WIX Toolset 3.11..."
-        choco install wixtoolset --version 3.11.2 -y
+        # Download WIX Toolset 3.11.2 directly from GitHub releases
+        Write-Host "Downloading WIX Toolset 3.11.2..."
+        $wixUrl = "https://github.com/wixtoolset/wix3/releases/download/wix3112rtm/wix311-binaries.zip"
+        $wixZip = "wix311-binaries.zip"
+        $wixPath = "C:\wix"
         
-        # Add WIX bin directory to PATH for current session
-        $wixPath = "C:\Program Files (x86)\WiX Toolset v3.11\bin"
-        $env:PATH += ";$wixPath"
+        # Download WIX binaries
+        Invoke-WebRequest -Uri $wixUrl -OutFile $wixZip
+        Write-Host "Downloaded WIX binaries: $wixZip"
+        
+        # Extract WIX to C:\wix
+        Expand-Archive -Path $wixZip -DestinationPath $wixPath -Force
+        Write-Host "Extracted WIX to: $wixPath"
+        
+        # Add WIX bin directory to PATH for current session and future steps
+        $wixBinPath = "$wixPath"
+        $env:PATH += ";$wixBinPath"
+        Add-Content $env:GITHUB_PATH $wixBinPath
+        Write-Host "Added to PATH: $wixBinPath"
         
         # Verify installation
         Write-Host "Verifying WIX installation..."
-        if (Test-Path "$wixPath\candle.exe") {
+        if (Test-Path "$wixBinPath\candle.exe") {
             Write-Host "✓ candle.exe found"
-            & "$wixPath\candle.exe" -? | Select-Object -First 3
+            & "$wixBinPath\candle.exe" -? | Select-Object -First 3
         } else {
-            Write-Error "❌ candle.exe not found at $wixPath"
+            Write-Error "❌ candle.exe not found at $wixBinPath"
+            Get-ChildItem $wixPath -Recurse | Select-Object Name, FullName
             exit 1
         }
         
-        if (Test-Path "$wixPath\light.exe") {
+        if (Test-Path "$wixBinPath\light.exe") {
             Write-Host "✓ light.exe found"
-            & "$wixPath\light.exe" -? | Select-Object -First 3
+            & "$wixBinPath\light.exe" -? | Select-Object -First 3
         } else {
-            Write-Error "❌ light.exe not found at $wixPath"
+            Write-Error "❌ light.exe not found at $wixBinPath"
+            Get-ChildItem $wixPath -Recurse | Select-Object Name, FullName
             exit 1
         }
 
@@ -286,10 +300,7 @@ jobs:
         cd build
         cmake --build . --config Release --parallel
         
-        # Set WIX PATH for CPack
-        $wixPath = "C:\Program Files (x86)\WiX Toolset v3.11\bin"
-        $env:PATH += ";$wixPath"
-        
+        # WIX should already be in PATH from installation step
         # Verify WIX is accessible
         Write-Host "Verifying WIX tools are accessible..."
         if (-not (Get-Command candle.exe -ErrorAction SilentlyContinue)) {
