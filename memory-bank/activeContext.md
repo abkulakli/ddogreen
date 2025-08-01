@@ -17,10 +17,11 @@
 - **IPlatformUtils Interface**: Extended with getDefaultConfigPath() virtual method
 - **Platform Implementations**: Added getDefaultConfigPath() to all platform-specific utilities
   - Linux/macOS: "/etc/ddogreen/ddogreen.conf"
-  - Windows: "C:\\ProgramData\\DDOSoft\\ddogreen\\ddogreen.conf"
+  - Windows: "%ProgramData%\DDOSoft\ddogreen\ddogreen.conf" (uses environment variable)
 - **Config Class**: Updated getDefaultConfigPath() to use platform utilities via PlatformFactory
 - **Help Output**: Cleaned printUsage() function removing hardcoded configuration paths
 - **Test System**: Updated CMakeLists.txt to include necessary platform dependencies
+- **Windows Environment Variables**: Updated all Windows file paths to use %ProgramData% environment variable
 
 ### Architecture Achievements
 - **Clean Separation**: No #ifdef preprocessor directives in configuration logic

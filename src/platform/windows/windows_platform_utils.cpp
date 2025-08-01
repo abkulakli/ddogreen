@@ -3,6 +3,7 @@
 #include <string>
 #include <iostream>
 #include <memory>
+#include <cstdlib>
 
 /**
  * Windows-specific platform utilities implementation
@@ -90,26 +91,26 @@ public:
 
     /**
      * Get the default log file path for Windows
-     * @return C:\ProgramData\DDOSoft\ddogreen\ddogreen.log
+     * @return path to default log file using %ProgramData% environment variable
      */
     std::string getDefaultLogPath() const override {
-        return "C:\\ProgramData\\DDOSoft\\ddogreen\\ddogreen.log";
+        return getProgramDataPath() + "\\DDOSoft\\ddogreen\\ddogreen.log";
     }
 
     /**
      * Get the default PID file path for Windows
-     * @return C:\ProgramData\DDOSoft\ddogreen\ddogreen.pid
+     * @return path to default PID file using %ProgramData% environment variable
      */
     std::string getDefaultPidPath() const override {
-        return "C:\\ProgramData\\DDOSoft\\ddogreen\\ddogreen.pid";
+        return getProgramDataPath() + "\\DDOSoft\\ddogreen\\ddogreen.pid";
     }
 
     /**
      * Get the default configuration file path for Windows
-     * @return C:\ProgramData\DDOSoft\ddogreen\ddogreen.conf
+     * @return path to default configuration file using %ProgramData% environment variable
      */
     std::string getDefaultConfigPath() const override {
-        return "C:\\ProgramData\\DDOSoft\\ddogreen\\ddogreen.conf";
+        return getProgramDataPath() + "\\DDOSoft\\ddogreen\\ddogreen.conf";
     }
 
     /**
@@ -156,6 +157,26 @@ public:
 
         // If GetFullPathName fails, return the simple concatenation as fallback
         return tempPath;
+    }
+
+private:
+    /**
+     * Get the ProgramData directory path from environment variable
+     * @return ProgramData path, or C:\ProgramData as fallback
+     */
+    std::string getProgramDataPath() const {
+        char* programDataPath = nullptr;
+        size_t len = 0;
+        errno_t err = _dupenv_s(&programDataPath, &len, "ProgramData");
+        
+        if (err == 0 && programDataPath != nullptr) {
+            std::string path = std::string(programDataPath);
+            free(programDataPath);
+            return path;
+        }
+        
+        // Fallback to hardcoded path if environment variable is not available
+        return "C:\\ProgramData";
     }
 };
 
