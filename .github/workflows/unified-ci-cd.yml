@@ -255,30 +255,56 @@ jobs:
 
     - name: Install WIX Toolset
       run: |
-        # Install .NET (required for WIX .NET Tools)
-        Write-Host "Installing .NET 8 SDK..."
+        # Install WIX Toolset 3.11 (CPack compatible version)
+        Write-Host "Installing WIX Toolset 3.11..."
+        choco install wixtoolset --version 3.11.2 -y
         
-        # Install WIX CLI tool
-        Write-Host "Installing WIX CLI tool..."
-        dotnet tool install --global wix --version 4.0.4
-        
-        # Add WIX UI extension (required by CPack's default WIX template)
-        Write-Host "Adding WIX UI extension..."
-        wix extension add --global WixToolset.UI.wixext/4.0.4
+        # Add WIX bin directory to PATH for current session
+        $wixPath = "C:\Program Files (x86)\WiX Toolset v3.11\bin"
+        $env:PATH += ";$wixPath"
         
         # Verify installation
         Write-Host "Verifying WIX installation..."
-        wix --version
+        if (Test-Path "$wixPath\candle.exe") {
+            Write-Host "✓ candle.exe found"
+            & "$wixPath\candle.exe" -? | Select-Object -First 3
+        } else {
+            Write-Error "❌ candle.exe not found at $wixPath"
+            exit 1
+        }
+        
+        if (Test-Path "$wixPath\light.exe") {
+            Write-Host "✓ light.exe found"
+            & "$wixPath\light.exe" -? | Select-Object -First 3
+        } else {
+            Write-Error "❌ light.exe not found at $wixPath"
+            exit 1
+        }
 
     - name: Create Windows packages
       run: |
         cd build
         cmake --build . --config Release --parallel
         
+        # Set WIX PATH for CPack
+        $wixPath = "C:\Program Files (x86)\WiX Toolset v3.11\bin"
+        $env:PATH += ";$wixPath"
+        
+        # Verify WIX is accessible
+        Write-Host "Verifying WIX tools are accessible..."
+        if (-not (Get-Command candle.exe -ErrorAction SilentlyContinue)) {
+            Write-Error "❌ candle.exe not found in PATH"
+            Write-Host "Current PATH: $env:PATH"
+            exit 1
+        }
+        Write-Host "✓ WIX tools are accessible"
+        
         # Create ZIP package (existing)
+        Write-Host "Creating ZIP package..."
         cpack -G ZIP
         
         # Create WIX MSI installer
+        Write-Host "Creating WIX MSI installer..."
         cpack -G WIX
 
     - name: Create custom Windows ZIP with installer
