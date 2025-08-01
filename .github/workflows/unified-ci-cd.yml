@@ -671,32 +671,6 @@ jobs:
         }
 
         Write-Host "Windows WIX MSI installer validation completed"
-            $fileInfo = Get-ItemProperty -Path $installerFile.FullName
-            Write-Host "File version info available: $($fileInfo -ne $null)"
-            
-            # Verify it's a valid executable
-            if ($installerFile.Name -like "*.exe") {
-                Write-Host "✓ Installer has correct .exe extension"
-            } else {
-                Write-Host "✗ ERROR: Installer does not have .exe extension"
-                exit 1
-            }
-            
-            # Check file size is reasonable (should be > 100KB for a real installer)
-            if ($installerFile.Length -gt 100KB) {
-                Write-Host "✓ Installer size is reasonable ($([math]::Round($installerFile.Length / 1KB, 2)) KB)"
-            } else {
-                Write-Host "✗ WARNING: Installer size seems too small ($([math]::Round($installerFile.Length / 1KB, 2)) KB)"
-            }
-            
-            Write-Host "Note: Installer functional testing requires admin privileges and is not performed in CI"
-            Write-Host "The installer will install ddogreen as a Windows service automatically"
-        } else {
-            Write-Host "✗ ERROR: No installer executable found"
-            exit 1
-        }
-
-        Write-Host "Windows NSIS installer validation completed"
 
   # Step 5: Create Release (only on tags)
   release:
@@ -737,7 +711,7 @@ jobs:
 
         # Copy and rename Windows package files with version
         cp ddogreen-windows-zip/*.zip "release-files/ddogreen-${VERSION}-windows.zip"
-        cp ddogreen-windows-installer/*.exe "release-files/ddogreen-${VERSION}-windows-installer.exe"
+        cp ddogreen-windows-msi/*.msi "release-files/ddogreen-${VERSION}-windows.msi"
 
         # Create checksums
         cd release-files
@@ -759,13 +733,13 @@ jobs:
 
           ### Installation Options
 
-          #### Windows (MSI-like Installer) - **NEW!**
+          #### Windows (MSI Installer)
           ```powershell
-          # Download and run installer (automatic service setup)
-          Invoke-WebRequest -Uri "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/ddogreen-${{ github.ref_name }}-windows-installer.exe" -OutFile "ddogreen-installer.exe"
+          # Download MSI installer (automatic service setup)
+          Invoke-WebRequest -Uri "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/ddogreen-${{ github.ref_name }}-windows.msi" -OutFile "ddogreen-installer.msi"
           
-          # Run as Administrator (required for service installation)
-          Start-Process -FilePath "ddogreen-installer.exe" -Verb RunAs -Wait
+          # Install MSI package (requires Administrator privileges)
+          Start-Process -FilePath "msiexec.exe" -ArgumentList "/i ddogreen-installer.msi /quiet" -Verb RunAs -Wait
           
           # Service will be automatically installed and started
           Get-Service ddogreen
