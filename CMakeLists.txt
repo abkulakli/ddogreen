@@ -97,8 +97,8 @@ endif()
 
 # CPack configuration for platform-specific packages
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    # Windows-specific packaging with ZIP and NSIS (for MSI-like installer)
-    set(CPACK_GENERATOR "ZIP;NSIS")
+    # Windows-specific packaging with ZIP and WIX (for MSI installer)
+    set(CPACK_GENERATOR "ZIP;WIX")
     set(CPACK_PACKAGE_FILE_NAME "ddogreen-windows")
 else()
     # Linux packaging with DEB, RPM, and TGZ
@@ -139,47 +139,24 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE "${CMAKE_CURRENT_SOURCE_DIR}/packaging/linux/rpm/postun")
 endif()
 
-# Windows-specific NSIS packaging configuration
+# Windows-specific WIX packaging configuration
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    # NSIS installer configuration for MSI-like behavior
-    set(CPACK_NSIS_PACKAGE_NAME "DDOGreen")
-    set(CPACK_NSIS_DISPLAY_NAME "DDOGreen - Intelligent Green Power Management")
-    set(CPACK_NSIS_HELP_LINK "https://www.ddosoft.com")
-    set(CPACK_NSIS_URL_INFO_ABOUT "https://www.ddosoft.com")
-    set(CPACK_NSIS_CONTACT "support@ddosoft.com")
-    set(CPACK_NSIS_MODIFY_PATH OFF)
+    # WIX MSI installer configuration
+    set(CPACK_WIX_UPGRADE_GUID "8B9A5C1D-7F2E-4A6B-9C3D-E5F8A1B4C7D2")  # Fixed GUID for upgrades
+    set(CPACK_WIX_UI_REF "WixUI_InstallDir")
+    set(CPACK_WIX_PROGRAM_MENU_FOLDER "DDOSoft")
+    set(CPACK_WIX_CULTURES "en-us")
     
-    # Service installation configuration
-    set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
-        ; Create configuration directory
-        CreateDirectory \\\"$APPDATA\\\\DDOSoft\\\\ddogreen\\\"
-        
-        ; Copy default configuration if it doesn't exist
-        IfFileExists \\\"$APPDATA\\\\DDOSoft\\\\ddogreen\\\\ddogreen.conf\\\" ConfigExists 0
-        CopyFiles \\\"$INSTDIR\\\\share\\\\ddogreen\\\\ddogreen.conf.default\\\" \\\"$APPDATA\\\\DDOSoft\\\\ddogreen\\\\ddogreen.conf\\\"
-        ConfigExists:
-        
-        ; Install and start the ddogreen service
-        ExecWait 'sc create ddogreen binPath= \\\"$INSTDIR\\\\ddogreen.exe --daemon --config $APPDATA\\\\DDOSoft\\\\ddogreen\\\\ddogreen.conf\\\" DisplayName= \\\"DDOGreen - Intelligent Green Power Management\\\" start= auto'
-        ExecWait 'sc description ddogreen \\\"Automatically manages Windows power plans based on system load monitoring for sustainable computing\\\"'
-        ExecWait 'sc failure ddogreen reset= 86400 actions= restart/10000/restart/30000/restart/60000'
-        ExecWait 'sc start ddogreen'
-    ")
+    # MSI Properties for Add/Remove Programs
+    set(CPACK_WIX_PROPERTY_ARPCOMMENTS "Intelligent Green Power Management for Sustainable Computing")
+    set(CPACK_WIX_PROPERTY_ARPHELPLINK "https://www.ddosoft.com/support")
+    set(CPACK_WIX_PROPERTY_ARPURLINFOABOUT "https://www.ddosoft.com")
+    set(CPACK_WIX_PROPERTY_ARPURLUPDATEINFO "https://www.ddosoft.com/updates")
     
-    set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "
-        ; Stop and remove the ddogreen service
-        ExecWait 'sc stop ddogreen'
-        ExecWait 'sc delete ddogreen'
-        
-        ; Ask user if they want to remove configuration
-        MessageBox MB_YESNO \\\"Remove configuration files?\\\" IDYES RemoveConfig IDNO KeepConfig
-        RemoveConfig:
-        RMDir /r \\\"$APPDATA\\\\DDOSoft\\\\ddogreen\\\"
-        KeepConfig:
-    ")
+    # Service installation via WIX patch file
+    set(CPACK_WIX_PATCH_FILE "${CMAKE_CURRENT_SOURCE_DIR}/packaging/windows/wix/service-patch.xml")
     
     # Set install directory
-    set(CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES64")
     set(CPACK_PACKAGE_INSTALL_DIRECTORY "DDOSoft\\DDOGreen")
 endif()
 

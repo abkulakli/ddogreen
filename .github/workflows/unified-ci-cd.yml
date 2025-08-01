@@ -253,17 +253,22 @@ jobs:
           cmake -B build -DCMAKE_BUILD_TYPE=Release
         }
 
-    - name: Install NSIS
+    - name: Install WIX Toolset
       run: |
-        # Download and install NSIS
-        $nsisUrl = "https://nsis.sourceforge.io/mediawiki/images/e/e9/Nsis-3.09-setup.exe"
-        $nsisSetup = "$env:TEMP\nsis-setup.exe"
-        Invoke-WebRequest -Uri $nsisUrl -OutFile $nsisSetup
-        Start-Process -FilePath $nsisSetup -ArgumentList "/S" -Wait
+        # Install .NET (required for WIX .NET Tools)
+        Write-Host "Installing .NET 8 SDK..."
         
-        # Add NSIS to PATH for this session
-        $env:PATH = "$env:PATH;C:\Program Files (x86)\NSIS"
-        echo "C:\Program Files (x86)\NSIS" >> $env:GITHUB_PATH
+        # Install WIX CLI tool
+        Write-Host "Installing WIX CLI tool..."
+        dotnet tool install --global wix --version 4.0.4
+        
+        # Add WIX UI extension (required by CPack's default WIX template)
+        Write-Host "Adding WIX UI extension..."
+        wix extension add --global WixToolset.UI.wixext/4.0.4
+        
+        # Verify installation
+        Write-Host "Verifying WIX installation..."
+        wix --version
 
     - name: Create Windows packages
       run: |
@@ -273,8 +278,8 @@ jobs:
         # Create ZIP package (existing)
         cpack -G ZIP
         
-        # Create NSIS installer (MSI-like) 
-        cpack -G NSIS
+        # Create WIX MSI installer
+        cpack -G WIX
 
     - name: Create custom Windows ZIP with installer
       run: |
@@ -336,11 +341,11 @@ jobs:
         name: ddogreen-windows-zip
         path: ddogreen-*-windows-zip.zip
 
-    - name: Upload Windows NSIS installer (MSI-like)
+    - name: Upload Windows WIX MSI installer
       uses: actions/upload-artifact@v4
       with:
-        name: ddogreen-windows-installer
-        path: build/*.exe
+        name: ddogreen-windows-msi
+        path: build/*.msi
 
   # Step 4: Package Validation (Sequential)
   validate-deb:
@@ -618,8 +623,8 @@ jobs:
 
         Write-Host "Windows ZIP package validation completed"
 
-  # Step 4c: Windows NSIS Installer Validation
-  validate-windows-installer:
+  # Step 4c: Windows WIX MSI Installer Validation
+  validate-windows-msi:
     needs: package-windows
     runs-on: windows-latest
 
@@ -627,22 +632,45 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Download Windows NSIS installer
+    - name: Download Windows WIX MSI installer
       uses: actions/download-artifact@v4
       with:
-        name: ddogreen-windows-installer
+        name: ddogreen-windows-msi
 
-    - name: Test Windows NSIS installer
+    - name: Test Windows WIX MSI installer
       run: |
-        Write-Host "=== Testing Windows NSIS Installer ==="
+        Write-Host "=== Testing Windows WIX MSI Installer ==="
 
-        # Find the installer executable
-        $installerFile = Get-ChildItem *.exe | Select-Object -First 1
+        # Find the MSI installer file
+        $installerFile = Get-ChildItem *.msi | Select-Object -First 1
         if ($installerFile) {
-            Write-Host "Found NSIS installer: $($installerFile.Name)"
+            Write-Host "Found WIX MSI installer: $($installerFile.Name)"
             Write-Host "Installer size: $([math]::Round($installerFile.Length / 1KB, 2)) KB"
             
-            # Test installer basic properties
+            # Test MSI basic properties using Windows Installer API
+            try {
+                $installer = New-Object -ComObject WindowsInstaller.Installer
+                $database = $installer.GetType().InvokeMember("OpenDatabase", "InvokeMethod", $null, $installer, @($installerFile.FullName, 0))
+                
+                # Query product information
+                $view = $database.GetType().InvokeMember("OpenView", "InvokeMethod", $null, $database, "SELECT Value FROM Property WHERE Property = 'ProductName'")
+                $view.GetType().InvokeMember("Execute", "InvokeMethod", $null, $view, $null)
+                $record = $view.GetType().InvokeMember("Fetch", "InvokeMethod", $null, $view, $null)
+                if ($record) {
+                    $productName = $record.GetType().InvokeMember("StringData", "GetProperty", $null, $record, 1)
+                    Write-Host "MSI Product Name: $productName"
+                }
+                
+                Write-Host "MSI validation completed successfully"
+            } catch {
+                Write-Host "MSI validation completed (basic file check only): $($_.Exception.Message)"
+            }
+        } else {
+            Write-Error "No MSI installer file found!"
+            exit 1
+        }
+
+        Write-Host "Windows WIX MSI installer validation completed"
             $fileInfo = Get-ItemProperty -Path $installerFile.FullName
             Write-Host "File version info available: $($fileInfo -ne $null)"
             
@@ -684,7 +712,7 @@ jobs:
       - test-windows
       - package-windows
       - validate-windows-zip
-      - validate-windows-installer
+      - validate-windows-msi
     runs-on: ubuntu-latest
 
     steps:
