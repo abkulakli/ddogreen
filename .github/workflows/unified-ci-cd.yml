@@ -261,37 +261,58 @@ jobs:
         $wixZip = "wix311-binaries.zip"
         $wixPath = "C:\wix"
         
-        # Download WIX binaries
-        Invoke-WebRequest -Uri $wixUrl -OutFile $wixZip
-        Write-Host "Downloaded WIX binaries: $wixZip"
+        try {
+            # Download WIX binaries
+            Invoke-WebRequest -Uri $wixUrl -OutFile $wixZip -TimeoutSec 120
+            Write-Host "✓ Downloaded WIX binaries: $wixZip"
+        } catch {
+            Write-Error "❌ Failed to download WIX from GitHub: $($_.Exception.Message)"
+            Write-Host "Attempting fallback: Chocolatey installation..."
+            try {
+                choco install wixtoolset --version 3.11.2 -y
+                $wixPath = "C:\Program Files (x86)\WiX Toolset v3.11\bin"
+                $wixBinPath = $wixPath
+            } catch {
+                Write-Error "❌ Both download methods failed: $($_.Exception.Message)"
+                exit 1
+            }
+        }
         
-        # Extract WIX to C:\wix
-        Expand-Archive -Path $wixZip -DestinationPath $wixPath -Force
-        Write-Host "Extracted WIX to: $wixPath"
+        if (Test-Path $wixZip) {
+            # Extract WIX to C:\wix
+            Expand-Archive -Path $wixZip -DestinationPath $wixPath -Force
+            Write-Host "✓ Extracted WIX to: $wixPath"
+            $wixBinPath = "$wixPath"
+        }
         
         # Add WIX bin directory to PATH for current session and future steps
-        $wixBinPath = "$wixPath"
         $env:PATH += ";$wixBinPath"
         Add-Content $env:GITHUB_PATH $wixBinPath
-        Write-Host "Added to PATH: $wixBinPath"
+        Write-Host "✓ Added to PATH: $wixBinPath"
         
         # Verify installation
-        Write-Host "Verifying WIX installation..."
+        Write-Host "=== Verifying WIX installation ==="
         if (Test-Path "$wixBinPath\candle.exe") {
-            Write-Host "✓ candle.exe found"
-            & "$wixBinPath\candle.exe" -? | Select-Object -First 3
+            Write-Host "✓ candle.exe found at $wixBinPath\candle.exe"
+            & "$wixBinPath\candle.exe" -? 2>&1 | Select-Object -First 3
         } else {
             Write-Error "❌ candle.exe not found at $wixBinPath"
-            Get-ChildItem $wixPath -Recurse | Select-Object Name, FullName
+            Write-Host "Contents of $wixPath:"
+            if (Test-Path $wixPath) {
+                Get-ChildItem $wixPath -Recurse | Select-Object Name, FullName
+            }
             exit 1
         }
         
         if (Test-Path "$wixBinPath\light.exe") {
-            Write-Host "✓ light.exe found"
-            & "$wixBinPath\light.exe" -? | Select-Object -First 3
+            Write-Host "✓ light.exe found at $wixBinPath\light.exe"
+            & "$wixBinPath\light.exe" -? 2>&1 | Select-Object -First 3
         } else {
             Write-Error "❌ light.exe not found at $wixBinPath"
-            Get-ChildItem $wixPath -Recurse | Select-Object Name, FullName
+            Write-Host "Contents of $wixPath:"
+            if (Test-Path $wixPath) {
+                Get-ChildItem $wixPath -Recurse | Select-Object Name, FullName
+            }
             exit 1
         }
 
@@ -302,21 +323,60 @@ jobs:
         
         # WIX should already be in PATH from installation step
         # Verify WIX is accessible
-        Write-Host "Verifying WIX tools are accessible..."
+        Write-Host "=== Verifying WIX Installation ==="
+        Write-Host "Current PATH: $env:PATH"
+        
         if (-not (Get-Command candle.exe -ErrorAction SilentlyContinue)) {
             Write-Error "❌ candle.exe not found in PATH"
-            Write-Host "Current PATH: $env:PATH"
+            Write-Host "Looking for WIX tools in C:\wix..."
+            if (Test-Path "C:\wix") {
+                Get-ChildItem "C:\wix" -Recurse -Name "*.exe" | ForEach-Object { Write-Host "Found: $_" }
+            }
             exit 1
         }
         Write-Host "✓ WIX tools are accessible"
         
+        # Test WIX tools
+        Write-Host "Testing candle.exe..."
+        candle.exe -? 2>&1 | Select-Object -First 5
+        Write-Host "Testing light.exe..."
+        light.exe -? 2>&1 | Select-Object -First 5
+        
         # Create ZIP package (existing)
-        Write-Host "Creating ZIP package..."
-        cpack -G ZIP
+        Write-Host "=== Creating ZIP package ==="
+        try {
+            cpack -G ZIP
+            Write-Host "✓ ZIP package created successfully"
+        } catch {
+            Write-Error "❌ ZIP package creation failed: $($_.Exception.Message)"
+            exit 1
+        }
         
         # Create WIX MSI installer
-        Write-Host "Creating WIX MSI installer..."
-        cpack -G WIX
+        Write-Host "=== Creating WIX MSI installer ==="
+        Write-Host "CPack will now attempt to create WIX MSI package..."
+        
+        # Check if WIX patch file exists
+        $patchFile = "../packaging/windows/wix/service-patch.xml"
+        if (Test-Path $patchFile) {
+            Write-Host "✓ WIX patch file found: $patchFile"
+            Write-Host "Patch file content preview:"
+            Get-Content $patchFile | Select-Object -First 10
+        } else {
+            Write-Error "❌ WIX patch file not found: $patchFile"
+            exit 1
+        }
+        
+        try {
+            cpack -G WIX --verbose
+            Write-Host "✓ WIX MSI installer created successfully"
+        } catch {
+            Write-Error "❌ WIX MSI installer creation failed: $($_.Exception.Message)"
+            Write-Host "=== Debug Information ==="
+            Write-Host "Build directory contents:"
+            Get-ChildItem . -Recurse | Where-Object { $_.Name -like "*wix*" -or $_.Name -like "*msi*" } | Select-Object Name, FullName
+            exit 1
+        }
 
     - name: Create custom Windows ZIP with installer
       run: |
