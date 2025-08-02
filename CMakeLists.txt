@@ -167,7 +167,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     set(CPACK_WIX_PATCH_FILE "${CMAKE_CURRENT_SOURCE_DIR}/packaging/windows/wix/service-patch.xml")
     
     # Set install directory
-    set(CPACK_PACKAGE_INSTALL_DIRECTORY "DDOSoft\\DDOGreen")
+    set(CPACK_PACKAGE_INSTALL_DIRECTORY "DDOSoft/DDOGreen")
 endif()
 
 include(CPack)
