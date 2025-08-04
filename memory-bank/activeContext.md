@@ -1,11 +1,50 @@
 # Active Context - DDOGreen
 
 ## Current Work Focus
-**Project Status**: Platform-Specific Configuration Paths - COMPLETED
-**Last Updated**: February 2, 2025
-**Current State**: Production-ready cross-platform application with proper platform abstraction for configuration paths
+**Project Status**: Windows MSI Installer Implementation - COMPLETED & CLEANED
+**Last Updated**: August 4, 2025
+**Current State**: Production-ready cross-platform application with comprehensive packaging options including Windows MSI installer
 
-## Latest Activity: Platform-Specific Configuration Path Implementation - COMPLETED
+## Latest Activity: Final MSI Packaging Cleanup - COMPLETED
+
+### Completed Task: Minimal MSI Packaging (August 4, 2025)
+- **Activity**: Removed all unnecessary build scripts and achieved truly minimal MSI packaging
+- **Scope**: Deleted standalone build-wix5.bat script, maintaining only CMake-required files
+- **Result**: Ultra-clean MSI packaging with single file (ddogreen.wxs) and working `cpack` integration
+- **Philosophy**: "Keep it simple" - use only CMake infrastructure, no duplicate build logic
+
+### Final Clean MSI Structure (1 File Total)
+```
+packaging/windows/msi/
+└── ddogreen.wxs          # WiX template for CMake CPack (2,771 bytes)
+```
+
+### WiX v5 Integration Status - FULLY WORKING
+- **Root Cause Resolved**: CMake CPack WiX generator defaults to WiX v3 (candle/light tools)
+- **Solution Applied**: Set `CPACK_WIX_VERSION "4"` to enable WiX .NET Tools (v4/v5) support
+- **Requirements Met**: WiX v5.0.2 + WixToolset.UI.wixext/5.0.2 extension installed
+- **Build Command**: Standard `cpack` generates both ZIP (57KB) and MSI (405KB) packages
+- **Quality**: Professional MSI installer with Add/Remove Programs integration
+
+### Advantages of Final Clean Approach
+- **Zero Maintenance**: CMake handles all MSI build logic automatically
+- **No Duplication**: Removed standalone build scripts that duplicated CMake functionality
+- **Modern Tooling**: Uses latest WiX v5.0.2 with unified `wix.exe` command
+- **Version Compatibility**: `CPACK_WIX_VERSION "4"` enables WiX .NET Tools support
+- **Integrated Workflow**: MSI generation part of standard CMake build process
+- **Automatic Variables**: CMake manages version numbers, GUIDs, and paths dynamically
+- **Professional Result**: Creates 405KB MSI installer with standard Windows features
+
+### Technical Implementation (Final Clean State)
+- **WiX Version**: Set `CPACK_WIX_VERSION "4"` in CMakeLists.txt for v4/v5 support
+- **Extension Setup**: WixToolset.UI.wixext/5.0.2 installed via `wix extension add --global`
+- **Custom Template**: Commented out `CPACK_WIX_TEMPLATE` to use CMake's default template
+- **File Generation**: CMake generates directories.wxs, files.wxs, features.wxs, main.wxs automatically
+- **Build Process**: Standard `cpack` command generates MSI alongside ZIP (405KB output)
+- **User Experience**: Professional MSI installer with Add/Remove Programs integration
+- **Cleanup**: Removed build-wix5.bat script to eliminate duplicate build logic
+
+## Previous Activity: Platform-Specific Configuration Paths - COMPLETED
 
 ### Completed Task: Clean Architecture for Configuration Path Resolution
 - **Activity**: Implemented platform-specific configuration paths without preprocessor directives

@@ -97,9 +97,18 @@ endif()
 
 # CPack configuration for platform-specific packages
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    # Windows-specific packaging with ZIP only
-    set(CPACK_GENERATOR "ZIP")
+    # Windows-specific packaging with ZIP and MSI
+    set(CPACK_GENERATOR "ZIP;WIX")
     set(CPACK_PACKAGE_FILE_NAME "ddogreen-windows")
+    
+    # WiX-specific settings for MSI generation (WiX v5 compatible)
+    set(CPACK_WIX_VERSION "4")  # Use WiX .NET Tools (v4/v5) instead of legacy v3
+    set(CPACK_WIX_UPGRADE_GUID "A1B2C3D4-E5F6-7890-ABCD-EF1234567890")
+    set(CPACK_WIX_PROGRAM_MENU_FOLDER "DDOSoft")
+    set(CPACK_WIX_PROPERTY_INSTALLSCOPE "perMachine")
+    
+    # Use our custom WiX template with service installation
+    # set(CPACK_WIX_TEMPLATE "${CMAKE_CURRENT_SOURCE_DIR}/packaging/windows/msi/ddogreen.wxs")
 else()
     # Linux packaging with DEB, RPM, and TGZ
     set(CPACK_GENERATOR "DEB;RPM;TGZ")

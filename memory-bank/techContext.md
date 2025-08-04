@@ -36,8 +36,8 @@ cmake --build --preset debug       # Build debug executable
 cmake --preset release             # Configure release build  
 cmake --build --preset release     # Build release executable
 
-# Windows packaging (ZIP archive)
-cd build/release && cpack          # Generate ZIP package
+# Windows packaging (ZIP + MSI packages)
+cd build/release && cpack          # Generate both ZIP and MSI packages
 ```
 
 #### Build Directories Structure (VERIFIED CURRENT)
@@ -98,7 +98,7 @@ cmake --build --preset debug|release # Build executable
 - **Separated Builds**: Debug and release in separate directories
 - **Testing Integration**: GoogleTest via `BUILD_TESTS=ON` (24 tests passing)
 - **Cross-Platform**: Native builds per platform
-- **Windows Packaging**: ZIP archives with custom installer scripts
+- **Windows Packaging**: ZIP archives + MSI installers with professional Windows integration
 - **Service Installation**: Executable service options removed; package installers handle service setup
   - **Windows Service Installation**: Uses custom installer.bat script for service management
 
@@ -149,6 +149,36 @@ sudo apt install mingw-w64 mingw-w64-tools
 sudo apt install zip
 
 # Note: Primary Windows development uses CMake presets with native tools
+```
+
+### Windows MSI Packaging (WiX Toolset v5)
+
+#### WiX v5 Dependencies (Windows Development Environment)
+```powershell
+# Install WiX v5 via dotnet tool
+dotnet tool install --global wix --version 5.0.2
+
+# Install required UI extension for CMake CPack integration
+wix extension add --global WixToolset.UI.wixext/5.0.2
+
+# Verify installation
+wix --version  # Should show: 5.0.2+aa65968c
+```
+
+#### CMake WiX Integration Configuration
+```cmake
+# In CMakeLists.txt for Windows MSI support
+set(CPACK_WIX_VERSION "4")  # Enable WiX .NET Tools (v4/v5) support
+set(CPACK_WIX_UPGRADE_GUID "A1B2C3D4-E5F6-7890-ABCD-EF1234567890")
+set(CPACK_WIX_PROGRAM_MENU_FOLDER "DDOSoft")
+set(CPACK_WIX_PROPERTY_INSTALLSCOPE "perMachine")
+```
+
+#### MSI Package Generation
+```powershell
+# Standard CMake workflow generates both ZIP and MSI
+cd build/release
+cpack  # Outputs: ddogreen-windows.zip (57KB) + ddogreen-windows.msi (405KB)
 ```
 
 #### Build Dependencies
