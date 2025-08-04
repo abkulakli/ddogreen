@@ -617,6 +617,119 @@ jobs:
 
         Write-Host "Windows ZIP package validation completed"
 
+  # Step 4c: Windows MSI Package Validation
+  validate-windows-msi:
+    needs: package-windows
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download Windows MSI package
+      uses: actions/download-artifact@v4
+      with:
+        name: ddogreen-windows-msi
+
+    - name: Test Windows MSI package
+      run: |
+        Write-Host "=== Testing Windows MSI Package ==="
+
+        # Find MSI file
+        $msiFile = Get-ChildItem *.msi | Select-Object -First 1
+        if (-not $msiFile) {
+            Write-Host "ERROR: No MSI file found"
+            exit 1
+        }
+        Write-Host "Found MSI package: $($msiFile.Name)"
+        Write-Host "MSI file size: $([math]::Round($msiFile.Length / 1KB, 2)) KB"
+
+        # Validate MSI structure using msiexec
+        Write-Host "Validating MSI structure..."
+        $validateResult = Start-Process -FilePath "msiexec.exe" -ArgumentList "/a", "$($msiFile.FullName)", "/qn", "TARGETDIR=`"$PWD\msi-extract`"" -Wait -PassThru
+        
+        if ($validateResult.ExitCode -eq 0) {
+            Write-Host "MSI structure validation passed"
+            
+            # Check extracted contents
+            if (Test-Path "msi-extract") {
+                Write-Host "MSI extraction successful. Contents:"
+                Get-ChildItem -Recurse "msi-extract" | Sort-Object FullName | ForEach-Object {
+                    Write-Host "  $($_.FullName.Replace($PWD, '.'))"
+                }
+                
+                # Look for ddogreen.exe
+                $executable = Get-ChildItem -Recurse "msi-extract" -Name "ddogreen.exe" | Select-Object -First 1
+                if ($executable) {
+                    Write-Host "✓ Found ddogreen.exe in MSI package"
+                    $exePath = Get-ChildItem -Recurse "msi-extract" -Filter "ddogreen.exe" | Select-Object -First 1
+                    
+                    # Test executable functionality
+                    Write-Host "Testing executable functionality..."
+                    & $exePath.FullName --help
+                    & $exePath.FullName --version
+                } else {
+                    Write-Host "ERROR: ddogreen.exe not found in MSI package"
+                    exit 1
+                }
+                
+                # Look for configuration file
+                $configFile = Get-ChildItem -Recurse "msi-extract" -Name "ddogreen.conf" | Select-Object -First 1
+                if ($configFile) {
+                    Write-Host "✓ Found configuration file in MSI package"
+                } else {
+                    Write-Host "WARNING: ddogreen.conf not found in MSI package"
+                }
+                
+                # Clean up extraction
+                Remove-Item -Recurse -Force "msi-extract" -ErrorAction SilentlyContinue
+            } else {
+                Write-Host "WARNING: MSI extraction directory not created"
+            }
+        } else {
+            Write-Host "ERROR: MSI structure validation failed (Exit code: $($validateResult.ExitCode))"
+            exit 1
+        }
+
+        # Additional MSI metadata validation
+        Write-Host "Checking MSI properties..."
+        try {
+            $installer = New-Object -ComObject WindowsInstaller.Installer
+            $database = $installer.GetType().InvokeMember("OpenDatabase", "InvokeMethod", $null, $installer, @($msiFile.FullName, 0))
+            
+            # Check Product Name
+            $view = $database.GetType().InvokeMember("OpenView", "InvokeMethod", $null, $database, "SELECT Value FROM Property WHERE Property='ProductName'")
+            $view.GetType().InvokeMember("Execute", "InvokeMethod", $null, $view, $null)
+            $record = $view.GetType().InvokeMember("Fetch", "InvokeMethod", $null, $view, $null)
+            if ($record) {
+                $productName = $record.GetType().InvokeMember("StringData", "GetProperty", $null, $record, 1)
+                Write-Host "✓ Product Name: $productName"
+            }
+            
+            # Check Product Version
+            $view = $database.GetType().InvokeMember("OpenView", "InvokeMethod", $null, $database, "SELECT Value FROM Property WHERE Property='ProductVersion'")
+            $view.GetType().InvokeMember("Execute", "InvokeMethod", $null, $view, $null)
+            $record = $view.GetType().InvokeMember("Fetch", "InvokeMethod", $null, $view, $null)
+            if ($record) {
+                $productVersion = $record.GetType().InvokeMember("StringData", "GetProperty", $null, $record, 1)
+                Write-Host "✓ Product Version: $productVersion"
+            }
+            
+            # Check Manufacturer
+            $view = $database.GetType().InvokeMember("OpenView", "InvokeMethod", $null, $database, "SELECT Value FROM Property WHERE Property='Manufacturer'")
+            $view.GetType().InvokeMember("Execute", "InvokeMethod", $null, $view, $null)
+            $record = $view.GetType().InvokeMember("Fetch", "InvokeMethod", $null, $view, $null)
+            if ($record) {
+                $manufacturer = $record.GetType().InvokeMember("StringData", "GetProperty", $null, $record, 1)
+                Write-Host "✓ Manufacturer: $manufacturer"
+            }
+            
+        } catch {
+            Write-Host "WARNING: Could not read MSI metadata: $($_.Exception.Message)"
+        }
+
+        Write-Host "Windows MSI package validation completed successfully"
+
   # Step 5: Create Release (only on tags)
   release:
     if: startsWith(github.ref, 'refs/tags/v') && github.event_name == 'push'
@@ -631,6 +744,7 @@ jobs:
       - test-windows
       - package-windows
       - validate-windows-zip
+      - validate-windows-msi
     runs-on: ubuntu-latest
 
     steps:
@@ -759,6 +873,6 @@ jobs:
           ### Verify Installation
           All packages automatically install and start the service. The service will manage your system's power automatically with no configuration required.
 
-          **Note**: Linux packages (DEB and TGZ) are fully tested in CI. RPM, MSI, and Windows ZIP packages are structure-validated but not installation-tested in CI.
+          **Note**: Linux packages (DEB and TGZ) are fully tested in CI. RPM packages and Windows packages (MSI and ZIP) are structure-validated and functionality-tested but not installation-tested in CI.
       env:
         GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}

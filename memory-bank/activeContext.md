@@ -18,6 +18,7 @@
 - **Extension Setup**: Automated `wix extension add --global WixToolset.UI.wixext/5.0.2`
 - **Build Command**: Changed from `cpack -G ZIP` to `cpack` (generates both ZIP + MSI)
 - **Artifact Upload**: Added `ddogreen-windows-msi` artifact alongside existing ZIP artifacts
+- **MSI Validation**: Added `validate-windows-msi` job with structure, functionality, and metadata testing
 - **Release Integration**: MSI files automatically included in GitHub releases
 - **Documentation**: Updated release notes with MSI installation instructions
 
