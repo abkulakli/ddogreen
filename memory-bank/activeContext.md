@@ -5,13 +5,21 @@
 **Last Updated**: August 4, 2025
 **Current State**: Production-ready cross-platform application with comprehensive packaging options including Windows MSI installer
 
-## Latest Activity: Final MSI Packaging Cleanup - COMPLETED
+## Latest Activity: GitHub Actions MSI Integration - COMPLETED
 
-### Completed Task: Minimal MSI Packaging (August 4, 2025)
-- **Activity**: Removed all unnecessary build scripts and achieved truly minimal MSI packaging
-- **Scope**: Deleted standalone build-wix5.bat script, maintaining only CMake-required files
-- **Result**: Ultra-clean MSI packaging with single file (ddogreen.wxs) and working `cpack` integration
-- **Philosophy**: "Keep it simple" - use only CMake infrastructure, no duplicate build logic
+### Completed Task: CI/CD Pipeline MSI Support (August 4, 2025)
+- **Activity**: Updated GitHub Actions workflow to build and release MSI packages
+- **Scope**: Added WiX v5 installation, MSI generation, and release artifact handling
+- **Result**: CI/CD pipeline now automatically generates both ZIP and MSI packages for Windows
+- **Quality**: MSI packages included in GitHub releases with proper installation instructions
+
+### CI/CD MSI Integration Features
+- **WiX Installation**: Automated `dotnet tool install --global wix --version 5.0.2` in workflow
+- **Extension Setup**: Automated `wix extension add --global WixToolset.UI.wixext/5.0.2`
+- **Build Command**: Changed from `cpack -G ZIP` to `cpack` (generates both ZIP + MSI)
+- **Artifact Upload**: Added `ddogreen-windows-msi` artifact alongside existing ZIP artifacts
+- **Release Integration**: MSI files automatically included in GitHub releases
+- **Documentation**: Updated release notes with MSI installation instructions
 
 ### Final Clean MSI Structure (1 File Total)
 ```

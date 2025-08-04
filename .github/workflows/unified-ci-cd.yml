@@ -233,6 +233,17 @@ jobs:
     - name: Setup MSVC
       uses: microsoft/setup-msbuild@v2
 
+    - name: Install WiX Toolset v5 for MSI packaging
+      run: |
+        Write-Host "Installing WiX Toolset v5.0.2..."
+        dotnet tool install --global wix --version 5.0.2
+        
+        Write-Host "Installing WiX UI extension..."
+        wix extension add --global WixToolset.UI.wixext/5.0.2
+        
+        Write-Host "Verifying WiX installation..."
+        wix --version
+
     - name: Download Windows build artifacts
       uses: actions/download-artifact@v4
       with:
@@ -253,11 +264,16 @@ jobs:
           cmake -B build -DCMAKE_BUILD_TYPE=Release
         }
 
-    - name: Create Windows packages
+    - name: Create Windows packages (ZIP + MSI)
       run: |
         cd build
         cmake --build . --config Release --parallel
-        cpack -G ZIP
+        
+        Write-Host "Generating Windows packages (ZIP + MSI)..."
+        cpack
+        
+        Write-Host "Generated packages:"
+        Get-ChildItem *.zip, *.msi | Format-Table Name, Length
 
     - name: Create custom Windows ZIP with installer
       run: |
@@ -318,6 +334,12 @@ jobs:
       with:
         name: ddogreen-windows-zip
         path: ddogreen-*-windows-zip.zip
+
+    - name: Upload Windows MSI package
+      uses: actions/upload-artifact@v4
+      with:
+        name: ddogreen-windows-msi
+        path: build/*.msi
 
   # Step 4: Package Validation (Sequential)
   validate-deb:
@@ -633,6 +655,7 @@ jobs:
 
         # Copy and rename Windows package files with version
         cp ddogreen-windows-zip/*.zip "release-files/ddogreen-${VERSION}-windows.zip"
+        cp ddogreen-windows-msi/*.msi "release-files/ddogreen-${VERSION}-windows.msi"
 
         # Create checksums
         cd release-files
@@ -653,6 +676,18 @@ jobs:
           ## ddogreen ${{ github.ref_name }}
 
           ### Installation Options
+
+          #### Windows (MSI Installer - Recommended)
+          ```powershell
+          # Download and install MSI package
+          Invoke-WebRequest -Uri "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/ddogreen-${{ github.ref_name }}-windows.msi" -OutFile "ddogreen-installer.msi"
+          
+          # Install (requires Administrator privileges)
+          Start-Process msiexec.exe -ArgumentList "/i ddogreen-installer.msi /quiet" -Verb RunAs -Wait
+          
+          # Service is automatically installed and started
+          # Uninstall via Add/Remove Programs or: msiexec.exe /x ddogreen-installer.msi /quiet
+          ```
 
           #### Windows (Portable ZIP)
           ```powershell
@@ -724,6 +759,6 @@ jobs:
           ### Verify Installation
           All packages automatically install and start the service. The service will manage your system's power automatically with no configuration required.
 
-          **Note**: Linux packages (DEB and TGZ) are fully tested in CI. RPM and Windows packages are structure-validated but not installation-tested in CI.
+          **Note**: Linux packages (DEB and TGZ) are fully tested in CI. RPM, MSI, and Windows ZIP packages are structure-validated but not installation-tested in CI.
       env:
         GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
