@@ -23,9 +23,9 @@ Developed by DDOSoft Solutions (www.ddosoft.com)
 - Lower carbon footprint from reduced electricity usage
 - Contributes to sustainable computing practices
 
-### Save Money
-- Lower electricity bills from reduced power consumption
-- Your laptop runs cooler, lasting longer
+### Cost Savings
+- **Lower electricity bills** from reduced power consumption
+- Extended laptop lifespan from better thermal management
 
 ## How It Works
 
@@ -43,9 +43,6 @@ ddogreen watches how busy your computer is and automatically switches power mode
 See the latest Release for platform-specific installation instructions (Linux DEB/RPM/TGZ, Windows MSI/ZIP):
 
 https://github.com/abkulakli/ddogreen/releases/latest
-### Cost Savings
-- **Lower electricity bills** from reduced power consumption
-- Extended laptop lifespan from better thermal management
 
 ## Troubleshooting
 
