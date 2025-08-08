@@ -218,7 +218,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 endif()
 ```
 
-#### Windows Build (Mock)
+#### Windows Build
 ```bash
 # Windows platform source files
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
@@ -437,23 +437,22 @@ monitoring_frequency=10          # Check interval (1-300 seconds)
 
 ## Build System Details
 
-### CMake Structure
+### CMake Structure (current)
 ```cmake
-# Project definition
 cmake_minimum_required(VERSION 3.16)
-project(ddogreen VERSION 1.0.0)
-
-# Compiler settings
+project(ddogreen VERSION ${PROJECT_VERSION_OVERRIDE})
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-# Source organization
-set(SOURCES src/main.cpp src/activity_monitor.cpp ...)
+set(SOURCES
+  src/main.cpp
+  src/activity_monitor.cpp
+  src/daemon.cpp
+  src/logger.cpp
+  src/config.cpp
+  src/platform/platform_factory.cpp
+  src/platform/idaemon.cpp
+)
 include_directories(include)
-
-# Installation rules
-install(TARGETS ddogreen DESTINATION /usr/local/bin)
-install(FILES systemd/ddogreen.service DESTINATION /etc/systemd/system)
 ```
 
 ### Build Configuration
@@ -466,31 +465,40 @@ install(FILES systemd/ddogreen.service DESTINATION /etc/systemd/system)
 ### Header Structure
 ```
 include/
-├── activity_monitor.h    # CPU monitoring and activity detection
-├── config.h             # Compile-time configuration constants
-├── daemon.h             # Daemon lifecycle management
-├── logger.h             # Logging system interface
-└── tlp_manager.h        # TLP command execution
+├── activity_monitor.h    # Activity monitoring and callbacks
+├── config.h              # Configuration parsing and validation
+├── daemon.h              # Daemon lifecycle management
+├── logger.h              # Logging system interface
+└── platform/             # Platform abstraction interfaces
+  ├── idaemon.h
+  ├── iplatform_utils.h
+  ├── ipower_manager.h
+  └── isystem_monitor.h
 ```
 
 ### Source Structure
 ```
 src/
-├── main.cpp             # Entry point and command-line handling
-├── activity_monitor.cpp # CPU monitoring implementation
-├── daemon.cpp           # Daemonization and signal handling
-├── logger.cpp           # Logging implementation
-└── tlp_manager.cpp      # TLP command execution
+├── main.cpp                  # Entry point and coordination
+├── activity_monitor.cpp      # Activity monitoring implementation
+├── daemon.cpp                # Daemonization and signal handling
+├── logger.cpp                # Logging implementation
+├── config.cpp                # Configuration implementation
+└── platform/
+  ├── platform_factory.cpp  # Platform object creation
+  ├── linux/                # Linux implementations (TLP, /proc, systemd)
+  ├── windows/              # Windows implementations (powercfg, PDH, SCM)
+  └── macos/                # macOS stubs/placeholders
 ```
 
-### Configuration Files
+### Configuration and Services
 ```
 config/
-├── ddogreen.conf          # Runtime configuration
-└── ddogreen-logrotate     # Log rotation settings
+└── ddogreen.conf.default     # Packaged configuration template
 
-systemd/
-└── ddogreen.service       # Service definition
+packaging/linux/              # DEB/RPM/TGZ scripts manage systemd service at install time
+packaging/windows/msi/        # WiX template for MSI
+packaging/windows/zip/        # ZIP installer script
 ```
 
 ## Technical Constraints

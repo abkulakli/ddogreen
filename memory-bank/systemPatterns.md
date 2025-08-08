@@ -217,11 +217,11 @@ activityMonitor.setActivityCallback([&powerManager](bool isActive) {
 **Rationale**: Decouples activity detection from power management actions
 **Benefits**: Easy to extend with additional observers, clean separation of concerns
 
-### 4. Command Pattern (TLP Execution)
+### 4. Command Pattern (Backend Command Execution)
 ```cpp
-// TLPManager encapsulates command execution
-bool TLPManager::setPerformanceMode() {
-    std::string output = executeCommandWithOutput("sudo tlp start 2>&1");
+// Encapsulate backend command execution inside the platform power manager
+bool LinuxPowerManager::setPerformanceMode() {
+    std::string output = executeCommandWithOutput("tlp ac 2>&1");
     // Process output and handle results
 }
 ```
@@ -373,8 +373,8 @@ class ActivityMonitor {
 
 ### 1. Graceful Degradation
 ```cpp
-if (!tlpManager.isTLPAvailable()) {
-    Logger::warning("TLP not available, continuing without power management");
+if (!linuxPowerManager.isBackendAvailable()) {
+    Logger::warning("Power backend not available, continuing without power management");
     // Continue running for monitoring/logging
 }
 ```

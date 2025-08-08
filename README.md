@@ -159,8 +159,11 @@ powercfg /getactivescheme
 
 - Linux (DEB): `sudo apt remove ddogreen`
 - Linux (RPM): `sudo rpm -e ddogreen`
+- Linux (TGZ): Use the installer script’s uninstall option if available, or disable/stop the service and remove installed files
+  - `sudo systemctl disable --now ddogreen`
+  - Remove installed files under your chosen install prefix
 - Windows (MSI): Uninstall from “Apps & features”
-- Windows (ZIP): Run `installer.bat` uninstall option (if provided), or remove service manually
+- Windows (ZIP): Use `installer.bat` uninstall option (run as Administrator)
 
 ## Advanced Usage
 
@@ -176,8 +179,6 @@ Options:
   -c, --config PATH      Use custom configuration file
   -h, --help             Show this help message
   -v, --version          Show version information
-```
-  -d, --daemon           Run as daemon/service
 ```
 
 ---
@@ -195,8 +196,8 @@ Options:
 ## Technical Details
 
 ### Simple and Safe
-- **No configuration needed** - works automatically with smart defaults
-- **Minimal resource usage** - checks system load once per minute
+- **Requires a configuration file** - packages ship a template you can copy and edit
+- **Minimal resource usage** - configurable monitoring frequency (1–300 seconds)
 - **Safe** - only changes power modes, nothing else
 - **Cross-platform** - same intelligent logic on all platforms
 
@@ -215,10 +216,9 @@ ddogreen supports several command-line options for different use cases on both L
 Usage: ddogreen [OPTIONS]
 Options:
   -d, --daemon           Run as daemon/service
+  -c, --config PATH      Use custom configuration file
   -h, --help             Show this help message
   -v, --version          Show version information
-  -i, --install          Install system service
-  -u, --uninstall        Uninstall system service
 ```
 
 ## Configuration
@@ -385,17 +385,25 @@ Check the detailed logs for error messages:
 ## Uninstall
 
 ### Linux
+Use your package manager (preferred):
 ```bash
-sudo ddogreen --uninstall
-sudo rm -f /usr/local/bin/ddogreen
+# Debian/Ubuntu
+sudo apt remove ddogreen
+
+# Fedora/RHEL
+sudo rpm -e ddogreen
+```
+
+For TGZ installs, use the installer’s uninstall option if provided, or:
+```bash
+sudo systemctl disable --now ddogreen
+# Then remove installed files (bin, config, service) as appropriate
 ```
 
 ### Windows
-```cmd
-# Run as Administrator
-ddogreen.exe --uninstall
-del C:\path\to\ddogreen.exe
-```
+MSI installs: uninstall from “Apps & features”.
+
+ZIP installs: run `installer.bat` and choose uninstall (run as Administrator).
 
 ### Technical Details
 
