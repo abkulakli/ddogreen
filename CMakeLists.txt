@@ -108,7 +108,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     set(CPACK_WIX_PROPERTY_INSTALLSCOPE "perMachine")
     
     # Use our custom WiX template with service installation
-    # set(CPACK_WIX_TEMPLATE "${CMAKE_CURRENT_SOURCE_DIR}/packaging/windows/msi/ddogreen.wxs")
+    set(CPACK_WIX_TEMPLATE "${CMAKE_CURRENT_SOURCE_DIR}/packaging/windows/msi/ddogreen.wxs")
 else()
     # Linux packaging with DEB, RPM, and TGZ
     set(CPACK_GENERATOR "DEB;RPM;TGZ")

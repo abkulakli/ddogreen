@@ -1,62 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
-  <Product Id="@CPACK_WIX_PRODUCT_GUID@"
-           Name="@CPACK_PACKAGE_NAME@"
+  <Package Name="@CPACK_PACKAGE_NAME@"
            Language="1033"
            Version="@CPACK_PACKAGE_VERSION@"
            Manufacturer="@CPACK_PACKAGE_VENDOR@"
-           UpgradeCode="@CPACK_WIX_UPGRADE_GUID@">
-
-    <Package InstallerVersion="200"
-             Compressed="yes"
-             InstallScope="perMachine" />
+           UpgradeCode="@CPACK_WIX_UPGRADE_GUID@"
+           InstallerVersion="500"
+           Compressed="yes"
+           Scope="perMachine">
 
     <MajorUpgrade DowngradeErrorMessage="A newer version is already installed." />
-    <MediaTemplate EmbedCab="yes" />
+    <Media Id="1" Cabinet="media1.cab" EmbedCab="yes" />
 
     <!-- Install directories -->
-    <Directory Id="TARGETDIR" Name="SourceDir">
-      <Directory Id="@CPACK_WIX_PROGRAM_FILES_FOLDER@">
-        <Directory Id="ManufacturerFolder" Name="DDOSoft">
-          <Directory Id="INSTALLFOLDER" Name="ddogreen" />
-        </Directory>
+    <StandardDirectory Id="ProgramFiles6432Folder">
+      <Directory Id="ManufacturerFolder" Name="DDOSoft">
+        <Directory Id="INSTALLFOLDER" Name="ddogreen" />
       </Directory>
-      <Directory Id="CommonAppDataFolder">
-        <Directory Id="CommonAppDataManufacturerFolder" Name="DDOSoft">
-          <Directory Id="CONFIGFOLDER" Name="ddogreen" />
-        </Directory>
+    </StandardDirectory>
+    <StandardDirectory Id="CommonAppDataFolder">
+      <Directory Id="CommonAppDataManufacturerFolder" Name="DDOSoft">
+        <Directory Id="CONFIGFOLDER" Name="ddogreen" />
       </Directory>
-    </Directory>
+    </StandardDirectory>
 
     <!-- Files and service -->
     <DirectoryRef Id="INSTALLFOLDER">
-      <Component Id="MainFiles" Guid="B2C3D4E5-F6A7-8901-BCDE-F23456789012">
-  <File Id="ddogreen.exe" Source="$(var.CPACK_WIX_ROOT)ddogreen.exe" KeyPath="yes" />
+      <Component Id="MainFiles">
+        <File Id="ddogreen.exe" Source="@CPACK_TOPLEVEL_DIRECTORY@/ddogreen-windows/bin/ddogreen.exe" />
 
-  <!-- Windows Service (must be in the same component as the service executable) -->
-  <ServiceInstall Id="DDOGreenService"
-      Name="ddogreen"
-      DisplayName="DDOGreen - Power Management Service"
-      Description="Manages Windows power plans based on system load"
-      Type="ownProcess"
-      Start="auto"
-      Account="LocalSystem"
-      ErrorControl="normal"
-      Arguments='--daemon --config "[CONFIGFOLDER]ddogreen.conf"' />
+        <!-- Windows Service (must be in the same component as the service executable) -->
+        <ServiceInstall Id="DDOGreenService"
+            Name="ddogreen"
+            DisplayName="DDOGreen - Power Management Service"
+            Description="Manages Windows power plans based on system load"
+            Type="ownProcess"
+            Start="auto"
+            Account="LocalSystem"
+            ErrorControl="normal"
+            Arguments='--daemon --config "[CONFIGFOLDER]ddogreen.conf"' />
 
-  <!-- Ensure service starts on install, stops on upgrade/uninstall, and is removed before files are deleted -->
-  <ServiceControl Id="DDOGreenServiceControl"
-      Name="ddogreen"
-      Start="install"
-      Stop="both"
-      Remove="uninstall"
-      Wait="yes" />
+        <!-- Service control: install/remove service but don't auto-start -->
+        <ServiceControl Id="DDOGreenServiceControl"
+            Name="ddogreen"
+            Stop="both"
+            Remove="uninstall"
+            Wait="no" />
       </Component>
     </DirectoryRef>
 
     <DirectoryRef Id="CONFIGFOLDER">
-      <Component Id="ConfigFiles" Guid="C3D4E5F6-A7B8-9012-CDEF-345678901234">
-        <File Id="ddogreen.conf" Source="$(var.CPACK_WIX_ROOT)share\ddogreen\ddogreen.conf.default" Name="ddogreen.conf" KeyPath="yes" />
+      <Component Id="ConfigFiles">
+        <File Id="ddogreen.conf" Source="@CPACK_TOPLEVEL_DIRECTORY@/ddogreen-windows/share/ddogreen/ddogreen.conf.default" Name="ddogreen.conf" />
         <CreateFolder />
       </Component>
     </DirectoryRef>
@@ -67,5 +62,5 @@
       <ComponentRef Id="ConfigFiles" />
     </Feature>
 
-  </Product>
+  </Package>
 </Wix>
