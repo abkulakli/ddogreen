@@ -44,22 +44,31 @@ ddogreen watches how busy your computer is and automatically switches power mode
 
 Recommended (DEB/RPM packages)
 ```bash
-# Debian/Ubuntu
-wget https://github.com/abkulakli/ddogreen/releases/latest/download/ddogreen-linux.deb
-sudo apt install ./ddogreen-linux.deb
+# Debian/Ubuntu (replace vX.Y.Z with the latest tag from Releases)
+wget https://github.com/abkulakli/ddogreen/releases/download/vX.Y.Z/ddogreen-vX.Y.Z-linux.deb
+sudo apt install ./ddogreen-vX.Y.Z-linux.deb
 
-# Fedora/RHEL
-wget https://github.com/abkulakli/ddogreen/releases/latest/download/ddogreen-linux.rpm
-sudo rpm -i ddogreen-linux.rpm
+# Fedora/RHEL (replace vX.Y.Z with the latest tag from Releases)
+wget https://github.com/abkulakli/ddogreen/releases/download/vX.Y.Z/ddogreen-vX.Y.Z-linux.rpm
+sudo rpm -i ddogreen-vX.Y.Z-linux.rpm
+```
+
+Optional: auto-detect the latest tag and download (bash)
+```bash
+VERSION=$(curl -sI https://github.com/abkulakli/ddogreen/releases/latest | tr -d '\r' | sed -n 's#location: .*/tag/\(v[^/]*\).*#\1#p')
+echo "Latest version: $VERSION"
+wget "https://github.com/abkulakli/ddogreen/releases/download/$VERSION/ddogreen-$VERSION-linux.deb"
+sudo apt install "./ddogreen-$VERSION-linux.deb"
 ```
 
 Packages install the systemd service and wire it to start automatically after configuration.
 
 Alternative (TGZ)
 ```bash
-wget https://github.com/abkulakli/ddogreen/releases/latest/download/ddogreen-linux.tgz
-tar xzf ddogreen-linux.tgz
-cd ddogreen-linux
+# Replace vX.Y.Z with the latest tag from Releases
+wget https://github.com/abkulakli/ddogreen/releases/download/vX.Y.Z/ddogreen-vX.Y.Z-linux.tar.gz
+tar xzf ddogreen-vX.Y.Z-linux.tar.gz
+cd ddogreen-*
 sudo ./installer.sh   # sets up files and service
 ```
 
@@ -74,57 +83,11 @@ sudo dnf install tlp
 
 ### Windows Installation
 
-Recommended (MSI)
-1. Download ddogreen-windows.msi from Releases
-2. Run the MSI (Administrator). It installs the service and data paths.
+## Installation
 
-Alternative (ZIP)
-1. Download ddogreen-windows.zip from Releases
-2. Extract
-3. Run installer.bat as Administrator to install and start the service
+See the latest Release for platform-specific installation instructions (Linux DEB/RPM/TGZ, Windows MSI/ZIP):
 
-## Check if It's Working
-
-### Service Status
-
-- Linux: `sudo systemctl status ddogreen`
-- Windows: `sc query ddogreen`
-
-### See What It's Doing
-
-#### Linux
-```bash
-sudo tail -f /var/log/ddogreen.log
-```
-
-#### Windows
-- Check Windows Event Viewer (Applications and Services Logs), and/or service status
-
-You'll see messages like:
-```
-[2025-07-21 15:30:45] System became idle - switching to power saving mode
-[2025-07-21 15:45:12] System became active - switching to high performance mode
-```
-
-### Check Your Current Power Mode
-
-#### Linux
-```bash
-sudo tlp-stat -s
-```
-
-#### Windows
-```cmd
-powercfg /getactivescheme
-```
-
-## Your Energy Impact
-
-### Individual Benefits
-- **Daily savings**: Reduced energy consumption per laptop
-- **Annual impact**: Significant reduction in electricity usage
-- **Environmental benefit**: Lower carbon footprint from reduced power consumption
-
+https://github.com/abkulakli/ddogreen/releases/latest
 ### Cost Savings
 - **Lower electricity bills** from reduced power consumption
 - Extended laptop lifespan from better thermal management
