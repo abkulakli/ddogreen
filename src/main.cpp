@@ -127,11 +127,11 @@ int main(int argc, char* argv[]) {
     // Check if power management is available
     Logger::info("Checking power management availability...");
     if (!powerManager || !powerManager->isAvailable()) {
-        Logger::error("Power management is not installed or not available");
-        Logger::error("Please install TLP: sudo apt install tlp (Debian/Ubuntu) or sudo dnf install tlp (Fedora)");
+        Logger::error("Power management backend is not available on this system");
+        Logger::error("Ensure a supported power management backend is installed and accessible");
         return 1;
     }
-    Logger::info("Power management system (TLP) is available");
+    Logger::info("Power management backend is available");
 
     // Configure activity monitor with settings from config
     Logger::info("Configuring activity monitor...");
