@@ -40,51 +40,6 @@ ddogreen watches how busy your computer is and automatically switches power mode
 
 ## Installation
 
-### Linux Installation
-
-Recommended (DEB/RPM packages)
-```bash
-# Debian/Ubuntu (replace vX.Y.Z with the latest tag from Releases)
-wget https://github.com/abkulakli/ddogreen/releases/download/vX.Y.Z/ddogreen-vX.Y.Z-linux.deb
-sudo apt install ./ddogreen-vX.Y.Z-linux.deb
-
-# Fedora/RHEL (replace vX.Y.Z with the latest tag from Releases)
-wget https://github.com/abkulakli/ddogreen/releases/download/vX.Y.Z/ddogreen-vX.Y.Z-linux.rpm
-sudo rpm -i ddogreen-vX.Y.Z-linux.rpm
-```
-
-Optional: auto-detect the latest tag and download (bash)
-```bash
-VERSION=$(curl -sI https://github.com/abkulakli/ddogreen/releases/latest | tr -d '\r' | sed -n 's#location: .*/tag/\(v[^/]*\).*#\1#p')
-echo "Latest version: $VERSION"
-wget "https://github.com/abkulakli/ddogreen/releases/download/$VERSION/ddogreen-$VERSION-linux.deb"
-sudo apt install "./ddogreen-$VERSION-linux.deb"
-```
-
-Packages install the systemd service and wire it to start automatically after configuration.
-
-Alternative (TGZ)
-```bash
-# Replace vX.Y.Z with the latest tag from Releases
-wget https://github.com/abkulakli/ddogreen/releases/download/vX.Y.Z/ddogreen-vX.Y.Z-linux.tar.gz
-tar xzf ddogreen-vX.Y.Z-linux.tar.gz
-cd ddogreen-*
-sudo ./installer.sh   # sets up files and service
-```
-
-Prerequisite: TLP must be installed on Linux
-```bash
-# Ubuntu/Debian
-sudo apt install tlp
-
-# Fedora/RHEL
-sudo dnf install tlp
-```
-
-### Windows Installation
-
-## Installation
-
 See the latest Release for platform-specific installation instructions (Linux DEB/RPM/TGZ, Windows MSI/ZIP):
 
 https://github.com/abkulakli/ddogreen/releases/latest
