@@ -1,16 +1,26 @@
 # Progress - ddogreen
 
-> **File Purpose**: Track completed achievements, milestones, and project evolution. 
+> **File Purpose**: Track completed achievements, milestones, and project evolution.
 > **Content Focus**: High-level "what was accomplished" and "when it was completed"
 > **Avoid**: Detailed implementation specs (→ systemPatterns.md), current work (→ activeContext.md), tech setup (→ techContext.md)
 
 ## Project Status: WINDOWS MSI INSTALLER IMPLEMENTATION COMPLETED & CLEANED
 
 **Version**: Development (0.0.0 default, production releases use version tags)
-**Last Updated**: August 4, 2025  
+**Last Updated**: August 8, 2025
 **Current State**: Production-ready application with **COMPREHENSIVE WINDOWS PACKAGING (ZIP + MSI)**
 
 ## Latest Achievement: Ultra-Clean MSI Packaging with WiX v5 Integration
+
+### User Documentation Alignment (August 8, 2025)
+- README updated to reflect actual CLI options (-d, -c, -h, -v) and remove deprecated --install/--uninstall.
+- Installation flows clarified: Linux (DEB/RPM/TGZ installers), Windows (MSI/ZIP with installer.bat).
+- Configuration requirement emphasized; template location standardized at share/ddogreen/ddogreen.conf.default.
+- Service management documented via system tools/installer scripts.
+- Platform-neutral messaging ensured across user docs.
+
+### Code Consistency Improvement
+- main.cpp logs made platform-agnostic for power management backend availability.
 
 ### Windows MSI Installer Package Development - FINAL STATE
 - **WiX v5 Integration**: Complete MSI installer using modern WiX Toolset v5.0.2 with CMake CPack integration
@@ -68,7 +78,7 @@ Both packages provide identical functionality with different installation experi
 
 ### Windows Packaging Simplification
 - **NSIS Removal**: Completely removed NSIS installer from CI/CD pipeline
-- **Single Package Strategy**: Windows now uses ZIP-only packaging approach  
+- **Single Package Strategy**: Windows now uses ZIP-only packaging approach
 - **Maintained Quality**: All validation and quality gates preserved for ZIP packages
 - **Simplified Dependencies**: Removed NSIS build dependencies from Windows jobs
 
@@ -159,8 +169,8 @@ Both packages provide identical functionality with different installation experi
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     install(FILES "config/ddogreen.conf.default"
             DESTINATION share/ddogreen)  # ← NOT data/ as claimed
-            
-# Windows packages: use data/ 
+
+# Windows packages: use data/
 else()
     install(FILES "config/ddogreen.conf.default"
             DESTINATION data)
@@ -210,7 +220,7 @@ elif [[ -f "share/ddogreen/ddogreen.conf.default" ]]; then  # Fallback
 - **Include Cleanup**: Removed Windows.h dependency from main application layer
 - **Build Verification**: Both Linux (164K ELF) and Windows (2.6M PE32+) executables verified working
 
-### Architecture Benefits  
+### Architecture Benefits
 - **Zero Platform Dependencies**: Main application has no platform-specific code whatsoever
 - **Clean Separation**: All OS-specific functionality properly encapsulated in platform layer
 - **Unified Interface**: Single `resolveAbsolutePath()` method works across all platforms
@@ -228,10 +238,10 @@ elif [[ -f "share/ddogreen/ddogreen.conf.default" ]]; then  # Fallback
 
 ### Complete Service Manager Abstraction Layer Removal
 - **Code Simplification**: Removed entire service manager abstraction layer (IServiceManager interface + 3 platform implementations)
-- **Files Removed**: 
+- **Files Removed**:
   - `include/platform/iservice_manager.h` (74 lines)
   - `src/platform/linux/linux_service_manager.cpp` (323 lines)
-  - `src/platform/windows/windows_service_manager.cpp` (286 lines) 
+  - `src/platform/windows/windows_service_manager.cpp` (286 lines)
   - `src/platform/macos/macos_service_manager.cpp` (122 lines)
 - **Platform Factory Cleanup**: Removed createServiceManager() method and all related factory code
 - **CMakeLists.txt Updates**: Removed references to deleted service manager source files
@@ -268,7 +278,7 @@ elif [[ -f "share/ddogreen/ddogreen.conf.default" ]]; then  # Fallback
 
 ## Previous Achievement: GitHub Actions CI Integration
 
-### Continuous Integration Pipeline Implementation  
+### Continuous Integration Pipeline Implementation
 - **GitHub Actions CI**: Complete CI pipeline that runs tests on every push and pull request
 - **Test Integration**: Unit tests run automatically and fail the build if tests fail
 - **GoogleTest Dependencies**: Fixed CI by installing libgtest-dev package in GitHub Actions
@@ -289,7 +299,7 @@ elif [[ -f "share/ddogreen/ddogreen.conf.default" ]]; then  # Fallback
 
 ## Previous Achievement: Configuration File Integration in Packaging System
 
-### Configuration File Packaging Integration  
+### Configuration File Packaging Integration
 - **Package Inclusion**: ddogreen.conf included in all package formats (DEB, RPM, TGZ)
 - **Path Correction**: Fixed CMakeLists.txt to use correct config/ddogreen.conf path
 - **Universal Support**: Configuration handled properly in all three package types

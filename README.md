@@ -2,14 +2,14 @@
 
 A smart sustainability-focused service that automatically optimizes your PC and laptop power consumption by intelligently switching between high-performance and power-saving modes based on actual system usage patterns.
 
-**Cross-Platform Support**: Works on Linux (with TLP) and Windows (with Power Plans)
+**Cross-Platform Support**: Linux (TLP) and Windows (Power Plans)
 
 ddogreen - Power Management Service for Linux & Windows
-========================================================
+======================================================
 
-**An intelligent power management daemon that automatically optimizes your system's power settings based on CPU load monitoring**
+An intelligent power management daemon that automatically optimizes your system's power settings based on CPU load monitoring.
 
-**Developed by DDOSoft Software Solutions (www.ddosoft.com)**
+Developed by DDOSoft Software Solutions (www.ddosoft.com)
 
 ## Why Use ddogreen?
 
@@ -18,7 +18,7 @@ ddogreen - Power Management Service for Linux & Windows
 - Automatically switches to power-saving when you're not actively using the system
 - Full performance when you need it for work
 
-### Environmental Benefits  
+### Environmental Benefits
 - **Reduces energy consumption** when your laptop is idle
 - Lower carbon footprint from reduced electricity usage
 - Contributes to sustainable computing practices
@@ -42,22 +42,28 @@ ddogreen watches how busy your computer is and automatically switches power mode
 
 ### Linux Installation
 
-#### Quick Install (Recommended)
+Recommended (DEB/RPM packages)
 ```bash
-# Download and install from releases
+# Debian/Ubuntu
 wget https://github.com/abkulakli/ddogreen/releases/latest/download/ddogreen-linux.deb
-sudo dpkg -i ddogreen-linux.deb
+sudo apt install ./ddogreen-linux.deb
 
-# Or for RPM-based systems
+# Fedora/RHEL
 wget https://github.com/abkulakli/ddogreen/releases/latest/download/ddogreen-linux.rpm
 sudo rpm -i ddogreen-linux.rpm
-
-# Install and start the service
-sudo ddogreen --install
 ```
 
-#### Prerequisites
-Make sure TLP is installed:
+Packages install the systemd service and wire it to start automatically after configuration.
+
+Alternative (TGZ)
+```bash
+wget https://github.com/abkulakli/ddogreen/releases/latest/download/ddogreen-linux.tgz
+tar xzf ddogreen-linux.tgz
+cd ddogreen-linux
+sudo ./installer.sh   # sets up files and service
+```
+
+Prerequisite: TLP must be installed on Linux
 ```bash
 # Ubuntu/Debian
 sudo apt install tlp
@@ -68,27 +74,21 @@ sudo dnf install tlp
 
 ### Windows Installation
 
-#### Quick Install (Recommended)
-1. Download `ddogreen-windows.zip` from [releases](https://github.com/abkulakli/ddogreen/releases/latest)
-2. Extract to `C:\Program Files\ddogreen`
-3. Open Command Prompt as Administrator
-4. Run: `ddogreen.exe --install`
+Recommended (MSI)
+1. Download ddogreen-windows.msi from Releases
+2. Run the MSI (Administrator). It installs the service and data paths.
 
-That's it! ddogreen is now running and will automatically manage your power settings.
+Alternative (ZIP)
+1. Download ddogreen-windows.zip from Releases
+2. Extract
+3. Run installer.bat as Administrator to install and start the service
 
 ## Check if It's Working
 
 ### Service Status
 
-#### Linux
-```bash
-sudo systemctl status ddogreen
-```
-
-#### Windows
-```cmd
-sc query ddogreen
-```
+- Linux: `sudo systemctl status ddogreen`
+- Windows: `sc query ddogreen`
 
 ### See What It's Doing
 
@@ -98,9 +98,7 @@ sudo tail -f /var/log/ddogreen.log
 ```
 
 #### Windows
-```cmd
-type C:\Windows\System32\ddogreen.log
-```
+- Check Windows Event Viewer (Applications and Services Logs), and/or service status
 
 You'll see messages like:
 ```
@@ -157,48 +155,28 @@ powercfg /getactivescheme
 - Verify power plans: `powercfg /getactivescheme`
 - Ensure you have admin privileges
 
-## Uninstall
+### Uninstall
 
-### Linux
-```bash
-sudo ddogreen --uninstall
-sudo apt remove ddogreen        # For DEB install
-# or
-sudo rpm -e ddogreen           # For RPM install
-```
-
-### Windows
-```cmd
-# Run as Administrator
-ddogreen.exe --uninstall
-# Then uninstall via Programs and Features
-```
+- Linux (DEB): `sudo apt remove ddogreen`
+- Linux (RPM): `sudo rpm -e ddogreen`
+- Windows (MSI): Uninstall from “Apps & features”
+- Windows (ZIP): Run `installer.bat` uninstall option (if provided), or remove service manually
 
 ## Advanced Usage
 
 ### Manual Control
-If you want to test ddogreen interactively:
+Run interactively (foreground) for testing, or as a daemon/service.
 
-#### Linux
-```bash
-sudo ddogreen                  # See live activity
-sudo ddogreen --daemon         # Run silently
-```
-
-#### Windows
-```cmd
-ddogreen.exe                   # See live activity
-ddogreen.exe --daemon          # Run silently
-```
-
-### Command Line Options
+- Linux: `sudo ddogreen` (interactive), `sudo ddogreen --daemon` (service-style)
+- Windows: `ddogreen.exe` (interactive), `ddogreen.exe --daemon` (service-style)
 ```
 Usage: ddogreen [OPTIONS]
 Options:
+  -d, --daemon           Run as daemon/service
+  -c, --config PATH      Use custom configuration file
   -h, --help             Show this help message
   -v, --version          Show version information
-  -i, --install          Install system service
-  -u, --uninstall        Uninstall system service
+```
   -d, --daemon           Run as daemon/service
 ```
 
@@ -211,7 +189,7 @@ Options:
 ## Platform Support
 
 - ✅ **Linux** - Full support with TLP integration
-- ✅ **Windows** - Full support with Power Plans integration  
+- ✅ **Windows** - Full support with Power Plans integration
 - 🚧 **macOS** - Architecture ready, implementation pending
 
 ## Technical Details
@@ -245,24 +223,23 @@ Options:
 
 ## Configuration
 
-ddogreen requires a configuration file at `/etc/ddogreen/ddogreen.conf` on Linux.
+ddogreen requires a configuration file. Packages ship a template at `share/ddogreen/ddogreen.conf.default`.
 
-### Configuration Setup
+Default configuration paths
+- Linux: `/etc/ddogreen/ddogreen.conf`
+- Windows: `%ProgramData%\DDOSoft\ddogreen\ddogreen.conf`
 
-1. Create the configuration directory:
-   ```bash
-   sudo mkdir -p /etc/ddogreen
-   ```
+Quick setup (Linux)
+```bash
+sudo mkdir -p /etc/ddogreen
+sudo cp /usr/share/ddogreen/ddogreen.conf.default /etc/ddogreen/ddogreen.conf
+sudo nano /etc/ddogreen/ddogreen.conf
+```
 
-2. Copy the example configuration:
-   ```bash
-   sudo cp example-config/ddogreen.conf /etc/ddogreen/
-   ```
-
-3. Edit the configuration as needed:
-   ```bash
-   sudo nano /etc/ddogreen/ddogreen.conf
-   ```
+Quick setup (Windows, ZIP)
+1. Create `%ProgramData%\DDOSoft\ddogreen` if missing
+2. Copy `share\ddogreen\ddogreen.conf.default` to `%ProgramData%\DDOSoft\ddogreen\ddogreen.conf`
+3. Edit values as needed
 
 ### Configuration Format
 
@@ -284,7 +261,7 @@ monitoring_frequency=10
 ### Configuration Parameters
 
 - **high_performance_threshold**: CPU load per core threshold for switching to high performance mode (0.1-1.0)
-- **power_save_threshold**: CPU load per core threshold for switching to power save mode (0.05-0.9)  
+- **power_save_threshold**: CPU load per core threshold for switching to power save mode (0.05-0.9)
 - **monitoring_frequency**: How often to check system load in seconds (1-300)
 
 ### Hysteresis Behavior
@@ -299,35 +276,8 @@ Example with 20 cores and default thresholds:
 
 ### Service Management
 
-#### Linux (systemd)
-```bash
-# Install the service
-sudo ddogreen --install
-
-# Uninstall the service  
-sudo ddogreen --uninstall
-
-# Run interactively (see live activity)
-sudo ddogreen
-
-# Run as daemon (silent operation)
-sudo ddogreen --daemon
-```
-
-#### Windows (Service Control Manager)
-```cmd
-# Install the service (run as Administrator)
-ddogreen.exe --install
-
-# Uninstall the service (run as Administrator)
-ddogreen.exe --uninstall
-
-# Run interactively (see live activity)
-ddogreen.exe
-
-# Run as service (silent operation)
-ddogreen.exe --daemon
-```
+- Linux: Services are installed and managed by DEB/RPM/TGZ installers. Use `systemctl` to control.
+- Windows: MSI installs and manages the service. ZIP provides an `installer.bat` to install/uninstall.
 
 ### Interactive vs Daemon Mode
 
@@ -447,13 +397,13 @@ ddogreen.exe --uninstall
 del C:\path\to\ddogreen.exe
 ```
 
-## Technical Details
+### Technical Details
 
 ### Cross-Platform Architecture
-- **No configuration needed** - works automatically with smart defaults
-- **Minimal resource usage** - checks system load once per minute
-- **Platform abstraction** - same core logic, platform-specific implementations
-- **Safe** - only changes power modes, nothing else
+- Read-only configuration required at startup (no built-in defaults)
+- Minimal resource usage with configurable monitoring frequency
+- Platform abstraction in application layer; platform-specific implementations under the hood
+- Safe: only switches power modes via platform backends
 
 ### Power Management
 - **Linux**: Uses TLP (ThinkPad-Linux-Power) for power management
@@ -464,10 +414,10 @@ del C:\path\to\ddogreen.exe
   - Power Saving: Power Saver power plan
 
 ### System Monitoring
-- **Linux**: Reads load averages from `/proc/loadavg`
-- **Windows**: Uses Performance Counters to calculate load averages
-- **Thresholds**: Configurable CPU load per core thresholds with hysteresis to prevent rapid switching
-- **Check Interval**: Configurable monitoring frequency (default: 10 seconds)
+- Linux: Kernel load averages (`/proc/loadavg`)
+- Windows: Performance Counters-based load equivalent
+- Thresholds: Configurable per-core thresholds with hysteresis
+- Monitoring frequency: Configurable (1–300 seconds)
 
 ### Service Management
 - **Linux**: Integrates with systemd for service management
@@ -484,7 +434,7 @@ del C:\path\to\ddogreen.exe
 ## Platform Support
 
 - ✅ **Linux** - Full support with TLP integration
-- ✅ **Windows** - Full support with Power Plans integration  
+- ✅ **Windows** - Full support with Power Plans integration
 - 🚧 **macOS** - Architecture ready, implementation pending
 
 ## Same Rules, Every Platform

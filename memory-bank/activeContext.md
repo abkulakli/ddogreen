@@ -2,10 +2,15 @@
 
 ## Current Work Focus
 **Project Status**: Windows MSI Installer Implementation - COMPLETED & CLEANED
-**Last Updated**: August 4, 2025
+**Last Updated**: August 8, 2025
 **Current State**: Production-ready cross-platform application with comprehensive packaging options including Windows MSI installer
 
 ## Latest Activity: GitHub Actions MSI Integration - COMPLETED
+
+### Documentation Alignment (August 8, 2025)
+- Updated README to be user-focused: current CLI (-d, -c, -h, -v), installer-managed services (Linux systemd via packages, Windows MSI/ZIP), required configuration and default paths.
+- Removed outdated --install/--uninstall flags from README and aligned monitoring/status guidance.
+- Adjusted main.cpp logs to be platform-agnostic (generic power management backend messages).
 
 ### Completed Task: CI/CD Pipeline MSI Support (August 4, 2025)
 - **Activity**: Updated GitHub Actions workflow to build and release MSI packages
@@ -160,7 +165,7 @@ ddogreen-linux/share/ddogreen/ddogreen.conf.default  # ✅ Standardized structur
 
 ### Memory Bank Documentation Corrections Made
 1. **activeContext.md**: Updated to reflect actual package structure reality
-2. **progress.md**: Added critical findings section highlighting documentation errors  
+2. **progress.md**: Added critical findings section highlighting documentation errors
 3. **techContext.md**: Corrected build structure documentation and added service installation inconsistency note
 
 ### Remaining Issues Requiring Resolution
@@ -191,7 +196,7 @@ ddogreen-linux/share/ddogreen/ddogreen.conf.default  # ✅ Standardized structur
 
 ### Major Discrepancies Found and Corrected
 1. **Package Structure**: Memory bank claimed standardization to `data/` folder was completed - ACTUALLY still mixed implementation
-2. **Service Installation**: Memory bank partially correct - executable options removed but CMakeLists.txt inconsistent  
+2. **Service Installation**: Memory bank partially correct - executable options removed but CMakeLists.txt inconsistent
 3. **Build System**: Memory bank correctly documented working CMake presets and testing
 4. **Architecture**: Memory bank correctly documented platform abstraction achievements
 
@@ -218,7 +223,7 @@ ddogreen-linux/share/ddogreen/ddogreen.conf.default  # ✅ Standardized structur
 
 ### Technical Implementation Details
 - **Interface Enhancement**: Added `setMonitoringFrequency(int frequencySeconds)` to `ISystemMonitor` interface
-- **Windows System Monitor**: 
+- **Windows System Monitor**:
   - Added `m_monitoringFrequency` member variable for tracking current frequency
   - Updated `getLoadAverage()` to calculate samples dynamically: `60 / m_monitoringFrequency`
   - Enhanced `updateLoadAverages()` to maintain proper sample window size
@@ -319,7 +324,7 @@ ddogreen-linux/share/ddogreen/ddogreen.conf.default  # ✅ Standardized structur
 
 ### Technical Implementation Details
 - **Files Modified**: `src/main.cpp` - removed unistd.h include
-- **Platform Headers Verified**: 
+- **Platform Headers Verified**:
   - Linux/macOS implementations: Properly use `#include <unistd.h>`
   - Windows implementations: Properly use `#include <windows.h>`
   - Main application: Only standard C++ headers
@@ -347,7 +352,7 @@ ddogreen-linux/share/ddogreen/ddogreen.conf.default  # ✅ Standardized structur
 - **Release Integration**: Extended release artifacts to include Windows MSI, ZIP, and standalone executables
 
 ### Technical Implementation Details
-- **Windows Jobs Added**: 
+- **Windows Jobs Added**:
   - `build-windows` - Windows executable compilation using MSVC/MinGW
   - `test-windows` - Windows binary functionality testing
   - `package-windows` - NSIS installer and ZIP package creation

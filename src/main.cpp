@@ -48,18 +48,18 @@ int main(int argc, char* argv[]) {
 
     // Parse command line arguments
     ParsedArgs args = platformUtils->parseCommandLine(argc, argv);
-    
+
     if (args.hasUnknownOptions) {
         std::cerr << "Unknown option: " << args.unknownOption << std::endl;
         printUsage(argv[0]);
         return 1;
     }
-    
+
     if (args.showHelp) {
         printUsage(argv[0]);
         return 0;
     }
-    
+
     if (args.showVersion) {
         printVersion();
         return 0;
@@ -109,15 +109,15 @@ int main(int argc, char* argv[]) {
     // Load configuration
     Config config;
     std::string configPath = args.configPath.empty() ? Config::getDefaultConfigPath() : args.configPath;
-    
+
     Logger::info("Loading configuration from: " + configPath);
-    
+
     // Load configuration - application fails if config file doesn't exist or has errors
     if (!config.loadFromFile(configPath)) {
         Logger::error("Failed to load configuration file: " + configPath);
         return 1;
     }
-    
+
     Logger::info("Configuration loaded successfully");
 
     // Initialize components
@@ -137,7 +137,7 @@ int main(int argc, char* argv[]) {
     Logger::info("Configuring activity monitor...");
     activityMonitor.setLoadThresholds(config.getHighPerformanceThreshold(), config.getPowerSaveThreshold());
     activityMonitor.setMonitoringFrequency(config.getMonitoringFrequency());
-    
+
     Logger::info("High performance threshold: " + std::to_string(config.getHighPerformanceThreshold()));
     Logger::info("Power save threshold: " + std::to_string(config.getPowerSaveThreshold()));
     Logger::info("Monitoring frequency: " + std::to_string(config.getMonitoringFrequency()) + " seconds");
