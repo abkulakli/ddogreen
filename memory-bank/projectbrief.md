@@ -3,7 +3,7 @@
 ## Project Overview
 **ddogreen** - COMPLETE - A production-ready sustainability-focused power management service for PCs and laptops that automatically optimizes TLP (ThinkPad-Linux-Power) power settings based on intelligent system load monitoring.
 
-**Product of DDOSoft Software Solutions** - where "ddo" represents the company heritage and "green" represents our commitment to environmental sustainability and energy efficiency.
+**Product of DDOSoft Solutions** - where "ddo" represents the company heritage and "green" represents our commitment to environmental sustainability and energy efficiency.
 
 ## Final Status: Production-Ready Cross-Platform Application with Enhanced Monitoring
 - **Complete Application**: All features implemented and working on Linux and Windows

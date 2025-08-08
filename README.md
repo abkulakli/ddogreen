@@ -9,7 +9,7 @@ ddogreen - Power Management Service for Linux & Windows
 
 An intelligent power management daemon that automatically optimizes your system's power settings based on CPU load monitoring.
 
-Developed by DDOSoft Software Solutions (www.ddosoft.com)
+Developed by DDOSoft Solutions (www.ddosoft.com)
 
 ## Why Use ddogreen?
 
