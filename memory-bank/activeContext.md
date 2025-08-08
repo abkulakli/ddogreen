@@ -5,6 +5,23 @@
 **Last Updated**: August 8, 2025
 **Current State**: Production-ready cross-platform application with comprehensive packaging options including Windows MSI installer
 
+### Process Update (Aug 8, 2025): Clarifying Questions for Vague Prompts
+- Added explicit policy to Copilot instructions: when a request is vague, ask 1–3 targeted clarifying questions or proceed with 1–2 stated assumptions when safe. This improves accuracy without blocking on low-risk defaults.
+
+### Process Update (Aug 8, 2025): No Workarounds Principle
+- Added strict policy to avoid workaround/hacky fixes. Always prefer root-cause, long-term solutions aligned with architecture and standards. If blocked, ask targeted questions or outline the correct solution path—do not ship hacks.
+
+### Process Update (Aug 8, 2025): Memory Bank Governance
+- Clarified memory bank usage: only durable facts (decisions, standards, interfaces, patterns). No workaround content, no ephemeral notes/logs/secrets. Workarounds, if explicitly requested, are not recorded; only the proper solution path is documented once implemented.
+
+### New Update (Aug 8, 2025): MSI installs Windows Service and removes it on uninstall
+- Moved WiX ServiceInstall/ServiceControl into the component that installs `ddogreen.exe` so the service is correctly bound to the executable (WiX rule: service must be in same component as its file).
+- Service behavior:
+  - Installs and configures service `ddogreen` (auto start, LocalSystem).
+  - Starts service at the end of install; stops on upgrade/uninstall; removes service before files are removed.
+  - Passes arguments: `--daemon --config "[CONFIGFOLDER]ddogreen.conf"` ensuring it uses the installed config at `%ProgramData%\DDOSoft\ddogreen\ddogreen.conf`.
+- Result: Clean install/upgrade/uninstall flow; no orphaned service entries; config present before service start (StartServices occurs after InstallFiles).
+
 ## Latest Activity: GitHub Actions MSI Integration - COMPLETED
 
 ### Documentation Alignment (August 8, 2025)

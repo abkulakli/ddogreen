@@ -19,7 +19,7 @@
 ### Cross-Platform Architecture
 ```
 Application Layer (main.cpp, daemon.cpp) - ZERO platform-specific code
-├── Platform Abstraction Layer  
+├── Platform Abstraction Layer
 │   ├── IPowerManager (power control abstraction)
 │   ├── ISystemMonitor (load monitoring abstraction)
 │   ├── IPlatformUtils (path resolution, privilege checking)
@@ -83,10 +83,10 @@ Application Layer (main.cpp, daemon.cpp) - ZERO platform-specific code
 
 ### Configuration File Format
 ```ini
-# Linux: /etc/ddogreen/ddogreen.conf 
+# Linux: /etc/ddogreen/ddogreen.conf
 # Windows: Custom path required (use --config option)
 high_performance_threshold=0.70
-power_save_threshold=0.30  
+power_save_threshold=0.30
 monitoring_frequency=10
 ```
 
@@ -621,3 +621,9 @@ This architectural discipline ensures maintainable, testable, and extensible cro
 - **Patterns Section**: How components interact, architectural relationships
 - **Implementation Section**: What specific operations are performed
 - **Decisions Section**: Why architectural choices were made
+
+### Memory Bank Governance Rules
+- No Workarounds Policy: The memory bank must never capture workaround/hacky/temporary fixes. Only durable, architecturally correct solutions belong here.
+- Durable-Only Content: Store decisions, rationale, standards, interfaces, patterns, and validated processes—not temporary notes, experimental commands, or raw logs.
+- Security Hygiene: Never store secrets, tokens, or sensitive environment details.
+- Traceability: When a correct solution supersedes a prior approach, update the memory bank to reflect the final decision and rationale; prune obsolete guidance.

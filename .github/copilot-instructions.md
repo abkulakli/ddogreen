@@ -123,11 +123,12 @@ I have access to DeepWiki, which provides deep knowledge about GitHub repositori
 2. Use Context7 for library documentation when working with external dependencies
 3. Use DeepWiki for repository analysis when integrating with external projects
 4. If the user's request is vague or ambiguous, ask 1–3 targeted clarifying questions; if it's safe to proceed, state 1–2 explicit assumptions and continue
-5. Execute requested task using established patterns and best practices
-6. Automatically update documentation when significant changes are made
-7. Document new insights, patterns, or external library learnings
-8. Naturally update activeContext.md with current focus
-9. Organically update progress.md when milestones are reached
+5. Consult and apply project principles from the memory bank (see Memory Bank Governance Rules)
+6. Execute requested task using established patterns and best practices
+7. Automatically update documentation when significant changes are made
+8. Document new insights, patterns, or external library learnings
+9. Naturally update activeContext.md with current focus
+10. Organically update progress.md when milestones are reached
 ```
 
 ### Enhanced Research Workflow
@@ -214,6 +215,16 @@ I'll proactively mention when I'm updating files: *"Let me update the memory ban
 - Updates happen seamlessly as part of development flow
 - Documentation stays current without requiring special commands
 - Context is preserved automatically across sessions
+
+### Memory Bank Usage Discipline
+- Always use the memory bank as the authoritative source of durable project context
+- At session start, read ALL core files to restore context before acting
+- Update memory bank only with durable facts: decisions, rationale, standards, patterns, interfaces, integration notes, testing strategy, deployment procedures
+- Do not store ephemeral content: temporary notes, speculative ideas, raw logs, secrets, or long command outputs
+- No workaround content in memory bank: never record hacks, temporary fixes, or stopgaps; only document the proper long-term solution once implemented
+- If a workaround is executed at the user’s explicit request, do NOT document it in the memory bank; instead, capture the correct solution path and update once implemented
+
+
 
 ## Usage Commands
 
