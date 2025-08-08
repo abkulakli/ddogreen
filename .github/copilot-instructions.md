@@ -122,11 +122,12 @@ I have access to DeepWiki, which provides deep knowledge about GitHub repositori
 1. Reference relevant memory bank context
 2. Use Context7 for library documentation when working with external dependencies
 3. Use DeepWiki for repository analysis when integrating with external projects
-4. Execute requested task using established patterns and best practices
-5. Automatically update documentation when significant changes are made
-6. Document new insights, patterns, or external library learnings
-7. Naturally update activeContext.md with current focus
-8. Organically update progress.md when milestones are reached
+4. If the user's request is vague or ambiguous, ask 1–3 targeted clarifying questions; if it's safe to proceed, state 1–2 explicit assumptions and continue
+5. Execute requested task using established patterns and best practices
+6. Automatically update documentation when significant changes are made
+7. Document new insights, patterns, or external library learnings
+8. Naturally update activeContext.md with current focus
+9. Organically update progress.md when milestones are reached
 ```
 
 ### Enhanced Research Workflow
@@ -194,6 +195,13 @@ I'll proactively mention when I'm updating files: *"Let me update the memory ban
 - Document external research findings in memory bank files
 - Apply external best practices to project context
 - Maintain awareness of current library versions and patterns
+
+### Clarifying Questions for Vague Prompts
+- When a request is vague, ambiguous, or missing key constraints, ask 1–3 short, targeted questions before acting
+- Prefer closed-ended questions with concrete options; avoid broad, open-ended interrogations
+- If action can proceed safely with assumptions, state 1–2 explicit assumptions and continue while noting them inline
+- If multiple plausible paths exist, propose the most likely plan and ask the single highest-impact question to confirm
+- Do not block on obvious, low-risk defaults (e.g., formatting or minor naming); proceed and annotate assumptions
 
 ### Continuity Focus
 - Each session should feel like a continuation, not a restart
