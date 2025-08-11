@@ -1,9 +1,29 @@
 # Active Context - DDOGreen
 
 ## Current Work Focus
-**Project Status**: Windows MSI Installer Implementation - COMPLETED & CLEANED
-**Last Updated**: August 8, 2025
-**Current State**: Production-ready cross-platform application with comprehensive packaging options including Windows MSI installer
+**Project Status**: Modern Service Architecture - COMPLETED
+**Last Updated**: August 11, 2025
+**Current State**: Production-ready cross-platform application with modern service management approach
+
+### Major Update (Aug 11, 2025): Removed --daemon Flag - Modern Service Architecture
+**COMPLETED**: Modernized application to use contemporary service management patterns
+- **Removed**: `--daemon` flag and self-daemonization logic (~200 lines of platform-specific code)
+- **Architecture**: Applications run in foreground; service managers handle backgrounding
+- **Linux Services**: Changed from `Type=forking` to `Type=simple` in systemd service files
+- **Windows Services**: Removed `--daemon` from MSI service configuration
+- **Benefits**: 
+  - Simpler, more reliable code
+  - Better process supervision by service managers
+  - Easier debugging (foreground by default)
+  - Modern best practices alignment
+  - Eliminated PID file management complexity
+- **Updated Components**:
+  - `main.cpp`: Removed daemon fork logic and flag parsing
+  - Platform utils: Removed `-d/--daemon` from all platforms (Linux, Windows, macOS)
+  - Service installers: Updated all Linux packages (deb, rpm, tgz) to use `Type=simple`
+  - Windows MSI: Updated service arguments to remove `--daemon`
+  - Documentation: Updated README to reflect new service-first approach
+- **Testing**: Application builds successfully, help shows updated options, rejects old `--daemon` flag
 
 ### Process Update (Aug 8, 2025): Clarifying Questions for Vague Prompts
 - Added explicit policy to Copilot instructions: when a request is vague, ask 1–3 targeted clarifying questions or proceed with 1–2 stated assumptions when safe. This improves accuracy without blocking on low-risk defaults.
@@ -14,12 +34,12 @@
 ### Process Update (Aug 8, 2025): Memory Bank Governance
 - Clarified memory bank usage: only durable facts (decisions, standards, interfaces, patterns). No workaround content, no ephemeral notes/logs/secrets. Workarounds, if explicitly requested, are not recorded; only the proper solution path is documented once implemented.
 
-### New Update (Aug 8, 2025): MSI installs Windows Service and removes it on uninstall
+### Previous Update (Aug 8, 2025): MSI installs Windows Service and removes it on uninstall
 - Moved WiX ServiceInstall/ServiceControl into the component that installs `ddogreen.exe` so the service is correctly bound to the executable (WiX rule: service must be in same component as its file).
 - Service behavior:
   - Installs and configures service `ddogreen` (auto start, LocalSystem).
   - Starts service at the end of install; stops on upgrade/uninstall; removes service before files are removed.
-  - Passes arguments: `--daemon --config "[CONFIGFOLDER]ddogreen.conf"` ensuring it uses the installed config at `%ProgramData%\DDOSoft\ddogreen\ddogreen.conf`.
+  - Passes arguments: `--config "[CONFIGFOLDER]ddogreen.conf"` ensuring it uses the installed config at `%ProgramData%\DDOSoft\ddogreen\ddogreen.conf`.
 - Result: Clean install/upgrade/uninstall flow; no orphaned service entries; config present before service start (StartServices occurs after InstallFiles).
 
 ## Latest Activity: GitHub Actions MSI Integration - COMPLETED

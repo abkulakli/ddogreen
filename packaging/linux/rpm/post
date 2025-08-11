@@ -58,16 +58,14 @@ Documentation=https://www.ddosoft.com
 After=multi-user.target
 
 [Service]
-Type=forking
-ExecStart=$TARGET_EXECUTABLE_PATH --daemon
+Type=simple
+ExecStart=$TARGET_EXECUTABLE_PATH
 ExecReload=/bin/kill -HUP \$MAINPID
-PIDFile=$PID_FILE
 Restart=always
 RestartSec=10
 User=root
 Group=root
 TimeoutStartSec=30
-RemainAfterExit=no
 
 # Security settings
 NoNewPrivileges=yes

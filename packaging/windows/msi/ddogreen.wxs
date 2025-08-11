@@ -38,7 +38,7 @@
             Start="auto"
             Account="LocalSystem"
             ErrorControl="normal"
-            Arguments='--daemon --config "[CONFIGFOLDER]ddogreen.conf"' />
+            Arguments='--config "[CONFIGFOLDER]ddogreen.conf"' />
 
         <!-- Service control: install/remove service but don't auto-start -->
         <ServiceControl Id="DDOGreenServiceControl"

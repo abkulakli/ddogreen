@@ -7,7 +7,6 @@
  * Structure to hold parsed command line arguments
  */
 struct ParsedArgs {
-    bool runAsDaemon = false;
     bool showHelp = false;
     bool showVersion = false;
     bool hasUnknownOptions = false;

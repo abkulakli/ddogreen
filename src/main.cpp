@@ -24,12 +24,12 @@
 void printUsage(const char* programName) {
     std::cout << "Usage: " << programName << " [OPTIONS]\n"
               << "Options:\n"
-              << "  -d, --daemon           Run as daemon\n"
               << "  -c, --config PATH      Use custom configuration file\n"
               << "  -h, --help             Show this help message\n"
               << "  -v, --version          Show version information\n"
               << "\n"
-              << "Automatically switches between performance and power-saving modes based on system load.\n";
+              << "Automatically switches between performance and power-saving modes based on system load.\n"
+              << "When run as a service, process management is handled by the service manager (systemd/SCM).\n";
 }
 
 void printVersion() {
@@ -71,9 +71,9 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // Initialize logger with console output when not running as daemon
+    // Initialize logger with file output (always log to files for service operation)
     std::string logPath = platformUtils->getDefaultLogPath();
-    Logger::init(logPath, !args.runAsDaemon);
+    Logger::init(logPath, false);  // Always use file logging for services
 
     // Log version information
     Logger::info("Starting DDOGreen - Intelligent Green Power Management");
@@ -96,14 +96,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    if (args.runAsDaemon) {
-        if (!Daemon::daemonize()) {
-            Logger::error("Failed to daemonize");
-            return 1;
-        }
-    }
-
-    // Setup signal handlers
+    // Setup signal handlers (no daemonization - service manager handles process management)
     Daemon::setupSignalHandlers();
 
     // Load configuration
@@ -172,12 +165,6 @@ int main(int argc, char* argv[]) {
     Logger::info("Shutting down DDOGreen service");
     activityMonitor.stop();
     Daemon::cleanup();
-
-    // Remove PID file
-    if (args.runAsDaemon) {
-        std::string pidPath = platformUtils->getDefaultPidPath();
-        std::remove(pidPath.c_str());
-    }
 
     return 0;
 }

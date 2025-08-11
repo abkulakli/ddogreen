@@ -59,9 +59,7 @@ public:
         
         for (int i = 1; i < argc; i++) {
             std::string arg = argv[i];
-            if (arg == "-d" || arg == "--daemon") {
-                args.runAsDaemon = true;
-            } else if (arg == "-h" || arg == "--help") {
+            if (arg == "-h" || arg == "--help") {
                 args.showHelp = true;
             } else if (arg == "-v" || arg == "--version") {
                 args.showVersion = true;

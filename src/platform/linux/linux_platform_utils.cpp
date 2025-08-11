@@ -48,7 +48,6 @@ public:
         ParsedArgs args;
         
         static struct option long_options[] = {
-            {"daemon",      no_argument,       0, 'd'},
             {"help",        no_argument,       0, 'h'},
             {"version",     no_argument,       0, 'v'},
             {"config",      required_argument, 0, 'c'},
@@ -61,11 +60,8 @@ public:
         // Reset getopt state
         optind = 1;
 
-        while ((c = getopt_long(argc, argv, "dhvc:", long_options, &option_index)) != -1) {
+        while ((c = getopt_long(argc, argv, "hvc:", long_options, &option_index)) != -1) {
             switch (c) {
-                case 'd':
-                    args.runAsDaemon = true;
-                    break;
                 case 'h':
                     args.showHelp = true;
                     break;

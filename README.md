@@ -83,14 +83,13 @@ https://github.com/abkulakli/ddogreen/releases/latest
 ## Advanced Usage
 
 ### Manual Control
-Run interactively (foreground) for testing, or as a daemon/service.
+Run interactively (foreground) for testing. Service deployment handles background operation automatically.
 
-- Linux: `sudo ddogreen` (interactive), `sudo ddogreen --daemon` (service-style)
-- Windows: `ddogreen.exe` (interactive), `ddogreen.exe --daemon` (service-style)
+- Linux: `sudo ddogreen` (interactive) - For services, use systemd packages or installer
+- Windows: `ddogreen.exe` (interactive) - For services, use MSI installer
 ```
 Usage: ddogreen [OPTIONS]
 Options:
-  -d, --daemon           Run as daemon/service
   -c, --config PATH      Use custom configuration file
   -h, --help             Show this help message
   -v, --version          Show version information
@@ -130,7 +129,6 @@ ddogreen supports several command-line options for different use cases on both L
 ```bash
 Usage: ddogreen [OPTIONS]
 Options:
-  -d, --daemon           Run as daemon/service
   -c, --config PATH      Use custom configuration file
   -h, --help             Show this help message
   -v, --version          Show version information
@@ -194,7 +192,7 @@ Example with 20 cores and default thresholds:
 - Linux: Services are installed and managed by DEB/RPM/TGZ installers. Use `systemctl` to control.
 - Windows: MSI installs and manages the service. ZIP provides an `installer.bat` to install/uninstall.
 
-### Interactive vs Daemon Mode
+### Interactive vs Service Mode
 
 **Interactive Mode** (for testing and monitoring):
 - **Linux**: `sudo ddogreen`
@@ -203,11 +201,11 @@ Example with 20 cores and default thresholds:
 - Perfect for seeing how ddogreen responds to system load
 - All log messages displayed with timestamps
 
-**Daemon/Service Mode** (for production):
-- **Linux**: `sudo ddogreen -d`
-- **Windows**: `ddogreen.exe -d`
-- Silent operation, logs to file only
-- Suitable for systemd/Windows service deployment
+**Service Mode** (for production):
+- **Linux**: Managed by systemd via package installers
+- **Windows**: Managed by Windows Service Control Manager via MSI installer
+- Background operation with file logging
+- Automatic startup and process supervision by service manager
 
 ## Check if It's Working
 
