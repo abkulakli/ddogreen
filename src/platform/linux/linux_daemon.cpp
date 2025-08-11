@@ -14,6 +14,7 @@ public:
     bool daemonize() override;
     void setupSignalHandlers() override;
     bool shouldRun() override;
+    void waitForSignal() override;
 
 private:
     static void signalHandler(int signal);
@@ -142,6 +143,14 @@ void LinuxDaemon::signalHandler(int signal) {
 
 bool LinuxDaemon::shouldRun() {
     return s_running;
+}
+
+void LinuxDaemon::waitForSignal() {
+    // Use pause() to efficiently wait for any signal
+    // This blocks until a signal is received, eliminating busy waiting
+    while (s_running) {
+        pause();  // Suspend execution until signal is received
+    }
 }
 
 // Factory function

@@ -10,6 +10,7 @@ public:
     bool daemonize() override;
     void setupSignalHandlers() override;
     bool shouldRun() override;
+    void waitForSignal() override;
 };
 
 bool WindowsDaemon::daemonize() {
@@ -63,6 +64,14 @@ void WindowsDaemon::setupSignalHandlers() {
 
 bool WindowsDaemon::shouldRun() {
     return s_running;
+}
+
+void WindowsDaemon::waitForSignal() {
+    // Use WaitForSingleObject with INFINITE timeout to wait for signal
+    // This blocks until a signal is received, eliminating busy waiting
+    while (s_running) {
+        Sleep(1000);  // Sleep for 1 second and check again
+    }
 }
 
 // Factory function

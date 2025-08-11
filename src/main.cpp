@@ -166,11 +166,8 @@ int main(int argc, char* argv[]) {
     
     std::cout << "DDOGreen service running - press Ctrl+C to stop" << std::endl;
 
-    // Main loop - just keep the process alive while monitoring runs in background
-    // Use shorter sleep intervals for more responsive signal handling
-    while (Daemon::shouldRun()) {
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-    }
+    // Wait for termination signal (no busy waiting)
+    Daemon::waitForSignal();
 
     // Cleanup
     std::cout << "DDOGreen stopping" << std::endl;

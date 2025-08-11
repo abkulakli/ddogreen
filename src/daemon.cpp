@@ -47,6 +47,15 @@ bool Daemon::shouldRun() {
     return s_daemon->shouldRun();
 }
 
+void Daemon::waitForSignal() {
+    if (!s_daemon) {
+        Logger::error("Daemon not initialized. Call initialize() first.");
+        return;
+    }
+    
+    s_daemon->waitForSignal();
+}
+
 void Daemon::cleanup() {
     s_daemon.reset();
     Logger::info("Daemon cleanup completed");

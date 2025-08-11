@@ -17,6 +17,9 @@ public:
     // Check if daemon should continue running
     static bool shouldRun();
 
+    // Wait for termination signal (blocks until signal received)
+    static void waitForSignal();
+
     // Cleanup daemon resources
     static void cleanup();
 

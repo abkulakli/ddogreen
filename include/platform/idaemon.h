@@ -25,6 +25,12 @@ public:
      */
     virtual bool shouldRun() = 0;
 
+    /**
+     * Wait for a termination signal (blocks until signal received)
+     * This eliminates the need for busy waiting in the main loop
+     */
+    virtual void waitForSignal() = 0;
+
 protected:
     static volatile bool s_running;
 };
