@@ -72,8 +72,12 @@ int main(int argc, char* argv[]) {
     }
 
     // Initialize logger with file output (always log to files for service operation)
+    std::cout << "DDOGreen starting" << std::endl;
     std::string logPath = platformUtils->getDefaultLogPath();
     Logger::init(logPath, false);  // Always use file logging for services
+
+    // Inform user that application is starting and where to find logs
+    std::cout << "DDOGreen is logging to file " << logPath << std::endl;
 
     // Log version information
     Logger::info("Starting DDOGreen - Intelligent Green Power Management");
@@ -108,6 +112,7 @@ int main(int argc, char* argv[]) {
     // Load configuration - application fails if config file doesn't exist or has errors
     if (!config.loadFromFile(configPath)) {
         Logger::error("Failed to load configuration file: " + configPath);
+        std::cerr << "Failed to load configuration file: " << configPath << std::endl;
         return 1;
     }
 
@@ -122,6 +127,8 @@ int main(int argc, char* argv[]) {
     if (!powerManager || !powerManager->isAvailable()) {
         Logger::error("Power management backend is not available on this system");
         Logger::error("Ensure a supported power management backend is installed and accessible");
+        std::cerr << "Power management backend is not available on this system" << std::endl;
+        std::cerr << "Ensure a supported power management backend is installed and accessible" << std::endl;
         return 1;
     }
     Logger::info("Power management backend is available");
@@ -149,22 +156,29 @@ int main(int argc, char* argv[]) {
     // Start activity monitoring
     if (!activityMonitor.start()) {
         Logger::error("Failed to start activity monitor");
+        std::cerr << "Failed to start activity monitor" << std::endl;
         return 1;
     }
 
     Logger::info("DDOGreen service started successfully");
     Logger::info("Version: " + std::string(DDOGREEN_VERSION));
     Logger::info("Copyright (c) 2025 DDOSoft Solutions (www.ddosoft.com)");
+    
+    std::cout << "DDOGreen service running - press Ctrl+C to stop" << std::endl;
 
     // Main loop - just keep the process alive while monitoring runs in background
+    // Use shorter sleep intervals for more responsive signal handling
     while (Daemon::shouldRun()) {
-        std::this_thread::sleep_for(std::chrono::seconds(30));
+        std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 
     // Cleanup
+    std::cout << "DDOGreen stopping" << std::endl;
     Logger::info("Shutting down DDOGreen service");
     activityMonitor.stop();
     Daemon::cleanup();
+    
+    std::cout << "DDOGreen stopped" << std::endl;
 
     return 0;
 }
