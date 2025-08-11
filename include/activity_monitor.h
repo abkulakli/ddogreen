@@ -47,4 +47,6 @@ private:
     std::unique_ptr<ISystemMonitor> m_systemMonitor;  // Platform-specific system monitor
 
     std::chrono::steady_clock::time_point m_lastLoadCheckTime;
+    std::chrono::steady_clock::time_point m_lastStateChangeTime;  // Track last power state change
+    static constexpr int MINIMUM_STATE_CHANGE_INTERVAL = 60;  // Minimum seconds between state changes for energy efficiency
 };

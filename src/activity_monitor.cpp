@@ -26,6 +26,11 @@ ActivityMonitor::ActivityMonitor()
     , m_callback(nullptr)
     , m_systemMonitor(nullptr) {
     
+    // Initialize timestamps for energy-efficient operation
+    auto now = std::chrono::steady_clock::now();
+    m_lastLoadCheckTime = now;
+    m_lastStateChangeTime = now;
+    
     // Create platform-specific system monitor
     m_systemMonitor = PlatformFactory::createSystemMonitor();
     
@@ -115,6 +120,7 @@ void ActivityMonitor::setMonitoringFrequency(int frequencySeconds) {
     }
     
     Logger::info("Monitoring frequency set to " + std::to_string(frequencySeconds) + " seconds");
+    Logger::info("Energy efficiency: minimum " + std::to_string(MINIMUM_STATE_CHANGE_INTERVAL) + "s between power state changes");
 }
 
 bool ActivityMonitor::isActive() const {
@@ -174,21 +180,33 @@ void ActivityMonitor::monitorLoop() {
 
             // If activity state changed, notify callback
             if (wasActive != m_isActive && m_callback) {
-                double load1minPercentage = (load1min / m_coreCount) * 100;
-                double highPerfPercentage = m_highPerformanceThreshold * 100;
-                double powerSavePercentage = m_powerSaveThreshold * 100;
+                // Energy optimization: Enforce minimum time between state changes
+                auto timeSinceLastChange = std::chrono::duration_cast<std::chrono::seconds>(now - m_lastStateChangeTime).count();
                 
-                if (m_isActive) {
-                    Logger::info("System became active (load: " + formatNumber(load1min) +
-                                " = " + formatNumber(load1minPercentage) + "% avg per core > " + formatNumber(highPerfPercentage) + "%) - switching to performance mode");
+                if (timeSinceLastChange >= MINIMUM_STATE_CHANGE_INTERVAL) {
+                    double load1minPercentage = (load1min / m_coreCount) * 100;
+                    double highPerfPercentage = m_highPerformanceThreshold * 100;
+                    double powerSavePercentage = m_powerSaveThreshold * 100;
+                    
+                    if (m_isActive) {
+                        Logger::info("System became active (load: " + formatNumber(load1min) +
+                                    " = " + formatNumber(load1minPercentage) + "% avg per core > " + formatNumber(highPerfPercentage) + "%) - switching to performance mode");
+                    } else {
+                        Logger::info("System became idle (load: " + formatNumber(load1min) +
+                                    " = " + formatNumber(load1minPercentage) + "% avg per core < " + formatNumber(powerSavePercentage) + "%) - switching to power saving mode");
+                    }
+                    m_callback(m_isActive);
+                    m_lastStateChangeTime = now;
                 } else {
-                    Logger::info("System became idle (load: " + formatNumber(load1min) +
-                                " = " + formatNumber(load1minPercentage) + "% avg per core < " + formatNumber(powerSavePercentage) + "%) - switching to power saving mode");
+                    // Revert state change to avoid excessive switching
+                    m_isActive = wasActive;
+                    Logger::debug("State change suppressed for energy efficiency (last change " + std::to_string(timeSinceLastChange) + "s ago, minimum " + std::to_string(MINIMUM_STATE_CHANGE_INTERVAL) + "s)");
                 }
-                m_callback(m_isActive);
             }
         }
 
-        std::this_thread::sleep_for(std::chrono::seconds(m_monitoringFrequency));
+        // Energy optimization: Use longer sleep if monitoring frequency is high
+        int sleepDuration = std::max(m_monitoringFrequency, 10);  // Minimum 10 seconds for energy efficiency
+        std::this_thread::sleep_for(std::chrono::seconds(sleepDuration));
     }
 }
