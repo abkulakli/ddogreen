@@ -197,6 +197,12 @@ I'll proactively mention when I'm updating files: *"Let me update the memory ban
 - Apply external best practices to project context
 - Maintain awareness of current library versions and patterns
 
+### Enhanced Response Approach (Updated August 12, 2025)
+- **Thoughtful Response**: Do not try to respond quickly. Think as required and respond correctly.
+- **Question When Unclear**: Do not hesitate to ask questions to make the request clear.
+- **Quality Over Speed**: Prioritize accuracy and completeness over rapid responses.
+- **Deep Analysis**: Take time to understand context, implications, and optimal solutions before acting.
+
 ### Clarifying Questions for Vague Prompts
 - When a request is vague, ambiguous, or missing key constraints, ask 1–3 short, targeted questions before acting
 - Prefer closed-ended questions with concrete options; avoid broad, open-ended interrogations
