@@ -751,11 +751,10 @@ jobs:
 
           #### Windows (Portable ZIP)
           ```powershell
-          # Download and extract
           Invoke-WebRequest -Uri "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/ddogreen-${{ github.ref_name }}-windows.zip" -OutFile "ddogreen-windows.zip"
-          Expand-Archive -Path "ddogreen-windows.zip" -DestinationPath "ddogreen"
-          cd ddogreen
-          .\bin\ddogreen.exe --help
+          Expand-Archive -Path "ddogreen-windows.zip" -DestinationPath "."
+          cd ddogreen-*
+          .\installer.bat --install
           ```
 
           #### Debian/Ubuntu (DEB Package)
