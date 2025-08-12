@@ -1,11 +1,48 @@
 # Active Context - DDOGreen
 
 ## Current Work Focus
-**Project Status**: Windows Service Installation Fix - IN PROGRESS
+**Project Status**: CI/CD Pipeline Optimization - COMPLETED
 **Last Updated**: August 12, 2025
-**Current State**: Implementing NSSM-based service wrapper solution for Windows deployment
+**Current State**: Windows packaging now uses CMake exclusively for ZIP generation
 
-### Latest Update (Aug 12, 2025): Windows Service Installation Fix
+### Latest Update (Aug 12, 2025): Windows ZIP Package Structure Fix
+**COMPLETED**: Fixed nested folder issue in Windows ZIP packages
+- **Issue**: ZIP file contained unnecessary `ddogreen-windows/` top-level folder
+- **User Impact**: Users had to navigate into nested folder after extraction
+- **Solution**: Added `CPACK_INCLUDE_TOPLEVEL_DIRECTORY OFF` to CMakeLists.txt
+- **Result**: ZIP now extracts files directly to proper structure:
+  ```
+  ddogreen-windows.zip
+  ├── bin/
+  │   ├── ddogreen.exe
+  │   └── nssm.exe
+  ├── share/ddogreen/
+  │   └── ddogreen.conf.default
+  └── installer.bat
+  ```
+- **Benefit**: Improved user experience with cleaner extraction structure
+
+### Previous Update (Aug 12, 2025): GitHub Actions Custom ZIP Removal
+**COMPLETED**: Removed redundant custom ZIP creation from GitHub Actions workflow
+- **Issue**: Workflow had both CMake-generated ZIP (via CPack) and custom PowerShell ZIP creation
+- **Solution**: Removed custom ZIP creation section, now using only CMake's native ZIP packaging
+- **Benefits**:
+  - Simplified CI/CD pipeline with fewer steps
+  - Consistent packaging approach using CMake across all platforms
+  - Reduced complexity and potential for packaging inconsistencies
+  - Single source of truth for package structure via CMakeLists.txt
+- **Files Updated**:
+  - `.github/workflows/unified-ci-cd.yml` - Removed custom ZIP creation steps
+  - `memory-bank/cicdPipeline.md` - Updated documentation to reflect CMake-only approach
+
+**ARCHITECTURE IMPROVEMENT**: Single CMake-Based Packaging
+- **Windows**: CMake CPack generates both ZIP and MSI packages consistently
+- **ZIP Generation**: Uses CMake install rules and CPACK_GENERATOR="ZIP;WIX"
+- **MSI Generation**: Uses WiX toolset integration through CMake
+- **Consistency**: All packaging now follows CMake's standardized structure
+- **Validation**: Both ZIP and MSI packages validated in CI with same test criteria
+
+### Previous Update (Aug 12, 2025): Windows Service Installation Fix
 **ISSUE IDENTIFIED**: ddogreen console application cannot run as native Windows service
 - **Root Cause**: ddogreen is designed as modern foreground application (like systemd Type=simple)
 - **Windows Problem**: Both MSI and ZIP installers use `sc create` expecting native Windows service interface

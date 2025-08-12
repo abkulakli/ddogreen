@@ -23,14 +23,14 @@ The ddogreen project uses a comprehensive GitHub Actions-based CI/CD pipeline (`
 - **Runner**: `ubuntu-latest`
 - **Dependencies**: `build-essential`, `cmake`
 - **Configuration**: Uses CMake presets (`--preset release`)
-- **Version Handling**: 
+- **Version Handling**:
   - Tags: Extracts version from Git tag (removes `v` prefix)
   - Non-tags: Uses development version `0.0.0`
-- **Artifacts**: 
+- **Artifacts**:
   - `ddogreen` binary
   - `test_config` test executable
 
-#### Windows Build (`build-windows`)  
+#### Windows Build (`build-windows`)
 - **Runner**: `windows-latest`
 - **Dependencies**: MSVC
 - **Configuration**: Standard CMake with Release build type
@@ -41,7 +41,7 @@ The ddogreen project uses a comprehensive GitHub Actions-based CI/CD pipeline (`
 
 #### Linux Testing (`test-linux`)
 - **Compatibility Testing**: Both standard CMake and preset-based builds
-- **Test Execution**: 
+- **Test Execution**:
   - Standard CMake: `ctest --output-on-failure --verbose`
   - Presets: Both debug and release preset testing
 - **Functional Testing**: Binary help and version commands
@@ -58,17 +58,18 @@ The ddogreen project uses a comprehensive GitHub Actions-based CI/CD pipeline (`
 - **Package Types**: DEB, RPM, TGZ
 - **Tool**: CPack with multiple generators
 - **Version Integration**: Supports both tagged and development versions
-- **Artifacts**: 
+- **Artifacts**:
   - `ddogreen-deb`: Debian package
-  - `ddogreen-rpm`: Red Hat package  
+  - `ddogreen-rpm`: Red Hat package
   - `ddogreen-tgz`: Generic tarball
 
 #### Windows Packaging (`package-windows`)
-- **Package Types**: ZIP
-- **Custom ZIP Creation**: Includes executable, config template, installer script
-- **Structure**: Standardized `share/ddogreen/` layout across platforms
+- **Package Types**: ZIP, MSI
+- **Tool**: CPack with CMake-native ZIP and WiX MSI generators
+- **Version Integration**: Supports both tagged and development versions
 - **Artifacts**:
-  - `ddogreen-windows-zip`: Custom ZIP with installer
+  - `ddogreen-windows-zip`: CMake-generated ZIP package
+  - `ddogreen-windows-msi`: WiX-generated MSI installer
 
 ### Stage 4: Package Validation
 
@@ -98,6 +99,12 @@ The ddogreen project uses a comprehensive GitHub Actions-based CI/CD pipeline (`
 - **Content Verification**: Binary, config template, installer script presence
 - **Functional Testing**: Executable help/version commands
 - **Installer Testing**: Script help and status functionality (non-admin)
+- **Package Source**: CMake-generated ZIP using CPack
+
+**MSI Package Validation (`validate-windows-msi`)**
+- **Structure Testing**: MSI extraction and content verification
+- **Metadata Validation**: Product name, version, manufacturer verification
+- **Binary Testing**: Executable functionality verification
 
 ### Stage 5: Release Creation (`release`)
 
@@ -109,7 +116,7 @@ The ddogreen project uses a comprehensive GitHub Actions-based CI/CD pipeline (`
 - **Versioned Naming**: All packages renamed with version number
 - **Package Types**:
   - `ddogreen-{VERSION}-linux.deb`
-  - `ddogreen-{VERSION}-linux.rpm` 
+  - `ddogreen-{VERSION}-linux.rpm`
   - `ddogreen-{VERSION}-linux.tar.gz`
   - `ddogreen-{VERSION}-windows.zip`
 - **Verification**: SHA256 checksums for all packages

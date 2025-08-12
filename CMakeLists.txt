@@ -102,6 +102,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     # Windows-specific packaging with ZIP and MSI
     set(CPACK_GENERATOR "ZIP;WIX")
     set(CPACK_PACKAGE_FILE_NAME "ddogreen-windows")
+    set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY OFF)  # Prevent nested folder in ZIP
 
     # WiX-specific settings for MSI generation (WiX v5 compatible)
     set(CPACK_WIX_VERSION "4")  # Use WiX .NET Tools (v4/v5) instead of legacy v3

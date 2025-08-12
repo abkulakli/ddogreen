@@ -275,79 +275,11 @@ jobs:
         Write-Host "Generated packages:"
         Get-ChildItem *.zip, *.msi | Format-Table Name, Length
 
-    - name: Create custom Windows ZIP using CMake install
-      run: |
-        # Extract version for naming
-        if ($env:GITHUB_REF -like "refs/tags/*") {
-          $VERSION = $env:GITHUB_REF -replace "refs/tags/", ""
-          $VERSION = $VERSION -replace "^v", ""
-        } else {
-          $VERSION = "0.0.0"
-        }
-
-        Write-Host "Using CMake to create properly structured ZIP package..."
-
-        # Use CMake to install to a staging directory (this respects all CMake install rules)
-        $stagingDir = "ddogreen-windows-staging"
-
-        # Ensure we're in the right directory and clean up any existing staging
-        if (Test-Path $stagingDir) {
-          Remove-Item -Recurse -Force $stagingDir
-        }
-
-        # Use CMake install from the build directory
-        Write-Host "Running CMake install to staging directory..."
-        cmake --install build --config Release --prefix $stagingDir
-
-        if (-not (Test-Path $stagingDir)) {
-          Write-Error "CMake install failed - staging directory not created"
-          exit 1
-        }
-
-        # Verify the structure was created correctly by CMake
-        Write-Host "CMake install directory structure:"
-        Get-ChildItem -Recurse $stagingDir | Format-Table Name, FullName -AutoSize
-
-        # Verify required files exist
-        $requiredFiles = @(
-          "$stagingDir\bin\ddogreen.exe",
-          "$stagingDir\bin\nssm.exe",
-          "$stagingDir\share\ddogreen\ddogreen.conf.default",
-          "$stagingDir\installer.bat"
-        )
-
-        foreach ($file in $requiredFiles) {
-          if (-not (Test-Path $file)) {
-            Write-Warning "Required file missing: $file"
-          } else {
-            Write-Host "✓ Found: $file"
-          }
-        }
-
-        # Create the final ZIP package using CMake's installed structure
-        $zipName = "ddogreen-$VERSION-windows-zip.zip"
-        Compress-Archive -Path "$stagingDir\*" -DestinationPath $zipName -Force
-
-        if (Test-Path $zipName) {
-          Write-Host "✓ Successfully created: $zipName"
-          $zipInfo = Get-Item $zipName
-          Write-Host "   Size: $($zipInfo.Length) bytes"
-        } else {
-          Write-Error "Failed to create ZIP package"
-          exit 1
-        }
-
-    - name: Upload Windows ZIP package (CMake)
-      uses: actions/upload-artifact@v4
-      with:
-        name: ddogreen-windows-zip-cmake
-        path: build/*.zip
-
-    - name: Upload Windows ZIP package (Custom)
+    - name: Upload Windows ZIP package
       uses: actions/upload-artifact@v4
       with:
         name: ddogreen-windows-zip
-        path: ddogreen-*-windows-zip.zip
+        path: build/*.zip
 
     - name: Upload Windows MSI package
       uses: actions/upload-artifact@v4
