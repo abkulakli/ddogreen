@@ -26,7 +26,7 @@
 
     <!-- Files and service -->
     <DirectoryRef Id="INSTALLFOLDER">
-      <Component Id="MainFiles">
+      <Component Id="MainFiles" Guid="F1E2D3C4-B5A6-7890-CDEF-123456789ABC">
         <File Id="ddogreen.exe" Source="@CPACK_TOPLEVEL_DIRECTORY@/ddogreen-windows/bin/ddogreen.exe" />
         <File Id="nssm.exe" Source="@CPACK_TOPLEVEL_DIRECTORY@/ddogreen-windows/bin/nssm.exe" />
       </Component>
@@ -46,7 +46,7 @@
         Impersonate="no" />
 
     <DirectoryRef Id="CONFIGFOLDER">
-      <Component Id="ConfigFiles">
+      <Component Id="ConfigFiles" Guid="A9B8C7D6-E5F4-3210-9876-543210FEDCBA">
         <File Id="ddogreen.conf" Source="@CPACK_TOPLEVEL_DIRECTORY@/ddogreen-windows/share/ddogreen/ddogreen.conf.default" Name="ddogreen.conf" />
         <CreateFolder />
       </Component>
