@@ -5,7 +5,32 @@
 **Last Updated**: August 12, 2025
 **Current State**: Windows packaging now uses CMake exclusively for ZIP generation
 
-### Latest Update (Aug 12, 2025): Windows ZIP Package Structure Fix
+### Latest Update (Aug 12, 2025): Windows installer.bat Script Fixes
+**COMPLETED**: Fixed multiple issues in Windows ZIP package installer script
+- **Issue 1**: Admin privilege check was not stopping script execution properly
+  - **Root Cause**: `%errorlevel%` handling in complex batch if-statements 
+  - **Solution**: Changed from `if %errorlevel% neq 0 exit /b` to `call :check_admin || exit /b 1`
+  - **Result**: Script now properly stops when not run as Administrator
+
+- **Issue 2**: NSSM service installation command was malformed
+  - **Root Cause**: Passing ddogreen arguments directly to NSSM install command
+  - **Solution**: Split into separate commands:
+    - `nssm install service executable` 
+    - `nssm set service AppParameters "--config file"`
+  - **Result**: Proper NSSM service configuration
+
+- **Issue 3**: NSSM binary path detection was not robust
+  - **Root Cause**: Hardcoded `bin\nssm.exe` path assumption
+  - **Solution**: Added dynamic path detection similar to ddogreen.exe detection
+  - **Result**: Works with both nested and flat ZIP structures
+
+**Testing Status**:
+- ✅ `--help` and `--status` commands work correctly
+- ✅ Admin privilege check properly stops execution with clear error message
+- ✅ NSSM and ddogreen.exe path detection works with current ZIP structure
+- ⏳ Full service installation testing requires Administrator privileges
+
+### Previous Update (Aug 12, 2025): Windows ZIP Package Structure Fix
 **COMPLETED**: Fixed nested folder issue in Windows ZIP packages
 - **Issue**: ZIP file contained unnecessary `ddogreen-windows/` top-level folder
 - **User Impact**: Users had to navigate into nested folder after extraction

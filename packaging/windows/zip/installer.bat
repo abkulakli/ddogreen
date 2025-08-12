@@ -166,7 +166,20 @@ if %errorlevel% neq 0 (
 REM Install NSSM service wrapper
 set NSSM_PATH=%ProgramFiles%\ddosoft\ddogreen\nssm.exe
 call :print_info "Installing NSSM service wrapper..."
-copy "bin\nssm.exe" "%NSSM_PATH%" >nul
+
+REM Check if NSSM exists in current directory or bin/ subdirectory
+set NSSM_BINARY=
+if exist "nssm.exe" (
+    set NSSM_BINARY=nssm.exe
+) else if exist "bin\nssm.exe" (
+    set NSSM_BINARY=bin\nssm.exe
+) else (
+    call :print_error "NSSM.exe not found in current directory or bin\ subdirectory"
+    call :print_error "Please run this script from the extracted ZIP directory"
+    exit /b 1
+)
+
+copy "%NSSM_BINARY%" "%NSSM_PATH%" >nul
 if %errorlevel% neq 0 (
     call :print_error "Failed to copy NSSM"
     exit /b 1
@@ -179,11 +192,14 @@ if not exist "%LOG_FILE%" (
 
 REM Create and install Windows service using NSSM
 call :print_info "Creating Windows service with NSSM..."
-"%NSSM_PATH%" install "%SERVICE_NAME%" "%TARGET_EXECUTABLE_PATH%" --config "%CONFIG_FILE%"
+"%NSSM_PATH%" install "%SERVICE_NAME%" "%TARGET_EXECUTABLE_PATH%"
 if %errorlevel% neq 0 (
     call :print_error "Failed to create service with NSSM"
     exit /b 1
 )
+
+REM Set application parameters for the service
+"%NSSM_PATH%" set "%SERVICE_NAME%" AppParameters "--config ""%CONFIG_FILE%"""
 
 REM Set service description and display name
 "%NSSM_PATH%" set "%SERVICE_NAME%" Description "%SERVICE_DESCRIPTION%"
