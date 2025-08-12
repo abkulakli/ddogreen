@@ -84,7 +84,7 @@ if %errorlevel% equ 0 (
     call :print_info "Stopping existing service..."
     sc stop "%SERVICE_NAME%" >nul 2>&1
     timeout /t 5 /nobreak >nul
-    
+
     call :print_info "Removing existing service..."
     sc delete "%SERVICE_NAME%" >nul 2>&1
     timeout /t 2 /nobreak >nul
@@ -131,28 +131,42 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
+REM Install NSSM service wrapper
+set NSSM_PATH=%ProgramFiles%\DDOSoft\ddogreen\nssm.exe
+call :print_info "Installing NSSM service wrapper..."
+copy "bin\nssm.exe" "%NSSM_PATH%" >nul
+if %errorlevel% neq 0 (
+    call :print_error "Failed to copy NSSM"
+    exit /b 1
+)
+
 REM Create log file
 if not exist "%LOG_FILE%" (
     type nul > "%LOG_FILE%"
 )
 
-REM Create and install Windows service
-call :print_info "Creating Windows service..."
-sc create "%SERVICE_NAME%" binPath= "\"%TARGET_EXECUTABLE_PATH%\" --config \"%CONFIG_FILE%\"" DisplayName= "%SERVICE_DISPLAY_NAME%" start= auto
+REM Create and install Windows service using NSSM
+call :print_info "Creating Windows service with NSSM..."
+"%NSSM_PATH%" install "%SERVICE_NAME%" "%TARGET_EXECUTABLE_PATH%" --config "%CONFIG_FILE%"
 if %errorlevel% neq 0 (
-    call :print_error "Failed to create service"
+    call :print_error "Failed to create service with NSSM"
     exit /b 1
 )
 
-REM Set service description
-sc description "%SERVICE_NAME%" "%SERVICE_DESCRIPTION%"
+REM Set service description and display name
+"%NSSM_PATH%" set "%SERVICE_NAME%" Description "%SERVICE_DESCRIPTION%"
+"%NSSM_PATH%" set "%SERVICE_NAME%" DisplayName "%SERVICE_DISPLAY_NAME%"
 
 REM Set service to restart on failure
-sc failure "%SERVICE_NAME%" reset= 86400 actions= restart/10000/restart/30000/restart/60000
+"%NSSM_PATH%" set "%SERVICE_NAME%" AppRestartDelay 10000
+"%NSSM_PATH%" set "%SERVICE_NAME%" AppExit Default Restart
+
+REM Set service startup type to automatic
+"%NSSM_PATH%" set "%SERVICE_NAME%" Start SERVICE_AUTO_START
 
 REM Start the service
 call :print_info "Starting service..."
-sc start "%SERVICE_NAME%" >nul
+"%NSSM_PATH%" start "%SERVICE_NAME%"
 if %errorlevel% equ 0 (
     call :print_success "ddogreen installed and started successfully!"
     echo.
@@ -160,8 +174,8 @@ if %errorlevel% equ 0 (
     sc query "%SERVICE_NAME%"
     echo.
     call :print_info "To view logs: Get-WinEvent -LogName Application -Source ddogreen"
-    call :print_info "To stop:      sc stop ddogreen"
-    call :print_info "To restart:   sc stop ddogreen && sc start ddogreen"
+    call :print_info "To stop:      nssm stop ddogreen"
+    call :print_info "To restart:   nssm restart ddogreen"
     echo.
     call :print_success "ddogreen is now managing your system's power automatically!"
 ) else (
@@ -175,16 +189,26 @@ REM Function to uninstall ddogreen
 :uninstall_ddogreen
 call :print_info "Uninstalling ddogreen..."
 
-REM Stop and remove service
+REM Stop and remove service using NSSM
+set NSSM_PATH=%ProgramFiles%\DDOSoft\ddogreen\nssm.exe
 call :print_info "Stopping and removing service..."
-sc stop "%SERVICE_NAME%" >nul 2>&1
-timeout /t 5 /nobreak >nul
-sc delete "%SERVICE_NAME%" >nul 2>&1
+if exist "%NSSM_PATH%" (
+    "%NSSM_PATH%" stop "%SERVICE_NAME%" >nul 2>&1
+    timeout /t 5 /nobreak >nul
+    "%NSSM_PATH%" remove "%SERVICE_NAME%" confirm >nul 2>&1
+) else (
+    sc stop "%SERVICE_NAME%" >nul 2>&1
+    timeout /t 5 /nobreak >nul
+    sc delete "%SERVICE_NAME%" >nul 2>&1
+)
 
 REM Remove executable and program directory
-call :print_info "Removing executable..."
+call :print_info "Removing executables..."
 if exist "%TARGET_EXECUTABLE_PATH%" (
     del "%TARGET_EXECUTABLE_PATH%" >nul 2>&1
+)
+if exist "%NSSM_PATH%" (
+    del "%NSSM_PATH%" >nul 2>&1
 )
 if exist "%ProgramFiles%\DDOSoft\ddogreen" (
     rmdir "%ProgramFiles%\DDOSoft\ddogreen" >nul 2>&1
@@ -227,14 +251,14 @@ if exist "%TARGET_EXECUTABLE_PATH%" (
 sc query "%SERVICE_NAME%" >nul 2>&1
 if %errorlevel% equ 0 (
     call :print_success "Service: %SERVICE_NAME% (installed)"
-    
+
     sc query "%SERVICE_NAME%" | find "RUNNING" >nul
     if %errorlevel% equ 0 (
         call :print_success "Status: Running"
     ) else (
         call :print_warning "Status: Stopped"
     )
-    
+
     REM Check if service is set to auto-start
     sc qc "%SERVICE_NAME%" | find "AUTO_START" >nul
     if %errorlevel% equ 0 (

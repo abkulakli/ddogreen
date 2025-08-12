@@ -28,26 +28,22 @@
     <DirectoryRef Id="INSTALLFOLDER">
       <Component Id="MainFiles">
         <File Id="ddogreen.exe" Source="@CPACK_TOPLEVEL_DIRECTORY@/ddogreen-windows/bin/ddogreen.exe" />
-
-        <!-- Windows Service (must be in the same component as the service executable) -->
-        <ServiceInstall Id="DDOGreenService"
-            Name="ddogreen"
-            DisplayName="DDOGreen - Power Management Service"
-            Description="Manages Windows power plans based on system load"
-            Type="ownProcess"
-            Start="auto"
-            Account="LocalSystem"
-            ErrorControl="normal"
-            Arguments='--config "[CONFIGFOLDER]ddogreen.conf"' />
-
-        <!-- Service control: install/remove service but don't auto-start -->
-        <ServiceControl Id="DDOGreenServiceControl"
-            Name="ddogreen"
-            Stop="both"
-            Remove="uninstall"
-            Wait="no" />
+        <File Id="nssm.exe" Source="@CPACK_TOPLEVEL_DIRECTORY@/ddogreen-windows/bin/nssm.exe" />
       </Component>
     </DirectoryRef>
+
+    <!-- Custom actions to install/remove service using NSSM -->
+    <CustomAction Id="InstallService"
+        Directory="INSTALLFOLDER"
+        ExeCommand='nssm.exe install ddogreen "[INSTALLFOLDER]ddogreen.exe" --config "[CONFIGFOLDER]ddogreen.conf"'
+        Execute="deferred"
+        Impersonate="no" />
+
+    <CustomAction Id="RemoveService"
+        Directory="INSTALLFOLDER"
+        ExeCommand='nssm.exe remove ddogreen confirm'
+        Execute="deferred"
+        Impersonate="no" />
 
     <DirectoryRef Id="CONFIGFOLDER">
       <Component Id="ConfigFiles">
@@ -61,6 +57,12 @@
       <ComponentRef Id="MainFiles" />
       <ComponentRef Id="ConfigFiles" />
     </Feature>
+
+    <!-- Install sequence for custom actions -->
+    <InstallExecuteSequence>
+      <Custom Action="InstallService" After="InstallFiles" Condition="NOT Installed" />
+      <Custom Action="RemoveService" Before="RemoveFiles" Condition="REMOVE=&quot;ALL&quot;" />
+    </InstallExecuteSequence>
 
   </Package>
 </Wix>

@@ -1,9 +1,30 @@
 # Active Context - DDOGreen
 
 ## Current Work Focus
-**Project Status**: Complete Platform Abstraction Architecture - COMPLETED
+**Project Status**: Windows Service Installation Fix - IN PROGRESS
 **Last Updated**: August 12, 2025
-**Current State**: Production-ready cross-platform application with perfect platform abstraction compliance
+**Current State**: Implementing NSSM-based service wrapper solution for Windows deployment
+
+### Latest Update (Aug 12, 2025): Windows Service Installation Fix
+**ISSUE IDENTIFIED**: ddogreen console application cannot run as native Windows service
+- **Root Cause**: ddogreen is designed as modern foreground application (like systemd Type=simple)
+- **Windows Problem**: Both MSI and ZIP installers use `sc create` expecting native Windows service interface
+- **Architecture Gap**: Application lacks ServiceMain/ServiceCtrlHandler required for Windows SCM
+
+**SOLUTION IMPLEMENTED**: NSSM Service Wrapper Integration
+- **Approach**: Bundle NSSM (Non-Sucking Service Manager) with Windows installers
+- **Benefits**: Maintains clean console application architecture while enabling Windows service deployment
+- **Files Updated**:
+  - `packaging/windows/zip/installer.bat` - Updated to use NSSM for service creation
+  - `packaging/windows/msi/ddogreen.wxs` - Added NSSM custom actions for MSI installer
+  - `CMakeLists.txt` - Added NSSM.exe to Windows package installation
+  - `packaging/windows/nssm/nssm.exe` - Added NSSM 2.24 (331KB) to deployment
+
+**PROGRESS STATUS**:
+- ✅ ZIP Package: NSSM integration complete, builds successfully
+- ✅ Service Creation: Service installs via NSSM without errors
+- 🔄 Service Startup: Service starts but requires privilege verification
+- ⏳ MSI Package: WiX syntax fixes in progress for custom actions
 
 ### Latest Update (Aug 12, 2025): Complete Platform Abstraction Achievement + Test Fix
 **COMPLETED**: Achieved complete platform abstraction architecture with zero `#ifdef` in common code
@@ -11,7 +32,7 @@
 - **Signal Handling Platform Layer**: Replaced direct platform-specific code with clean ISignalHandler abstraction
 - **Test Platform Compliance**: Fixed test that was incorrectly hardcoded for Linux paths - now properly platform-aware
 - **Architecture Validation**: All 26 tests now passing (100% success rate) with proper platform abstraction
-- **Quality Achievement**: 
+- **Quality Achievement**:
   - Zero platform-specific code in main.cpp or any common application code
   - All platform dependencies isolated in dedicated platform layer
   - Clean interfaces for all cross-platform functionality
@@ -25,7 +46,7 @@
 - **Common Code Rule**: Application layer (`main.cpp`, `config.cpp`, `logger.cpp`, etc.) must use ONLY abstract interfaces
 - **Interface Pattern**: All platform functionality accessed through abstract base classes:
   - `ISystemMonitor` - System load monitoring
-  - `IPowerManager` - Power management control  
+  - `IPowerManager` - Power management control
   - `IPlatformUtils` - Path resolution, privilege checking
   - `ISignalHandler` - Signal handling and graceful shutdown
 - **Factory Creation**: Platform-specific objects created via `PlatformFactory::create*()` methods
@@ -66,7 +87,7 @@
 
 ### Previous Update (Aug 12, 2025): Complete Daemon Infrastructure Removal
 **COMPLETED**: Removed all daemon-related infrastructure and source files
-- **Removed Files**: 
+- **Removed Files**:
   - `include/daemon.h` and `src/daemon.cpp` (main daemon wrapper)
   - `include/platform/idaemon.h` and `src/platform/idaemon.cpp` (interface)
   - All platform-specific daemon implementations (linux_daemon.cpp, windows_daemon.cpp, macos_daemon.cpp)
@@ -90,7 +111,7 @@
 - **Architecture**: Applications run in foreground; service managers handle backgrounding
 - **Linux Services**: Changed from `Type=forking` to `Type=simple` in systemd service files
 - **Windows Services**: Removed `--daemon` from MSI service configuration
-- **Benefits**: 
+- **Benefits**:
   - Simpler, more reliable code
   - Better process supervision by service managers
   - Easier debugging (foreground by default)
