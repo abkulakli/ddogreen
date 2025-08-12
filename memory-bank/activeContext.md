@@ -5,7 +5,19 @@
 **Last Updated**: August 12, 2025
 **Current State**: Windows packaging now uses CMake exclusively for ZIP generation
 
-### Latest Update (Aug 12, 2025): Windows installer.bat Script Fixes
+### Latest Update (Aug 12, 2025): Windows installer.bat Directory Creation Fix
+**COMPLETED**: Fixed false "Failed to create directory" errors in installer script
+- **Issue**: `mkdir` command returning non-zero exit codes even when directories were successfully created
+- **Root Cause**: Windows mkdir can return error codes when directory already exists or in certain edge cases
+- **Solution**: Changed error detection from checking `%errorlevel%` to verifying directory existence:
+  ```batch
+  # Before: mkdir "%DIR%" && if %errorlevel% neq 0 error
+  # After:  mkdir "%DIR%" 2>nul && if not exist "%DIR%" error
+  ```
+- **Result**: Installer no longer shows false "Failed to create directory" errors
+- **Areas Fixed**: Both program directory and configuration directory creation
+
+### Previous Update (Aug 12, 2025): Windows installer.bat Script Fixes
 **COMPLETED**: Fixed multiple issues in Windows ZIP package installer script
 - **Issue 1**: Admin privilege check was not stopping script execution properly
   - **Root Cause**: `%errorlevel%` handling in complex batch if-statements 

@@ -93,15 +93,15 @@ if %errorlevel% equ 0 (
 REM Create program directory
 call :print_info "Creating program directory..."
 if not exist "%ProgramFiles%\ddosoft" (
-    mkdir "%ProgramFiles%\ddosoft"
-    if %errorlevel% neq 0 (
+    mkdir "%ProgramFiles%\ddosoft" 2>nul
+    if not exist "%ProgramFiles%\ddosoft" (
         call :print_error "Failed to create ddosoft directory"
         exit /b 1
     )
 )
 if not exist "%ProgramFiles%\ddosoft\ddogreen" (
-    mkdir "%ProgramFiles%\ddosoft\ddogreen"
-    if %errorlevel% neq 0 (
+    mkdir "%ProgramFiles%\ddosoft\ddogreen" 2>nul
+    if not exist "%ProgramFiles%\ddosoft\ddogreen" (
         call :print_error "Failed to create program directory"
         exit /b 1
     )
@@ -119,15 +119,15 @@ if not exist "%ProgramFiles%\ddosoft\ddogreen" (
 REM Install configuration first
 call :print_info "Setting up configuration..."
 if not exist "%ProgramData%\ddosoft" (
-    mkdir "%ProgramData%\ddosoft"
-    if %errorlevel% neq 0 (
+    mkdir "%ProgramData%\ddosoft" 2>nul
+    if not exist "%ProgramData%\ddosoft" (
         call :print_error "Failed to create ddosoft data directory"
         exit /b 1
     )
 )
 if not exist "%CONFIG_DIR%" (
-    mkdir "%CONFIG_DIR%"
-    if %errorlevel% neq 0 (
+    mkdir "%CONFIG_DIR%" 2>nul
+    if not exist "%CONFIG_DIR%" (
         call :print_error "Failed to create configuration directory"
         exit /b 1
     )
