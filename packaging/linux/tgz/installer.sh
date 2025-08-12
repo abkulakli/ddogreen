@@ -1,5 +1,5 @@
 #!/bin/bash
-# Generic ddogreen installer for all Linux distributions
+# Generic DDOGreen installer for all Linux distributions
 # Works without package managers - uses direct systemd integration
 
 set -e
@@ -55,7 +55,7 @@ check_systemd() {
 # Function to check if TLP is installed
 check_tlp() {
     if ! command -v tlp &> /dev/null; then
-        print_warning "TLP not found. ddogreen requires TLP for power management."
+        print_warning "TLP not found. DDOGreen requires TLP for power management."
         print_info "Install TLP with:"
         print_info "  Ubuntu/Debian: sudo apt install tlp"
         print_info "  Fedora/RHEL:   sudo dnf install tlp"
@@ -69,9 +69,9 @@ check_tlp() {
     fi
 }
 
-# Function to install ddogreen
+# Function to install DDOGreen
 install_ddogreen() {
-    print_info "Installing ddogreen..."
+    print_info "Installing DDOGreen..."
     
     # Check if binary exists in current directory or bin/ subdirectory
     DDOGREEN_BINARY=""
@@ -80,20 +80,20 @@ install_ddogreen() {
     elif [[ -f "bin/ddogreen" ]]; then
         DDOGREEN_BINARY="bin/ddogreen"
     else
-        print_error "ddogreen binary not found in current directory or bin/ subdirectory"
+        print_error "DDOGreen binary not found in current directory or bin/ subdirectory"
         print_error "Please run this script from the extracted tar.gz directory"
         exit 1
     fi
     
     # Check if service already exists and stop it
     if systemctl is-active --quiet "$SERVICE_NAME" 2>/dev/null; then
-        print_warning "ddogreen service is already running"
+        print_warning "DDOGreen service is already running"
         print_info "Stopping existing service..."
         systemctl stop "$SERVICE_NAME" || true
     fi
     
     if [[ -f "$SERVICE_FILE" ]]; then
-        print_warning "ddogreen service already exists - updating..."
+        print_warning "DDOGreen service already exists - updating..."
         systemctl disable "$SERVICE_NAME" || true
     fi
     
@@ -172,7 +172,7 @@ EOF
     # Start the service immediately
     print_info "Starting service..."
     if systemctl start "$SERVICE_NAME"; then
-        print_success "ddogreen installed and started successfully!"
+        print_success "DDOGreen installed and started successfully!"
         print_info ""
         print_info "Service Status:"
         systemctl status "$SERVICE_NAME" --no-pager --lines=3
@@ -181,7 +181,7 @@ EOF
         print_info "To stop:      sudo systemctl stop ddogreen"
         print_info "To restart:   sudo systemctl restart ddogreen"
         print_info ""
-        print_success "ddogreen is now managing your system's power automatically!"
+        print_success "DDOGreen is now managing your system's power automatically!"
     else
         print_error "Service installation failed"
         print_info "Check the logs: sudo journalctl -u ddogreen"
@@ -189,9 +189,9 @@ EOF
     fi
 }
 
-# Function to uninstall ddogreen
+# Function to uninstall DDOGreen
 uninstall_ddogreen() {
-    print_info "Uninstalling ddogreen..."
+    print_info "Uninstalling DDOGreen..."
     
     # Stop and disable service
     print_info "Stopping and disabling service..."
@@ -218,12 +218,12 @@ uninstall_ddogreen() {
         print_info "Configuration directory removed."
     fi
     
-    print_success "ddogreen has been completely uninstalled."
+    print_success "DDOGreen has been completely uninstalled."
 }
 
 # Function to show status
 show_status() {
-    print_info "ddogreen Status:"
+    print_info "DDOGreen Status:"
     
     if [[ -f "$TARGET_EXECUTABLE_PATH" ]]; then
         print_success "Executable: $TARGET_EXECUTABLE_PATH (installed)"
@@ -253,13 +253,13 @@ show_status() {
 # Function to show usage
 show_usage() {
     cat << EOF
-ddogreen Generic Linux Installer
+DDOGreen Generic Linux Installer
 
 Usage: sudo ./installer.sh [OPTION]
 
 Options:
-  --install     Install ddogreen service
-  --uninstall   Uninstall ddogreen service  
+  --install     Install DDOGreen service
+  --uninstall   Uninstall DDOGreen service  
   --status      Show installation status
   --help        Show this help message
 

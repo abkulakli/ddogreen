@@ -1,6 +1,6 @@
 @echo off
-REM ddogreen Windows installer script
-REM Installs and manages ddogreen Windows service
+REM DDOGreen Windows installer script
+REM Installs and manages DDOGreen Windows service
 REM Similar to Linux TGZ packaging functionality
 
 setlocal enabledelayedexpansion
@@ -9,10 +9,10 @@ REM Service configuration
 set SERVICE_NAME=ddogreen
 set SERVICE_DISPLAY_NAME=DDOGreen by DDOSoft - Intelligent Green Power Management for Sustainable Computing
 set SERVICE_DESCRIPTION=Automatically manages Windows power plans based on system load monitoring for sustainable computing
-set TARGET_EXECUTABLE_PATH=%ProgramFiles%\DDOSoft\ddogreen\ddogreen.exe
-set CONFIG_DIR=%ProgramData%\DDOSoft\ddogreen
+set TARGET_EXECUTABLE_PATH=%ProgramFiles%\ddosoft\ddogreen\ddogreen.exe
+set CONFIG_DIR=%ProgramData%\ddosoft\ddogreen
 set CONFIG_FILE=%CONFIG_DIR%\ddogreen.conf
-set LOG_FILE=%ProgramData%\DDOSoft\ddogreen\ddogreen.log
+set LOG_FILE=%ProgramData%\ddosoft\ddogreen\ddogreen.log
 
 REM Colors for output (using ANSI escape codes if supported)
 set "RED=[31m"
@@ -61,9 +61,9 @@ if %errorlevel% neq 0 (
 )
 goto :eof
 
-REM Function to install ddogreen
+REM Function to install DDOGreen
 :install_ddogreen
-call :print_info "Installing ddogreen..."
+call :print_info "Installing DDOGreen..."
 
 REM Check if binary exists in current directory or bin/ subdirectory
 set DDOGREEN_BINARY=
@@ -72,7 +72,7 @@ if exist "ddogreen.exe" (
 ) else if exist "bin\ddogreen.exe" (
     set DDOGREEN_BINARY=bin\ddogreen.exe
 ) else (
-    call :print_error "ddogreen.exe not found in current directory or bin\ subdirectory"
+    call :print_error "DDOGreen.exe not found in current directory or bin\ subdirectory"
     call :print_error "Please run this script from the extracted ZIP directory"
     exit /b 1
 )
@@ -80,7 +80,7 @@ if exist "ddogreen.exe" (
 REM Check if service already exists and stop it
 sc query "%SERVICE_NAME%" >nul 2>&1
 if %errorlevel% equ 0 (
-    call :print_warning "ddogreen service already exists"
+    call :print_warning "DDOGreen service already exists"
     call :print_info "Stopping existing service..."
     sc stop "%SERVICE_NAME%" >nul 2>&1
     timeout /t 5 /nobreak >nul
@@ -92,22 +92,54 @@ if %errorlevel% equ 0 (
 
 REM Create program directory
 call :print_info "Creating program directory..."
-if not exist "%ProgramFiles%\DDOSoft\ddogreen" (
-    mkdir "%ProgramFiles%\DDOSoft\ddogreen"
+if not exist "%ProgramFiles%\ddosoft" (
+    mkdir "%ProgramFiles%\ddosoft"
+    if %errorlevel% neq 0 (
+        call :print_error "Failed to create ddosoft directory"
+        exit /b 1
+    )
+)
+if not exist "%ProgramFiles%\ddosoft\ddogreen" (
+    mkdir "%ProgramFiles%\ddosoft\ddogreen"
     if %errorlevel% neq 0 (
         call :print_error "Failed to create program directory"
         exit /b 1
     )
+    call :print_success "Program directory created"
+) else (
+    call :print_info "Program directory already exists"
+)
+
+REM Verify directory is accessible
+if not exist "%ProgramFiles%\ddosoft\ddogreen" (
+    call :print_error "Program directory is not accessible: %ProgramFiles%\ddosoft\ddogreen"
+    exit /b 1
 )
 
 REM Install configuration first
 call :print_info "Setting up configuration..."
+if not exist "%ProgramData%\ddosoft" (
+    mkdir "%ProgramData%\ddosoft"
+    if %errorlevel% neq 0 (
+        call :print_error "Failed to create ddosoft data directory"
+        exit /b 1
+    )
+)
 if not exist "%CONFIG_DIR%" (
     mkdir "%CONFIG_DIR%"
     if %errorlevel% neq 0 (
         call :print_error "Failed to create configuration directory"
         exit /b 1
     )
+    call :print_success "Configuration directory created"
+) else (
+    call :print_info "Configuration directory already exists"
+)
+
+REM Verify configuration directory is accessible
+if not exist "%CONFIG_DIR%" (
+    call :print_error "Configuration directory is not accessible: %CONFIG_DIR%"
+    exit /b 1
 )
 
 if not exist "%CONFIG_FILE%" (
@@ -132,7 +164,7 @@ if %errorlevel% neq 0 (
 )
 
 REM Install NSSM service wrapper
-set NSSM_PATH=%ProgramFiles%\DDOSoft\ddogreen\nssm.exe
+set NSSM_PATH=%ProgramFiles%\ddosoft\ddogreen\nssm.exe
 call :print_info "Installing NSSM service wrapper..."
 copy "bin\nssm.exe" "%NSSM_PATH%" >nul
 if %errorlevel% neq 0 (
@@ -168,7 +200,7 @@ REM Start the service
 call :print_info "Starting service..."
 "%NSSM_PATH%" start "%SERVICE_NAME%"
 if %errorlevel% equ 0 (
-    call :print_success "ddogreen installed and started successfully!"
+    call :print_success "DDOGreen installed and started successfully!"
     echo.
     call :print_info "Service Status:"
     sc query "%SERVICE_NAME%"
@@ -177,7 +209,7 @@ if %errorlevel% equ 0 (
     call :print_info "To stop:      nssm stop ddogreen"
     call :print_info "To restart:   nssm restart ddogreen"
     echo.
-    call :print_success "ddogreen is now managing your system's power automatically!"
+    call :print_success "DDOGreen is now managing your system's power automatically!"
 ) else (
     call :print_error "Service installation failed"
     call :print_info "Check Windows Event Log: Get-WinEvent -LogName Application -Source ddogreen"
@@ -185,12 +217,12 @@ if %errorlevel% equ 0 (
 )
 goto :eof
 
-REM Function to uninstall ddogreen
+REM Function to uninstall DDOGreen
 :uninstall_ddogreen
-call :print_info "Uninstalling ddogreen..."
+call :print_info "Uninstalling DDOGreen..."
 
 REM Stop and remove service using NSSM
-set NSSM_PATH=%ProgramFiles%\DDOSoft\ddogreen\nssm.exe
+set NSSM_PATH=%ProgramFiles%\ddosoft\ddogreen\nssm.exe
 call :print_info "Stopping and removing service..."
 if exist "%NSSM_PATH%" (
     "%NSSM_PATH%" stop "%SERVICE_NAME%" >nul 2>&1
@@ -210,11 +242,11 @@ if exist "%TARGET_EXECUTABLE_PATH%" (
 if exist "%NSSM_PATH%" (
     del "%NSSM_PATH%" >nul 2>&1
 )
-if exist "%ProgramFiles%\DDOSoft\ddogreen" (
-    rmdir "%ProgramFiles%\DDOSoft\ddogreen" >nul 2>&1
+if exist "%ProgramFiles%\ddosoft\ddogreen" (
+    rmdir "%ProgramFiles%\ddosoft\ddogreen" >nul 2>&1
 )
-if exist "%ProgramFiles%\DDOSoft" (
-    rmdir "%ProgramFiles%\DDOSoft" >nul 2>&1
+if exist "%ProgramFiles%\ddosoft" (
+    rmdir "%ProgramFiles%\ddosoft" >nul 2>&1
 )
 
 REM Clean up remaining files
@@ -235,12 +267,12 @@ if exist "%CONFIG_DIR%" (
     )
 )
 
-call :print_success "ddogreen has been uninstalled."
+call :print_success "DDOGreen has been uninstalled."
 goto :eof
 
 REM Function to show status
 :show_status
-call :print_info "ddogreen Status:"
+call :print_info "DDOGreen Status:"
 
 if exist "%TARGET_EXECUTABLE_PATH%" (
     call :print_success "Executable: %TARGET_EXECUTABLE_PATH% (installed)"
@@ -273,13 +305,13 @@ goto :eof
 
 REM Function to show usage
 :show_usage
-echo ddogreen Windows Installer
+echo DDOGreen Windows Installer
 echo.
 echo Usage: installer.bat [OPTION]
 echo.
 echo Options:
-echo   --install     Install ddogreen service
-echo   --uninstall   Uninstall ddogreen service
+echo   --install     Install DDOGreen service
+echo   --uninstall   Uninstall DDOGreen service
 echo   --status      Show installation status
 echo   --help        Show this help message
 echo.
