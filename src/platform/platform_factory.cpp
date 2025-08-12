@@ -8,17 +8,17 @@
 std::unique_ptr<ISystemMonitor> createLinuxSystemMonitor();
 std::unique_ptr<IPowerManager> createLinuxPowerManager();
 std::unique_ptr<IPlatformUtils> createLinuxPlatformUtils();
-std::unique_ptr<IDaemon> createLinuxDaemon();
+std::unique_ptr<ISignalHandler> createLinuxSignalHandler();
 #elif defined(_WIN32) || defined(_WIN64)
 std::unique_ptr<ISystemMonitor> createWindowsSystemMonitor();
 std::unique_ptr<IPowerManager> createWindowsPowerManager();
 std::unique_ptr<IPlatformUtils> createWindowsPlatformUtils();
-std::unique_ptr<IDaemon> createWindowsDaemon();
+std::unique_ptr<ISignalHandler> createWindowsSignalHandler();
 #elif defined(__APPLE__) && defined(__MACH__)
 std::unique_ptr<ISystemMonitor> createMacOSSystemMonitor();
 std::unique_ptr<IPowerManager> createMacOSPowerManager();
 std::unique_ptr<IPlatformUtils> createMacOSPlatformUtils();
-std::unique_ptr<IDaemon> createMacOSDaemon();
+std::unique_ptr<ISignalHandler> createMacOSSignalHandler();
 #endif
 
 /**
@@ -82,21 +82,21 @@ std::unique_ptr<IPlatformUtils> PlatformFactory::createPlatformUtils() {
 }
 
 /**
- * Create a daemon for the current platform
- * @return unique_ptr to platform-specific daemon implementation
+ * Create a signal handler for the current platform
+ * @return unique_ptr to platform-specific signal handler implementation
  */
-std::unique_ptr<IDaemon> PlatformFactory::createDaemon() {
+std::unique_ptr<ISignalHandler> PlatformFactory::createSignalHandler() {
 #if defined(__linux__)
-    Logger::debug("Creating Linux daemon");
-    return createLinuxDaemon();
+    Logger::debug("Creating Linux signal handler");
+    return createLinuxSignalHandler();
 #elif defined(_WIN32) || defined(_WIN64)
-    Logger::debug("Creating Windows daemon");
-    return createWindowsDaemon();
+    Logger::debug("Creating Windows signal handler");
+    return createWindowsSignalHandler();
 #elif defined(__APPLE__) && defined(__MACH__)
-    Logger::debug("Creating macOS daemon");
-    return createMacOSDaemon();
+    Logger::debug("Creating macOS signal handler");
+    return createMacOSSignalHandler();
 #else
-    Logger::error("Unsupported platform for daemon");
+    Logger::error("Unsupported platform for signal handler");
     return nullptr;
 #endif
 }

@@ -3,7 +3,7 @@
 #include "platform/isystem_monitor.h"
 #include "platform/ipower_manager.h"
 #include "platform/iplatform_utils.h"
-#include "platform/idaemon.h"
+#include "platform/isignal_handler.h"
 #include <memory>
 
 /**
@@ -31,10 +31,10 @@ public:
     static std::unique_ptr<IPlatformUtils> createPlatformUtils();
 
     /**
-     * Create a daemon for the current platform
-     * @return unique_ptr to platform-specific daemon implementation
+     * Create a signal handler for the current platform
+     * @return unique_ptr to platform-specific signal handler implementation
      */
-    static std::unique_ptr<IDaemon> createDaemon();
+    static std::unique_ptr<ISignalHandler> createSignalHandler();
 
     /**
      * Get the current platform name

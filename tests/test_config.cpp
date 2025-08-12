@@ -73,8 +73,18 @@ TEST_F(TestConfig, test_get_default_config_path_returns_platform_specific_path)
     EXPECT_FALSE(defaultPath.empty());
     EXPECT_TRUE(defaultPath.find("ddogreen.conf") != std::string::npos);
     
-    // On Linux, it should be the /etc path (we can test this since we're running on Linux)
+    // Verify platform-specific path expectations
+#if defined(_WIN32) || defined(_WIN64)
+    // On Windows, should be in ProgramData
+    EXPECT_TRUE(defaultPath.find("DDOSoft") != std::string::npos);
+    EXPECT_TRUE(defaultPath.find("ddogreen") != std::string::npos);
+#elif defined(__linux__)
+    // On Linux, should be in /etc
     EXPECT_EQ("/etc/ddogreen/ddogreen.conf", defaultPath);
+#elif defined(__APPLE__) && defined(__MACH__)
+    // On macOS, should be in /etc (same as Linux for now)
+    EXPECT_EQ("/etc/ddogreen/ddogreen.conf", defaultPath);
+#endif
 }
 
 // Test successful configuration loading

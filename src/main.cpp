@@ -11,7 +11,6 @@
  */
 
 #include "activity_monitor.h"
-#include "daemon.h"
 #include "logger.h"
 #include "config.h"
 #include "platform/platform_factory.h"
@@ -20,6 +19,7 @@
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
+#include <memory>
 
 void printUsage(const char* programName) {
     std::cout << "Usage: " << programName << " [OPTIONS]\n"
@@ -94,14 +94,14 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    // Initialize daemon
-    if (!Daemon::initialize()) {
-        Logger::error("Failed to initialize daemon");
+    // Create and setup signal handler for graceful shutdown
+    auto signalHandler = PlatformFactory::createSignalHandler();
+    if (!signalHandler) {
+        Logger::error("Failed to create signal handler");
+        std::cerr << "Failed to create signal handler" << std::endl;
         return 1;
     }
-
-    // Setup signal handlers (no daemonization - service manager handles process management)
-    Daemon::setupSignalHandlers();
+    signalHandler->setupSignalHandlers();
 
     // Load configuration
     Config config;
@@ -166,14 +166,13 @@ int main(int argc, char* argv[]) {
     
     std::cout << "DDOGreen service running - press Ctrl+C to stop" << std::endl;
 
-    // Wait for termination signal (no busy waiting)
-    Daemon::waitForSignal();
+    // Wait for termination signal using platform signal handler
+    signalHandler->waitForSignal();
 
     // Cleanup
     std::cout << "DDOGreen stopping" << std::endl;
     Logger::info("Shutting down DDOGreen service");
     activityMonitor.stop();
-    Daemon::cleanup();
     
     std::cout << "DDOGreen stopped" << std::endl;
 

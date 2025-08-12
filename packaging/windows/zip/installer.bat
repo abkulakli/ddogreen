@@ -138,7 +138,7 @@ if not exist "%LOG_FILE%" (
 
 REM Create and install Windows service
 call :print_info "Creating Windows service..."
-sc create "%SERVICE_NAME%" binPath= "\"%TARGET_EXECUTABLE_PATH%\" --daemon --config \"%CONFIG_FILE%\"" DisplayName= "%SERVICE_DISPLAY_NAME%" start= auto
+sc create "%SERVICE_NAME%" binPath= "\"%TARGET_EXECUTABLE_PATH%\" --config \"%CONFIG_FILE%\"" DisplayName= "%SERVICE_DISPLAY_NAME%" start= auto
 if %errorlevel% neq 0 (
     call :print_error "Failed to create service"
     exit /b 1

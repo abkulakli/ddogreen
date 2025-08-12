@@ -9,6 +9,52 @@ This document establishes comprehensive coding standards for the ddogreen projec
 
 **For Testing Standards**: See [`testingStandards.md`](testingStandards.md) for comprehensive testing guidelines, frameworks, and practices.
 
+## **CRITICAL ARCHITECTURAL RULE** ⚠️
+
+### NO #ifdef IN COMMON CODE - ABSOLUTE ENFORCEMENT
+**MANDATORY COMPLIANCE**: Platform abstraction is the core architectural principle
+
+#### FORBIDDEN PATTERNS (ARCHITECTURE VIOLATIONS)
+```cpp
+// ❌ FORBIDDEN - #ifdef in common/application code
+#ifdef _WIN32
+    // Windows-specific code
+#elif defined(__linux__)
+    // Linux-specific code
+#endif
+
+// ❌ FORBIDDEN - Platform-specific includes in common code
+#include <windows.h>    // NEVER in main.cpp, config.cpp, etc.
+#include <unistd.h>     // NEVER in main.cpp, config.cpp, etc.
+```
+
+#### REQUIRED PATTERNS (ARCHITECTURE COMPLIANCE)
+```cpp
+// ✅ REQUIRED - Use abstract interfaces ONLY
+auto signalHandler = PlatformFactory::createSignalHandler();
+signalHandler->setupSignalHandlers();
+signalHandler->waitForSignal();
+
+// ✅ REQUIRED - Platform selection via factory
+auto platformUtils = PlatformFactory::createPlatformUtils();
+std::string configPath = platformUtils->getDefaultConfigPath();
+```
+
+#### ENFORCEMENT LOCATIONS
+- **FORBIDDEN LOCATIONS**: Any common/application code:
+  - `main.cpp`, `config.cpp`, `logger.cpp`, `activity_monitor.cpp`
+  - Any file in root `src/` directory
+  - Any file in `include/` directory (except interfaces)
+- **ALLOWED LOCATIONS**: Platform-specific implementation files ONLY:
+  - `src/platform/[platform]/` implementation files
+  - `src/platform/platform_factory.cpp` (compile-time selection)
+- **INTERFACE RULE**: Application code must use ONLY abstract base classes
+
+#### VIOLATION CONSEQUENCES
+- **Immediate Fix Required**: Any `#ifdef` in common code is an architecture violation
+- **Code Review Failure**: Pull requests with platform-specific common code will be rejected
+- **Refactoring Required**: Move platform-specific logic to appropriate platform implementation
+
 ## **DOCUMENTATION PHILOSOPHY** ⚠️
 
 ### Minimal Documentation Principle

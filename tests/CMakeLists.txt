@@ -36,7 +36,6 @@ add_executable(test_config
     ${CMAKE_SOURCE_DIR}/src/config.cpp
     ${CMAKE_SOURCE_DIR}/src/logger.cpp
     ${CMAKE_SOURCE_DIR}/src/platform/platform_factory.cpp
-    ${CMAKE_SOURCE_DIR}/src/platform/idaemon.cpp
 )
 
 # Add platform-specific source files based on the current platform
@@ -45,21 +44,21 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         ${CMAKE_SOURCE_DIR}/src/platform/linux/linux_platform_utils.cpp
         ${CMAKE_SOURCE_DIR}/src/platform/linux/linux_system_monitor.cpp
         ${CMAKE_SOURCE_DIR}/src/platform/linux/linux_power_manager.cpp
-        ${CMAKE_SOURCE_DIR}/src/platform/linux/linux_daemon.cpp
+        ${CMAKE_SOURCE_DIR}/src/platform/linux/linux_signal_handler.cpp
     )
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     target_sources(test_config PRIVATE
         ${CMAKE_SOURCE_DIR}/src/platform/windows/windows_platform_utils.cpp
         ${CMAKE_SOURCE_DIR}/src/platform/windows/windows_system_monitor.cpp
         ${CMAKE_SOURCE_DIR}/src/platform/windows/windows_power_manager.cpp
-        ${CMAKE_SOURCE_DIR}/src/platform/windows/windows_daemon.cpp
+        ${CMAKE_SOURCE_DIR}/src/platform/windows/windows_signal_handler.cpp
     )
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     target_sources(test_config PRIVATE
         ${CMAKE_SOURCE_DIR}/src/platform/macos/macos_platform_utils.cpp
         ${CMAKE_SOURCE_DIR}/src/platform/macos/macos_system_monitor.cpp
         ${CMAKE_SOURCE_DIR}/src/platform/macos/macos_power_manager.cpp
-        ${CMAKE_SOURCE_DIR}/src/platform/macos/macos_daemon.cpp
+        ${CMAKE_SOURCE_DIR}/src/platform/macos/macos_signal_handler.cpp
     )
 endif()
 

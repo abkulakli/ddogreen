@@ -18,27 +18,43 @@
 
 ### Cross-Platform Architecture
 ```
-Application Layer (main.cpp, daemon.cpp) - ZERO platform-specific code
-├── Platform Abstraction Layer
+Application Layer (main.cpp, config.cpp, logger.cpp) - ZERO platform-specific code
+├── Platform Abstraction Layer (Abstract Interfaces)
 │   ├── IPowerManager (power control abstraction)
 │   ├── ISystemMonitor (load monitoring abstraction)
 │   ├── IPlatformUtils (path resolution, privilege checking)
-│   └── IDaemon (daemon lifecycle management - kept for signal handling)
-└── Platform Implementations
-    ├── Linux (TLP, /proc/loadavg, systemd, realpath)
-    ├── Windows (Power Plans, Performance Counters, SCM, GetFullPathName)
-    └── macOS (pmset, system APIs, launchd, realpath)
+│   └── ISignalHandler (signal handling and graceful shutdown)
+└── Platform Implementations (Platform-Specific Code)
+    ├── Linux (TLP, /proc/loadavg, systemd, realpath, Unix signals)
+    ├── Windows (Power Plans, Performance Counters, SCM, GetFullPathName, Console handlers)
+    └── macOS (pmset, system APIs, launchd, realpath, Unix signals)
 ```
 
-**Note**: IServiceManager abstraction layer was removed (service installation moved to package installers), but IDaemon interface was retained for daemon lifecycle and signal handling functionality.
+### CRITICAL ARCHITECTURAL RULE: NO #ifdef IN COMMON CODE
+**STRICT ENFORCEMENT**: Platform abstraction compliance is mandatory across entire codebase
+- **FORBIDDEN**: `#ifdef` preprocessor directives in any common/application layer code
+- **ALLOWED LOCATIONS**: Platform-specific implementation files ONLY (`src/platform/[platform]/`)
+- **FACTORY EXCEPTION**: `platform_factory.cpp` may use `#ifdef` for compile-time platform selection
+- **INTERFACE RULE**: Application code must use ONLY abstract base class interfaces
+- **VIOLATION DETECTION**: Any `#ifdef` in common code is an architecture violation requiring immediate fix
 
-### Architectural Principles
-- **ZERO platform-specific code** in application layer (achieved)
-- **Interface-based design** for all platform operations
-- **Factory pattern** for platform selection at runtime
+### Platform Abstraction Interfaces (Complete Set)
+```cpp
+// All platform functionality accessed through these interfaces ONLY
+ISystemMonitor    - System load monitoring (Linux: /proc/loadavg, Windows: Performance Counters)
+IPowerManager     - Power control (Linux: TLP, Windows: powercfg, macOS: pmset)
+IPlatformUtils    - Path resolution, privilege checking, environment-specific operations
+ISignalHandler    - Signal handling and graceful shutdown (Windows: Console, Unix: signals)
+```
+
+### Architectural Principles (Enforced)
+- **ZERO platform-specific code** in application layer (STRICTLY ENFORCED)
+- **Interface-based design** for ALL platform operations (NO EXCEPTIONS)
+- **Factory pattern** for platform selection at compile-time with runtime creation
 - **RAII** for resource management
-- **Compile-time platform detection** for optimal binaries
+- **Compile-time platform detection** ONLY in factory for optimal binaries
 - **Path resolution abstraction** for cross-platform file handling
+- **Signal handling abstraction** for graceful shutdown across platforms
 
 ### Platform-Specific Implementation Details
 
@@ -48,6 +64,7 @@ Application Layer (main.cpp, daemon.cpp) - ZERO platform-specific code
 - **Service Management**: systemd integration
 - **Privilege Checking**: `geteuid()` for root access
 - **Path Resolution**: `realpath()` for canonical paths with error handling
+- **Signal Handling**: Unix `signal()` handlers for SIGTERM/SIGINT with atomic coordination
 
 #### Windows Implementation
 - **Power Management**: Power Plans via `powercfg`
@@ -57,6 +74,7 @@ Application Layer (main.cpp, daemon.cpp) - ZERO platform-specific code
 - **Path Resolution**: `GetFullPathName()` for Windows-compatible path resolution
 - **Load Average Calculation**: Dynamic sampling based on configurable monitoring frequency
 - **Performance Counters**: PDH (Performance Data Helper) API for real-time system metrics
+- **Signal Handling**: `SetConsoleCtrlHandler()` for console control events (CTRL_C, CTRL_BREAK, etc.)
 
 #### macOS Implementation (Future)
 - **Power Management**: `pmset` integration planned
@@ -64,6 +82,7 @@ Application Layer (main.cpp, daemon.cpp) - ZERO platform-specific code
 - **Service Management**: launchd integration
 - **Privilege Checking**: Authorization Services
 - **Path Resolution**: `realpath()` (same as Linux)
+- **Signal Handling**: Unix `signal()` handlers (same as Linux)
 
 ## Configuration System Architecture
 
