@@ -35,7 +35,13 @@
     <!-- Custom actions to install/remove service using NSSM -->
     <CustomAction Id="InstallService"
         Directory="INSTALLFOLDER"
-        ExeCommand='nssm.exe install ddogreen "[INSTALLFOLDER]ddogreen.exe" --config "[CONFIGFOLDER]ddogreen.conf"'
+        ExeCommand='nssm.exe install ddogreen "[INSTALLFOLDER]ddogreen.exe"'
+        Execute="deferred"
+        Impersonate="no" />
+
+    <CustomAction Id="ConfigureService"
+        Directory="INSTALLFOLDER"
+        ExeCommand='nssm.exe set ddogreen AppParameters "--config &quot;[CONFIGFOLDER]ddogreen.conf&quot;"'
         Execute="deferred"
         Impersonate="no" />
 
@@ -61,6 +67,7 @@
     <!-- Install sequence for custom actions -->
     <InstallExecuteSequence>
       <Custom Action="InstallService" After="InstallFiles" Condition="NOT Installed" />
+      <Custom Action="ConfigureService" After="InstallService" Condition="NOT Installed" />
       <Custom Action="RemoveService" Before="RemoveFiles" Condition="REMOVE=&quot;ALL&quot;" />
     </InstallExecuteSequence>
 

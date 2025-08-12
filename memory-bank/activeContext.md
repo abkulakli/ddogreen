@@ -5,7 +5,33 @@
 **Last Updated**: August 12, 2025
 **Current State**: Windows packaging now uses CMake exclusively for ZIP generation
 
-### Latest Update (Aug 12, 2025): Windows installer.bat Directory Creation Fix
+### Latest Update (Aug 12, 2025): Windows MSI (WiX) Template Fixes  
+**COMPLETED**: Fixed issues in Windows MSI installer WiX template
+- **Issue 1**: File source paths were incorrect after ZIP structure change
+  - **Root Cause**: WiX template referenced old nested folder structure  
+  - **Solution**: Updated paths to use `ddogreen-windows/bin/` and `ddogreen-windows/share/` prefixes
+  - **Result**: MSI builds successfully with correct file locations
+
+- **Issue 2**: NSSM service installation command was malformed (same as batch installer)
+  - **Root Cause**: Passing ddogreen arguments directly to NSSM install command
+  - **Solution**: Split into separate WiX custom actions:
+    - `InstallService`: `nssm install service executable`
+    - `ConfigureService`: `nssm set service AppParameters "--config file"`
+  - **Result**: Proper NSSM service configuration in MSI installer
+
+**Key Differences from Batch Installer**:
+- MSI uses WiX custom actions instead of batch commands  
+- Directory creation handled automatically by Windows Installer
+- No need for manual error checking (Windows Installer handles this)
+- Service installation/removal integrated into MSI install/uninstall process
+
+**Testing Status**:
+- ✅ MSI builds successfully with WiX v5
+- ✅ File paths correctly reference flat ZIP structure
+- ✅ NSSM service installation split into proper custom actions  
+- ⏳ Full MSI installation testing requires Administrator privileges
+
+### Previous Update (Aug 12, 2025): Windows installer.bat Directory Creation Fix
 **COMPLETED**: Fixed false "Failed to create directory" errors in installer script
 - **Issue**: `mkdir` command returning non-zero exit codes even when directories were successfully created
 - **Root Cause**: Windows mkdir can return error codes when directory already exists or in certain edge cases
