@@ -109,7 +109,7 @@ jobs:
         echo "=== Testing Standard CMake Build ==="
         cmake -B build-test -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON
         cmake --build build-test --parallel
-        
+
         echo "=== Running Standard CMake Tests ==="
         cd build-test
         ctest --output-on-failure --verbose
@@ -237,10 +237,10 @@ jobs:
       run: |
         Write-Host "Installing WiX Toolset v5.0.2..."
         dotnet tool install --global wix --version 5.0.2
-        
+
         Write-Host "Installing WiX UI extension..."
         wix extension add --global WixToolset.UI.wixext/5.0.2
-        
+
         Write-Host "Verifying WiX installation..."
         wix --version
 
@@ -268,14 +268,14 @@ jobs:
       run: |
         cd build
         cmake --build . --config Release --parallel
-        
+
         Write-Host "Generating Windows packages (ZIP + MSI)..."
         cpack
-        
+
         Write-Host "Generated packages:"
         Get-ChildItem *.zip, *.msi | Format-Table Name, Length
 
-    - name: Create custom Windows ZIP with installer
+    - name: Create custom Windows ZIP using CMake install
       run: |
         # Extract version for naming
         if ($env:GITHUB_REF -like "refs/tags/*") {
@@ -284,44 +284,58 @@ jobs:
         } else {
           $VERSION = "0.0.0"
         }
-        
-        # Create custom ZIP package directory
-        $customZipDir = "ddogreen-windows-custom"
-        New-Item -ItemType Directory -Path $customZipDir -Force
-        
-        # Copy executable to ZIP directory
-        Copy-Item "build\Release\ddogreen.exe" "$customZipDir\ddogreen.exe"
-        
-        # Search for the configuration file in multiple locations
-        $configPaths = @(
-          "config\ddogreen.conf.default",
-          ".\ddogreen.conf.default",
-          "packaging\config\ddogreen.conf.default"
+
+        Write-Host "Using CMake to create properly structured ZIP package..."
+
+        # Use CMake to install to a staging directory (this respects all CMake install rules)
+        $stagingDir = "ddogreen-windows-staging"
+
+        # Ensure we're in the right directory and clean up any existing staging
+        if (Test-Path $stagingDir) {
+          Remove-Item -Recurse -Force $stagingDir
+        }
+
+        # Use CMake install from the build directory
+        Write-Host "Running CMake install to staging directory..."
+        cmake --install build --config Release --prefix $stagingDir
+
+        if (-not (Test-Path $stagingDir)) {
+          Write-Error "CMake install failed - staging directory not created"
+          exit 1
+        }
+
+        # Verify the structure was created correctly by CMake
+        Write-Host "CMake install directory structure:"
+        Get-ChildItem -Recurse $stagingDir | Format-Table Name, FullName -AutoSize
+
+        # Verify required files exist
+        $requiredFiles = @(
+          "$stagingDir\bin\ddogreen.exe",
+          "$stagingDir\bin\nssm.exe",
+          "$stagingDir\share\ddogreen\ddogreen.conf.default",
+          "$stagingDir\installer.bat"
         )
-        
-        $configFile = $null
-        foreach ($path in $configPaths) {
-          if (Test-Path $path) {
-            $configFile = $path
-            break
+
+        foreach ($file in $requiredFiles) {
+          if (-not (Test-Path $file)) {
+            Write-Warning "Required file missing: $file"
+          } else {
+            Write-Host "✓ Found: $file"
           }
         }
-        
-        if ($configFile) {
-          Copy-Item $configFile "$customZipDir\ddogreen.conf.default"
-          Write-Host "Configuration file found and copied: $configFile"
-        } else {
-          Write-Warning "Configuration file not found in any of the expected locations."
-        }
-        
-        # Copy installer script
-        Copy-Item "packaging\windows\zip\installer.bat" "$customZipDir\installer.bat"
-        
-        # Create the custom ZIP package
+
+        # Create the final ZIP package using CMake's installed structure
         $zipName = "ddogreen-$VERSION-windows-zip.zip"
-        Compress-Archive -Path "$customZipDir\*" -DestinationPath $zipName -Force
-        
-        Write-Host "Created custom Windows ZIP: $zipName"
+        Compress-Archive -Path "$stagingDir\*" -DestinationPath $zipName -Force
+
+        if (Test-Path $zipName) {
+          Write-Host "✓ Successfully created: $zipName"
+          $zipInfo = Get-Item $zipName
+          Write-Host "   Size: $($zipInfo.Length) bytes"
+        } else {
+          Write-Error "Failed to create ZIP package"
+          exit 1
+        }
 
     - name: Upload Windows ZIP package (CMake)
       uses: actions/upload-artifact@v4
@@ -363,17 +377,17 @@ jobs:
     - name: Run comprehensive DEB package tests
       run: |
         echo "=== Running Comprehensive DEB Package Tests ==="
-        
+
         # Make test script executable
         chmod +x tests/test_packages.sh
-        
+
         # Copy DEB package to build directory structure expected by test script
         mkdir -p build/release
         cp *.deb build/release/
-        
+
         # Run DEB-specific testing
         sudo tests/test_packages.sh build/release 2>&1 | grep -A 50 "Testing DEB package" | head -100 || echo "Test completed"
-        
+
         echo "=== Manual DEB Package Validation ==="
 
     - name: Test DEB package (fallback manual test)
@@ -481,17 +495,17 @@ jobs:
     - name: Run comprehensive TGZ package tests
       run: |
         echo "=== Running Comprehensive TGZ Package Tests ==="
-        
+
         # Make test script executable
         chmod +x tests/test_packages.sh
-        
+
         # Copy TGZ package to build directory structure expected by test script
         mkdir -p build/release
         cp *.tar.gz build/release/ddogreen-linux.tar.gz
-        
+
         # Run TGZ-specific testing
         sudo tests/test_packages.sh build/release 2>&1 | grep -A 50 "Testing TGZ package" | head -100 || echo "Test completed"
-        
+
         echo "=== Manual TGZ Package Validation ==="
 
     - name: Test TGZ package (fallback manual test)
@@ -647,23 +661,23 @@ jobs:
         # Validate MSI structure using msiexec
         Write-Host "Validating MSI structure..."
         $validateResult = Start-Process -FilePath "msiexec.exe" -ArgumentList "/a", "$($msiFile.FullName)", "/qn", "TARGETDIR=`"$PWD\msi-extract`"" -Wait -PassThru
-        
+
         if ($validateResult.ExitCode -eq 0) {
             Write-Host "MSI structure validation passed"
-            
+
             # Check extracted contents
             if (Test-Path "msi-extract") {
                 Write-Host "MSI extraction successful. Contents:"
                 Get-ChildItem -Recurse "msi-extract" | Sort-Object FullName | ForEach-Object {
                     Write-Host "  $($_.FullName.Replace($PWD, '.'))"
                 }
-                
+
                 # Look for ddogreen.exe
                 $executable = Get-ChildItem -Recurse "msi-extract" -Name "ddogreen.exe" | Select-Object -First 1
                 if ($executable) {
                     Write-Host "✓ Found ddogreen.exe in MSI package"
                     $exePath = Get-ChildItem -Recurse "msi-extract" -Filter "ddogreen.exe" | Select-Object -First 1
-                    
+
                     # Test executable functionality
                     Write-Host "Testing executable functionality..."
                     & $exePath.FullName --help
@@ -672,7 +686,7 @@ jobs:
                     Write-Host "ERROR: ddogreen.exe not found in MSI package"
                     exit 1
                 }
-                
+
                 # Look for configuration file
                 $configFile = Get-ChildItem -Recurse "msi-extract" -Name "ddogreen.conf" | Select-Object -First 1
                 if ($configFile) {
@@ -680,7 +694,7 @@ jobs:
                 } else {
                     Write-Host "WARNING: ddogreen.conf not found in MSI package"
                 }
-                
+
                 # Clean up extraction
                 Remove-Item -Recurse -Force "msi-extract" -ErrorAction SilentlyContinue
             } else {
@@ -696,7 +710,7 @@ jobs:
         try {
             $installer = New-Object -ComObject WindowsInstaller.Installer
             $database = $installer.GetType().InvokeMember("OpenDatabase", "InvokeMethod", $null, $installer, @($msiFile.FullName, 0))
-            
+
             # Check Product Name
             $view = $database.GetType().InvokeMember("OpenView", "InvokeMethod", $null, $database, "SELECT Value FROM Property WHERE Property='ProductName'")
             $view.GetType().InvokeMember("Execute", "InvokeMethod", $null, $view, $null)
@@ -705,7 +719,7 @@ jobs:
                 $productName = $record.GetType().InvokeMember("StringData", "GetProperty", $null, $record, 1)
                 Write-Host "✓ Product Name: $productName"
             }
-            
+
             # Check Product Version
             $view = $database.GetType().InvokeMember("OpenView", "InvokeMethod", $null, $database, "SELECT Value FROM Property WHERE Property='ProductVersion'")
             $view.GetType().InvokeMember("Execute", "InvokeMethod", $null, $view, $null)
@@ -714,7 +728,7 @@ jobs:
                 $productVersion = $record.GetType().InvokeMember("StringData", "GetProperty", $null, $record, 1)
                 Write-Host "✓ Product Version: $productVersion"
             }
-            
+
             # Check Manufacturer
             $view = $database.GetType().InvokeMember("OpenView", "InvokeMethod", $null, $database, "SELECT Value FROM Property WHERE Property='Manufacturer'")
             $view.GetType().InvokeMember("Execute", "InvokeMethod", $null, $view, $null)
@@ -723,7 +737,7 @@ jobs:
                 $manufacturer = $record.GetType().InvokeMember("StringData", "GetProperty", $null, $record, 1)
                 Write-Host "✓ Manufacturer: $manufacturer"
             }
-            
+
         } catch {
             Write-Host "WARNING: Could not read MSI metadata: $($_.Exception.Message)"
         }
@@ -795,10 +809,10 @@ jobs:
           ```powershell
           # Download and install MSI package
           Invoke-WebRequest -Uri "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/ddogreen-${{ github.ref_name }}-windows.msi" -OutFile "ddogreen-installer.msi"
-          
+
           # Install (requires Administrator privileges)
           Start-Process msiexec.exe -ArgumentList "/i ddogreen-installer.msi /quiet" -Verb RunAs -Wait
-          
+
           # Service is automatically installed and started
           # Uninstall via Add/Remove Programs or: msiexec.exe /x ddogreen-installer.msi /quiet
           ```
