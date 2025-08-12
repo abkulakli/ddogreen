@@ -364,12 +364,12 @@ goto execute_action
 REM Execute action
 :execute_action
 if "%ACTION%"=="install" (
-    call :check_admin
-    call :check_powershell
+    call :check_admin || exit /b 1
+    call :check_powershell || exit /b 1
     call :install_ddogreen
 ) else if "%ACTION%"=="uninstall" (
-    call :check_admin
-    call :check_powershell
+    call :check_admin || exit /b 1
+    call :check_powershell || exit /b 1
     call :uninstall_ddogreen
 ) else if "%ACTION%"=="status" (
     call :show_status
