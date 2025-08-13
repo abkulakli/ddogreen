@@ -68,6 +68,12 @@ function(configure_test_executable target_name)
     
     target_compile_definitions(${target_name} PRIVATE DDOGREEN_VERSION="test")
     
+    # Apply coverage flags if coverage is enabled
+    if(BUILD_WITH_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        target_compile_options(${target_name} PRIVATE --coverage -g -O0)
+        target_link_options(${target_name} PRIVATE --coverage)
+    endif()
+    
     gtest_discover_tests(${target_name}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         TIMEOUT 30

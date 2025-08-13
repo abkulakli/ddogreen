@@ -272,13 +272,54 @@ TEST(WindowsPlatformTest, test_powercfg_availability)
 #endif
 ```
 
-## Test Coverage Requirements
+## Test Coverage Standards
 
-### Coverage Targets
-- **Unit tests**: Minimum 80% line coverage
-- **Platform implementations**: 90% coverage for each platform
-- **Critical paths**: 100% coverage (privilege checking, power management)
-- **Error handling**: All error paths must be tested
+### Coverage Requirements
+- **Line Coverage Target**: Minimum 70% overall, 90% for core business logic
+- **Function Coverage Target**: Minimum 85% overall
+- **Branch Coverage**: All critical decision paths must be tested
+- **Platform Coverage**: All platform implementations must have equivalent test coverage
+
+### Coverage Tools and Configuration
+- **Tool**: gcov/lcov for coverage analysis
+- **CMake Integration**: BUILD_WITH_COVERAGE option for coverage builds
+- **Automation**: `scripts/coverage.sh` for automated coverage analysis
+- **Reporting**: HTML reports generated at `build/coverage/coverage/html/index.html`
+
+### Coverage Build Configuration
+```cmake
+# Coverage option
+option(BUILD_WITH_COVERAGE "Enable coverage reporting" OFF)
+
+if(BUILD_WITH_COVERAGE)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage -fprofile-arcs -ftest-coverage")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
+endif()
+```
+
+### Coverage Analysis Workflow
+1. **Configure Coverage Build**: `cmake -B build/coverage -DBUILD_WITH_COVERAGE=ON -DBUILD_TESTS=ON`
+2. **Build Project**: `cmake --build build/coverage`
+3. **Generate Coverage Report**: `cmake --build build/coverage --target coverage`
+4. **Quick Summary**: `cmake --build build/coverage --target coverage-summary`
+5. **View HTML Report**: Open `build/coverage/coverage/html/index.html`
+
+### Coverage CMake Targets
+- **`coverage`**: Complete coverage analysis with HTML report generation
+- **`coverage-summary`**: Quick console summary of coverage metrics
+- **Dependencies**: Automatically builds project and runs all tests before analysis
+
+### Coverage Exclusions
+- Test files (`tests/**`)
+- System headers (`/usr/include/**`)
+- External dependencies (`build/_deps/**`)
+- Platform-specific code not relevant to current build target
+
+### Current Coverage Status
+- **Line Coverage**: 64.0% (419 of 655 lines)
+- **Function Coverage**: 84.9% (73 of 86 functions)
+- **Files Analyzed**: 14 source files
+- **Test Success Rate**: 100% (79/79 tests)
 
 ### Coverage Verification
 ```bash

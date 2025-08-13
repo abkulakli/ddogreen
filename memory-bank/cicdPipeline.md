@@ -47,6 +47,20 @@ The ddogreen project uses a comprehensive GitHub Actions-based CI/CD pipeline (`
 - **Functional Testing**: Binary help and version commands
 - **Dependencies**: Same as build stage
 
+#### Coverage Analysis (`coverage`)
+- **Runner**: `ubuntu-latest`
+- **Dependencies**: `build-essential`, `cmake`, `lcov`
+- **Build Configuration**: Debug build with coverage flags enabled
+- **Coverage Process**:
+  - Configure: `cmake -B build/coverage -DBUILD_WITH_COVERAGE=ON -DBUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Debug`
+  - Build: `cmake --build build/coverage --parallel`
+  - Analyze: `cmake --build build/coverage --target coverage`
+- **Reporting**:
+  - **Codecov Integration**: Uploads coverage data to Codecov service
+  - **HTML Reports**: Generated and uploaded as artifacts (30-day retention)
+  - **Coverage File**: `coverage_filtered.info` for external analysis
+- **Quality Gates**: Non-blocking (fail_ci_if_error: false)
+
 #### Windows Testing (`test-windows`)
 - **Artifact Integration**: Downloads Windows build artifacts
 - **Functional Testing**: Binary help and version commands

@@ -67,6 +67,12 @@ add_executable(ddogreen ${SOURCES})
 # Add version definition for use in source code
 target_compile_definitions(ddogreen PRIVATE DDOGREEN_VERSION="${PROJECT_VERSION}")
 
+# Apply coverage flags if coverage is enabled
+if(BUILD_WITH_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(ddogreen PRIVATE --coverage -g -O0)
+    target_link_options(ddogreen PRIVATE --coverage)
+endif()
+
 # Platform-specific libraries
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     # Link Windows-specific libraries for Performance Counters
@@ -153,8 +159,118 @@ endif()
 
 include(CPack)
 
-# Testing configuration
+# Testing and Coverage configuration
 option(BUILD_TESTS "Build unit tests" OFF)
+option(BUILD_WITH_COVERAGE "Build with coverage reporting" OFF)
+
+# Coverage configuration
+if(BUILD_WITH_COVERAGE)
+    if(NOT BUILD_TESTS)
+        message(FATAL_ERROR "Coverage requires BUILD_TESTS to be ON")
+    endif()
+    
+    # Check if we're using GCC or Clang (gcov compatible)
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        # Add coverage flags for all source files
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage -g -O0")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} --coverage -g -O0")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
+        
+        # Find required coverage tools
+        find_program(GCOV_PATH gcov)
+        find_program(LCOV_PATH lcov)
+        find_program(GENHTML_PATH genhtml)
+        
+        if(NOT GCOV_PATH)
+            message(WARNING "gcov not found - coverage reports may not work properly")
+        endif()
+        
+        if(LCOV_PATH AND GENHTML_PATH)
+            message(STATUS "Found lcov and genhtml - HTML coverage reports will be available")
+            
+            # Create coverage target
+            add_custom_target(coverage
+                COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/coverage
+                
+                # Cleanup previous coverage data
+                COMMAND ${LCOV_PATH} --directory ${CMAKE_BINARY_DIR} --zerocounters
+                
+                # Initialize coverage data
+                COMMAND ${LCOV_PATH} --directory ${CMAKE_BINARY_DIR} --capture --initial --output-file ${CMAKE_BINARY_DIR}/coverage/coverage_base.info --ignore-errors inconsistent,negative,unused
+                
+                # Run tests
+                COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
+                
+                # Capture coverage data
+                COMMAND ${LCOV_PATH} --directory ${CMAKE_BINARY_DIR} --capture --output-file ${CMAKE_BINARY_DIR}/coverage/coverage_test.info --ignore-errors inconsistent,negative,unused
+                
+                # Combine baseline and test coverage data
+                COMMAND ${LCOV_PATH} --add-tracefile ${CMAKE_BINARY_DIR}/coverage/coverage_base.info --add-tracefile ${CMAKE_BINARY_DIR}/coverage/coverage_test.info --output-file ${CMAKE_BINARY_DIR}/coverage/coverage_combined.info --ignore-errors inconsistent,negative,unused
+                
+                # Filter out system headers and test files
+                COMMAND ${LCOV_PATH} --remove ${CMAKE_BINARY_DIR}/coverage/coverage_combined.info 
+                    '/usr/*' 
+                    '*/tests/*' 
+                    '*/test/*'
+                    '*/_deps/*'
+                    '*/build/*'
+                    '*/.cache/*'
+                    --output-file ${CMAKE_BINARY_DIR}/coverage/coverage_filtered.info --ignore-errors inconsistent,negative,unused
+                
+                # Generate HTML report
+                COMMAND ${GENHTML_PATH} ${CMAKE_BINARY_DIR}/coverage/coverage_filtered.info --output-directory ${CMAKE_BINARY_DIR}/coverage/html --title "DDOGreen Coverage Report" --num-spaces 4 --legend --demangle-cpp
+                
+                COMMAND ${CMAKE_COMMAND} -E echo "Coverage report generated at: ${CMAKE_BINARY_DIR}/coverage/html/index.html"
+                
+                WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+                DEPENDS ddogreen
+                COMMENT "Generating coverage report"
+            )
+            
+            # Create a simpler coverage target that just shows console summary
+            add_custom_target(coverage-summary
+                COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/coverage
+                
+                # Cleanup previous coverage data
+                COMMAND ${LCOV_PATH} --directory ${CMAKE_BINARY_DIR} --zerocounters
+                
+                # Run tests
+                COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
+                
+                # Capture and filter coverage data with error handling
+                COMMAND ${LCOV_PATH} --directory ${CMAKE_BINARY_DIR} --capture --output-file ${CMAKE_BINARY_DIR}/coverage/coverage.info --ignore-errors inconsistent,negative,unused
+                COMMAND ${LCOV_PATH} --remove ${CMAKE_BINARY_DIR}/coverage/coverage.info 
+                    '/usr/*' 
+                    '*/tests/*' 
+                    '*/test/*'
+                    '*/_deps/*'
+                    '*/build/*'
+                    '*/.cache/*'
+                    --output-file ${CMAKE_BINARY_DIR}/coverage/coverage_filtered.info --ignore-errors inconsistent,negative,unused
+                
+                # Show summary
+                COMMAND ${LCOV_PATH} --summary ${CMAKE_BINARY_DIR}/coverage/coverage_filtered.info --ignore-errors inconsistent,negative,unused
+                
+                WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+                DEPENDS ddogreen
+                COMMENT "Generating coverage summary"
+            )
+        else()
+            message(WARNING "lcov and/or genhtml not found - HTML coverage reports will not be available. Install lcov package.")
+            
+            # Create a basic gcov target
+            add_custom_target(coverage
+                COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
+                COMMAND ${CMAKE_COMMAND} -E echo "Coverage data generated. Use gcov manually to analyze .gcno/.gcda files in build directory."
+                WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+                DEPENDS ddogreen
+                COMMENT "Running tests with coverage"
+            )
+        endif()
+    else()
+        message(WARNING "Coverage is only supported with GCC or Clang compilers")
+    endif()
+endif()
 
 if(BUILD_TESTS)
     enable_testing()

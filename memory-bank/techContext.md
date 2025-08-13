@@ -45,9 +45,26 @@ cd build/release && cpack          # Generate both ZIP and MSI packages
 build/
 ├── debug/          # Debug configuration with tests
 ├── release/        # Release configuration (not present in current workspace)
-└── test/           # Testing configuration (currently active)
-    ├── test_config # Compiled test executable
-    └── lib/        # GoogleTest libraries
+├── test/           # Testing configuration (currently active)
+│   ├── test_config # Compiled test executable
+│   └── lib/        # GoogleTest libraries
+└── coverage/       # Coverage build configuration
+    ├── ddogreen    # Coverage-enabled executable
+    ├── tests/      # Coverage-enabled test executables
+    └── coverage/   # Coverage analysis results
+        ├── coverage_filtered.info  # Filtered coverage data
+        └── html/   # HTML coverage reports
+```
+
+#### Coverage Build Configuration
+```bash
+# Coverage build workflow
+cmake -B build/coverage -DBUILD_WITH_COVERAGE=ON -DBUILD_TESTS=ON
+cmake --build build/coverage
+
+# Coverage analysis using CMake targets
+cmake --build build/coverage --target coverage         # Full HTML report
+cmake --build build/coverage --target coverage-summary # Quick summary
 ```
 
 #### Package Structure Reality (STANDARDIZED IMPLEMENTATION)
