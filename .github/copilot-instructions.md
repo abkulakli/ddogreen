@@ -91,18 +91,29 @@ I have access to Context7, which provides up-to-date documentation for libraries
 - Then fetch documentation using `mcp_context7_get-library-docs`
 - Focus documentation requests on specific topics when possible
 
-### DeepWiki Repository Knowledge
-I have access to DeepWiki, which provides deep knowledge about GitHub repositories. When working with or referencing external repositories:
+### Sequential Thinking for Complex Analysis
+I have access to Sequential Thinking, which provides step-by-step reasoning and analysis capabilities. When working on complex problems or decisions:
 
-1. **Repository Analysis**: Get comprehensive documentation about any GitHub repository
-2. **Architecture Understanding**: Learn how external projects are structured
-3. **Integration Patterns**: Understand how to integrate with external projects
-4. **Best Practices**: Learn from established open-source projects
+1. **Problem Analysis**: Break down complex problems into manageable steps
+2. **Design Planning**: Plan and design with room for revision and course correction
+3. **Thorough Investigation**: Ensure comprehensive analysis before making decisions
+4. **Quality Assurance**: Prioritize correctness over response speed
 
 **Usage Pattern**:
-- Use `mcp_deepwiki_read_wiki_structure` to understand repository organization
-- Use `mcp_deepwiki_read_wiki_contents` for comprehensive documentation
-- Use `mcp_deepwiki_ask_question` for specific queries about repositories
+- Use `mcp_sequentialthi_sequentialthinking` for complex analysis, planning, and problem-solving
+- Allow for iterative thinking with revisions and branch exploration
+- Generate solution hypotheses and verify them through step-by-step reasoning
+
+### MarkItDown Document Conversion
+I have access to MarkItDown, which converts various document formats to markdown. When working with external documentation or legacy files:
+
+1. **Format Conversion**: Convert PDFs, Word docs, and other formats to markdown
+2. **Documentation Processing**: Standardize documentation formats
+3. **Legacy File Handling**: Process existing documentation into consistent formats
+
+**Usage Pattern**:
+- Use `mcp_markitdown_convert_to_markdown` to convert documents from various formats
+- Provide URI (http, https, file, or data) to the document for conversion
 
 ## Core Workflows
 
@@ -113,15 +124,15 @@ I have access to DeepWiki, which provides deep knowledge about GitHub repositori
 3. Read any additional context files
 4. Understand current project state
 5. Identify immediate priorities from activeContext.md
-6. Use Context7/DeepWiki for any external library/repository context if needed
-7. Ready to assist with full context and enhanced documentation capabilities
+6. Use Sequential Thinking for complex analysis and Context7 for external library context if needed
+7. Ready to assist with full context and enhanced reasoning capabilities
 ```
 
 ### Task Execution Workflow
 ```
 1. Reference relevant memory bank context
-2. Use Context7 for library documentation when working with external dependencies
-3. Use DeepWiki for repository analysis when integrating with external projects
+2. Use Sequential Thinking for complex analysis, planning, and problem-solving
+3. Use Context7 for library documentation when working with external dependencies
 4. If the user's request is vague or ambiguous, ask 1–3 targeted clarifying questions; if it's safe to proceed, state 1–2 explicit assumptions and continue
 5. Consult and apply project principles from the memory bank (see Memory Bank Governance Rules)
 6. Execute requested task using established patterns and best practices
@@ -134,8 +145,8 @@ I have access to DeepWiki, which provides deep knowledge about GitHub repositori
 ### Enhanced Research Workflow
 ```
 When encountering new libraries, frameworks, or integration requirements:
-1. Use Context7 to research library documentation and current best practices
-2. Use DeepWiki to analyze similar projects or integration targets
+1. Use Sequential Thinking to thoroughly analyze requirements and approach
+2. Use Context7 to research library documentation and current best practices
 3. Document findings in appropriate memory bank files
 4. Apply learned patterns to current project context
 5. Update techContext.md with new dependencies or integration patterns
@@ -180,7 +191,7 @@ I'll proactively mention when I'm updating files: *"Let me update the memory ban
 - Build upon existing code patterns and conventions
 - Respect project constraints and requirements
 - Use Context7 to verify current best practices for external libraries
-- Use DeepWiki to understand integration patterns from similar projects
+- Use Sequential Thinking to ensure thorough analysis of integration patterns
 
 ### Documentation Discipline
 - Keep memory bank files concise but comprehensive
@@ -192,7 +203,8 @@ I'll proactively mention when I'm updating files: *"Let me update the memory ban
 
 ### Enhanced Research Practice
 - Leverage Context7 for authoritative library documentation
-- Use DeepWiki for learning from established open-source projects
+- Use Sequential Thinking for comprehensive analysis and decision-making
+- Use MarkItDown for document conversion and standardization needs
 - Document external research findings in memory bank files
 - Apply external best practices to project context
 - Maintain awareness of current library versions and patterns
