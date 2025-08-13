@@ -1,11 +1,25 @@
 # Active Context - DDOGreen
 
 ## Current Work Focus
-**Project Status**: CI/CD Pipeline Debugging - COMPLETED  
+**Project Status**: CI/CD Pipeline Maintenance - COMPLETED  
 **Last Updated**: August 13, 2025
-**Current State**: GitHub Actions test-linux step fixed with 70 tests passing
+**Current State**: Coverage step removed from GitHub Actions workflow
 
-### Latest Update (Aug 13, 2025): GitHub Actions Test Failures - RESOLVED
+### Latest Update (Aug 13, 2025): Coverage Step Removal - COMPLETED
+**COMPLETED**: Temporarily removed coverage analysis step from GitHub Actions CI/CD pipeline
+- **Change Made**: Removed the `coverage` job from unified-ci-cd.yml workflow
+- **Reason**: Simplifying CI/CD pipeline by removing coverage step for now
+- **Impact**: Pipeline now skips coverage analysis and Codecov reporting
+- **Documentation**: Updated cicdPipeline.md to reflect the removal
+- **Local Coverage**: Coverage functionality still available locally via CMake targets
+
+**Pipeline Simplification**:
+- ✅ **Workflow Updated**: Removed coverage job from GitHub Actions
+- ✅ **Dependencies Clean**: No jobs depend on coverage, so removal is clean
+- ✅ **Local Retention**: Coverage CMake targets remain available for local development
+- ✅ **Documentation Updated**: Pipeline documentation reflects current state
+
+### Previous Update (Aug 13, 2025): GitHub Actions Test Failures - RESOLVED
 **COMPLETED**: Fixed failing CI/CD pipeline tests that were preventing successful deployments
 - **Issue Diagnosed**: 2 out of 79 tests failing (TestLogger.test_log_levels and TestLogger.test_direct_log_method)
 - **Root Cause**: Release builds (-DCMAKE_BUILD_TYPE=Release) define NDEBUG, causing Logger to default to INFO level instead of DEBUG

@@ -48,6 +48,7 @@ The ddogreen project uses a comprehensive GitHub Actions-based CI/CD pipeline (`
 - **Dependencies**: Same as build stage
 
 #### Coverage Analysis (`coverage`)
+**REMOVED** - Coverage step has been temporarily removed from the CI/CD pipeline.
 - **Runner**: `ubuntu-latest`
 - **Dependencies**: `build-essential`, `cmake`, `lcov`
 - **Build Configuration**: Debug build with coverage flags enabled

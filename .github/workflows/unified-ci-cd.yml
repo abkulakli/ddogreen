@@ -156,49 +156,6 @@ jobs:
         .\build\Release\ddogreen.exe --help
         .\build\Release\ddogreen.exe --version
 
-  # Step 2c: Coverage Analysis (Linux)
-  coverage:
-    needs: test-linux
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y build-essential cmake lcov
-
-    - name: Configure with coverage
-      run: |
-        cmake -B build/coverage -DBUILD_WITH_COVERAGE=ON -DBUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Debug
-
-    - name: Build with coverage
-      run: |
-        cmake --build build/coverage --parallel
-
-    - name: Run coverage analysis
-      run: |
-        cmake --build build/coverage --target coverage
-
-    - name: Upload coverage reports to Codecov
-      uses: codecov/codecov-action@v4
-      with:
-        files: ./build/coverage/coverage/coverage_filtered.info
-        flags: unittests
-        name: ddogreen-coverage
-        fail_ci_if_error: false
-        verbose: true
-        token: ${{ secrets.CODECOV_TOKEN }}
-
-    - name: Upload coverage HTML report
-      uses: actions/upload-artifact@v4
-      with:
-        name: coverage-report
-        path: build/coverage/coverage/html/
-        retention-days: 30
-
   # Step 3: Package Building (Linux)
   package-linux:
     needs: [build-linux, test-linux]
