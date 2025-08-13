@@ -28,8 +28,53 @@ include(CTest)
 
 # Include directories
 include_directories(${CMAKE_SOURCE_DIR}/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})  # For mocks
 
-# Create test executable
+# Function to add platform-specific sources
+function(add_platform_sources target_name)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        target_sources(${target_name} PRIVATE
+            ${CMAKE_SOURCE_DIR}/src/platform/linux/linux_platform_utils.cpp
+            ${CMAKE_SOURCE_DIR}/src/platform/linux/linux_system_monitor.cpp
+            ${CMAKE_SOURCE_DIR}/src/platform/linux/linux_power_manager.cpp
+            ${CMAKE_SOURCE_DIR}/src/platform/linux/linux_signal_handler.cpp
+        )
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+        target_sources(${target_name} PRIVATE
+            ${CMAKE_SOURCE_DIR}/src/platform/windows/windows_platform_utils.cpp
+            ${CMAKE_SOURCE_DIR}/src/platform/windows/windows_system_monitor.cpp
+            ${CMAKE_SOURCE_DIR}/src/platform/windows/windows_power_manager.cpp
+            ${CMAKE_SOURCE_DIR}/src/platform/windows/windows_signal_handler.cpp
+        )
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+        target_sources(${target_name} PRIVATE
+            ${CMAKE_SOURCE_DIR}/src/platform/macos/macos_platform_utils.cpp
+            ${CMAKE_SOURCE_DIR}/src/platform/macos/macos_system_monitor.cpp
+            ${CMAKE_SOURCE_DIR}/src/platform/macos/macos_power_manager.cpp
+            ${CMAKE_SOURCE_DIR}/src/platform/macos/macos_signal_handler.cpp
+        )
+    endif()
+endfunction()
+
+# Function to configure test executable
+function(configure_test_executable target_name)
+    target_link_libraries(${target_name}
+        gtest
+        gtest_main
+        gmock
+        gmock_main
+        Threads::Threads
+    )
+    
+    target_compile_definitions(${target_name} PRIVATE DDOGREEN_VERSION="test")
+    
+    gtest_discover_tests(${target_name}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+        TIMEOUT 30
+    )
+endfunction()
+
+# Config tests
 add_executable(test_config
     test_config.cpp
     test_config_platform.cpp
@@ -37,43 +82,42 @@ add_executable(test_config
     ${CMAKE_SOURCE_DIR}/src/logger.cpp
     ${CMAKE_SOURCE_DIR}/src/platform/platform_factory.cpp
 )
+add_platform_sources(test_config)
+configure_test_executable(test_config)
 
-# Add platform-specific source files based on the current platform
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    target_sources(test_config PRIVATE
-        ${CMAKE_SOURCE_DIR}/src/platform/linux/linux_platform_utils.cpp
-        ${CMAKE_SOURCE_DIR}/src/platform/linux/linux_system_monitor.cpp
-        ${CMAKE_SOURCE_DIR}/src/platform/linux/linux_power_manager.cpp
-        ${CMAKE_SOURCE_DIR}/src/platform/linux/linux_signal_handler.cpp
-    )
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    target_sources(test_config PRIVATE
-        ${CMAKE_SOURCE_DIR}/src/platform/windows/windows_platform_utils.cpp
-        ${CMAKE_SOURCE_DIR}/src/platform/windows/windows_system_monitor.cpp
-        ${CMAKE_SOURCE_DIR}/src/platform/windows/windows_power_manager.cpp
-        ${CMAKE_SOURCE_DIR}/src/platform/windows/windows_signal_handler.cpp
-    )
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    target_sources(test_config PRIVATE
-        ${CMAKE_SOURCE_DIR}/src/platform/macos/macos_platform_utils.cpp
-        ${CMAKE_SOURCE_DIR}/src/platform/macos/macos_system_monitor.cpp
-        ${CMAKE_SOURCE_DIR}/src/platform/macos/macos_power_manager.cpp
-        ${CMAKE_SOURCE_DIR}/src/platform/macos/macos_signal_handler.cpp
-    )
-endif()
-
-# Link libraries
-target_link_libraries(test_config
-    gtest
-    gtest_main
-    Threads::Threads
+# Activity Monitor tests
+add_executable(test_activity_monitor
+    test_activity_monitor.cpp
+    ${CMAKE_SOURCE_DIR}/src/activity_monitor.cpp
+    ${CMAKE_SOURCE_DIR}/src/logger.cpp
+    ${CMAKE_SOURCE_DIR}/src/platform/platform_factory.cpp
 )
+add_platform_sources(test_activity_monitor)
+configure_test_executable(test_activity_monitor)
 
-# Add compiler definitions
-target_compile_definitions(test_config PRIVATE DDOGREEN_VERSION="test")
-
-# Discover individual GoogleTest cases for automatic IDE integration
-gtest_discover_tests(test_config
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    TIMEOUT 30
+# Logger tests
+add_executable(test_logger
+    test_logger.cpp
+    ${CMAKE_SOURCE_DIR}/src/logger.cpp
 )
+configure_test_executable(test_logger)
+
+# Platform Factory tests
+add_executable(test_platform_factory
+    test_platform_factory.cpp
+    ${CMAKE_SOURCE_DIR}/src/logger.cpp
+    ${CMAKE_SOURCE_DIR}/src/platform/platform_factory.cpp
+)
+add_platform_sources(test_platform_factory)
+configure_test_executable(test_platform_factory)
+
+# Integration tests
+add_executable(test_integration
+    test_integration.cpp
+    ${CMAKE_SOURCE_DIR}/src/activity_monitor.cpp
+    ${CMAKE_SOURCE_DIR}/src/config.cpp
+    ${CMAKE_SOURCE_DIR}/src/logger.cpp
+    ${CMAKE_SOURCE_DIR}/src/platform/platform_factory.cpp
+)
+add_platform_sources(test_integration)
+configure_test_executable(test_integration)
