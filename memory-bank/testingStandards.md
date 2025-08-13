@@ -319,7 +319,7 @@ endif()
 - **Line Coverage**: 64.0% (419 of 655 lines)
 - **Function Coverage**: 84.9% (73 of 86 functions)
 - **Files Analyzed**: 14 source files
-- **Test Success Rate**: 100% (79/79 tests)
+- **Test Success Rate**: 100% (70/70 tests)
 
 ### Coverage Verification
 ```bash

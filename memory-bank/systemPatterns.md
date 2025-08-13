@@ -47,14 +47,145 @@ IPlatformUtils    - Path resolution, privilege checking, environment-specific op
 ISignalHandler    - Signal handling and graceful shutdown (Windows: Console, Unix: signals)
 ```
 
-### Architectural Principles (Enforced)
+### Architectural Principles (Enforced with Energy Efficiency)
 - **ZERO platform-specific code** in application layer (STRICTLY ENFORCED)
 - **Interface-based design** for ALL platform operations (NO EXCEPTIONS)
 - **Factory pattern** for platform selection at compile-time with runtime creation
-- **RAII** for resource management
+- **RAII** for resource management and automatic cleanup
 - **Compile-time platform detection** ONLY in factory for optimal binaries
 - **Path resolution abstraction** for cross-platform file handling
 - **Signal handling abstraction** for graceful shutdown across platforms
+- **Energy-conscious operations**: Algorithmic efficiency over micro-optimizations
+- **Memory pool patterns**: Reuse containers and pre-allocate when size is predictable
+- **Cache-friendly design**: Structure data for optimal memory access patterns
+- **Minimal I/O overhead**: Batch operations and reduce system call frequency
+- **CPU power awareness**: Use blocking operations instead of polling/busy-waiting
+
+### Energy-Efficient Architectural Patterns
+
+#### Memory-Conscious Resource Management
+```cpp
+// PATTERN: Reusable buffer pools for frequent operations
+class SystemLoadMonitor {
+private:
+    // Fixed-size circular buffer avoids dynamic allocations
+    std::array<double, 300> load_history{};  // 5 minutes at 1-second intervals max
+    size_t current_index = 0;
+    size_t sample_count = 0;
+    
+    // Cache computed averages to avoid repeated calculations
+    mutable std::optional<double> cached_average;
+    mutable std::chrono::steady_clock::time_point cache_time;
+    
+public:
+    void add_sample(double load_value) {
+        load_history[current_index] = load_value;
+        current_index = (current_index + 1) % load_history.size();
+        sample_count = std::min(sample_count + 1, load_history.size());
+        
+        // Invalidate cache when new data arrives
+        cached_average = std::nullopt;
+    }
+    
+    auto get_average() const -> double {
+        const auto now = std::chrono::steady_clock::now();
+        
+        // Return cached value if recent (avoid recomputation)
+        if (cached_average && (now - cache_time) < std::chrono::milliseconds(100)) {
+            return *cached_average;
+        }
+        
+        // Compute and cache new average
+        const auto active_samples = std::span{load_history.data(), sample_count};
+        cached_average = std::accumulate(active_samples.begin(), active_samples.end(), 0.0) 
+                        / static_cast<double>(sample_count);
+        cache_time = now;
+        
+        return *cached_average;
+    }
+};
+```
+
+#### I/O-Efficient Communication Patterns
+```cpp
+// PATTERN: Batched logging to minimize system call overhead
+class EnergyEfficientLogger {
+private:
+    std::vector<std::string> pending_messages;
+    std::chrono::steady_clock::time_point last_flush;
+    static constexpr size_t BATCH_SIZE = 20;
+    static constexpr auto FLUSH_INTERVAL = std::chrono::seconds(5);
+    
+public:
+    void log(std::string_view message) {
+        pending_messages.emplace_back(message);
+        
+        const auto now = std::chrono::steady_clock::now();
+        const bool should_flush = pending_messages.size() >= BATCH_SIZE ||
+                                 (now - last_flush) >= FLUSH_INTERVAL;
+        
+        if (should_flush) {
+            flush_messages();
+        }
+    }
+    
+private:
+    void flush_messages() {
+        if (pending_messages.empty()) return;
+        
+        // Pre-calculate total size to avoid string reallocations
+        size_t total_size = 0;
+        for (const auto& msg : pending_messages) {
+            total_size += msg.size() + 1; // +1 for newline
+        }
+        
+        std::string batch_content;
+        batch_content.reserve(total_size);
+        
+        for (const auto& msg : pending_messages) {
+            batch_content += msg;
+            batch_content += '\n';
+        }
+        
+        write_to_file(batch_content); // Single I/O operation
+        pending_messages.clear();
+        last_flush = std::chrono::steady_clock::now();
+    }
+};
+```
+
+#### CPU-Efficient Monitoring Patterns
+```cpp
+// PATTERN: Event-driven monitoring instead of polling
+class ActivityMonitor {
+private:
+    std::atomic<bool> running{true};
+    std::condition_variable monitor_cv;
+    std::mutex monitor_mutex;
+    
+public:
+    void monitoring_loop(std::chrono::seconds interval) {
+        while (running.load()) {
+            collect_system_metrics();
+            evaluate_power_state();
+            
+            // Sleep until next interval (CPU can enter low-power state)
+            std::unique_lock lock(monitor_mutex);
+            monitor_cv.wait_for(lock, interval, [this] { return !running.load(); });
+        }
+    }
+    
+    void request_immediate_check() {
+        // Wake up monitoring thread for immediate check
+        monitor_cv.notify_one();
+    }
+    
+    void shutdown() {
+        running.store(false);
+        monitor_cv.notify_all(); // Wake sleeping thread for clean shutdown
+    }
+};
+```
 
 ### Platform-Specific Implementation Details
 

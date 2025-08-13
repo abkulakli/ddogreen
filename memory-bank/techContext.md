@@ -20,7 +20,7 @@ cmake --build --preset debug        # Build debug
 cmake --preset release              # Configure release build  
 cmake --build --preset release      # Build release
 
-# Testing with presets (24 tests confirmed passing)
+# Testing with presets (70 tests confirmed passing)
 cmake --build --preset debug --target test
 ctest --preset debug-tests
 
@@ -44,7 +44,7 @@ cd build/release && cpack          # Generate both ZIP and MSI packages
 ```
 build/
 ├── debug/          # Debug configuration with tests
-├── release/        # Release configuration (not present in current workspace)
+├── release/        # Release configuration with optimized executable
 ├── test/           # Testing configuration (currently active)
 │   ├── test_config # Compiled test executable
 │   └── lib/        # GoogleTest libraries
