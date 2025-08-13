@@ -9,7 +9,8 @@
 #include <condition_variable>
 #include "platform/isystem_monitor.h"
 
-class ActivityMonitor {
+class ActivityMonitor
+{
 public:
     ActivityMonitor();
     ~ActivityMonitor();

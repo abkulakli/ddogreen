@@ -1,17 +1,20 @@
 #pragma once
 
 #include <string>
+#include <span>
 
 /**
  * Configuration management for ddogreen
  * Handles loading and storing configuration settings
  */
-class Config {
+class Config
+{
 public:
     Config();
     ~Config() = default;
 
     bool loadFromFile(const std::string& configPath);
+    bool loadFromBuffer(std::span<const char> configData);
 
     int getMonitoringFrequency() const { return m_monitoringFrequency; }
     double getHighPerformanceThreshold() const { return m_highPerformanceThreshold; }
@@ -24,7 +27,9 @@ private:
     double m_highPerformanceThreshold;
     double m_powerSaveThreshold;
 
-    std::string trim(const std::string& str) const;
-    bool parseLine(const std::string& line);
+    std::string trim(std::span<const char> str) const;
+    bool parseLine(std::span<const char> line);
+    bool parseLineString(const std::string& line);
+    bool parseKeyValue(const std::string& key, const std::string& value);
     bool validateConfiguration() const;
 };

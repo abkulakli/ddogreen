@@ -8,6 +8,7 @@
 #include <sstream>
 #include <cstdlib>
 #include <vector>
+#include <span>
 #include <queue>
 #include <algorithm>
 #include <windows.h>
@@ -229,7 +230,8 @@ private:
         // Convert queue to vector for easier access
         std::vector<double> values;
         std::queue<double> temp = history; // Copy queue to iterate
-        while (!temp.empty()) {
+        while (!temp.empty())
+        {
             values.push_back(temp.front());
             temp.pop();
         }
@@ -239,8 +241,11 @@ private:
         const size_t startIndex = values.size() - numSamples;
         
         double sum = 0.0;
-        for (size_t i = startIndex; i < values.size(); ++i) {
-            sum += values[i];
+        // Use range-based for loop with subspan for better bounds safety
+        auto valueSpan = std::span<const double>{values}.subspan(startIndex);
+        for (const auto& value : valueSpan)
+        {
+            sum += value;
         }
         
         return sum / numSamples;

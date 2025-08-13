@@ -21,7 +21,8 @@
 #include <cstdlib>
 #include <memory>
 
-void printUsage(const char* programName) {
+void printUsage(const char* programName)
+{
     std::cout << "Usage: " << programName << " [OPTIONS]\n"
               << "Options:\n"
               << "  -c, --config PATH      Use custom configuration file\n"
@@ -32,25 +33,32 @@ void printUsage(const char* programName) {
               << "When run as a service, process management is handled by the service manager (systemd/SCM).\n";
 }
 
-void printVersion() {
+void printVersion()
+{
     std::cout << "DDOGreen version " << DDOGREEN_VERSION << "\n"
               << "Intelligent Green Power Management for Sustainable Computing\n"
               << "Copyright (c) 2025 DDOSoft Solutions (www.ddosoft.com)\n";
 }
 
-void configurePowerManagement(ActivityMonitor& activityMonitor, std::unique_ptr<IPowerManager>& powerManager) {
+void configurePowerManagement(ActivityMonitor& activityMonitor, std::unique_ptr<IPowerManager>& powerManager)
+{
     activityMonitor.setActivityCallback([&powerManager](bool isActive) {
-        if (isActive) {
+        if (isActive)
+        {
             powerManager->setPerformanceMode();
-        } else {
+        }
+        else
+        {
             powerManager->setPowerSavingMode();
         }
     });
 }
 
-bool validatePowerManagement(const std::unique_ptr<IPowerManager>& powerManager) {
+bool validatePowerManagement(const std::unique_ptr<IPowerManager>& powerManager)
+{
     Logger::info("Checking power management availability...");
-    if (!powerManager || !powerManager->isAvailable()) {
+    if (!powerManager || !powerManager->isAvailable())
+    {
         Logger::error("Power management backend is not available on this system");
         Logger::error("Ensure a supported power management backend is installed and accessible");
         std::cerr << "Power management backend is not available on this system" << std::endl;
@@ -61,7 +69,8 @@ bool validatePowerManagement(const std::unique_ptr<IPowerManager>& powerManager)
     return true;
 }
 
-void configureMonitoring(ActivityMonitor& activityMonitor, const Config& config) {
+void configureMonitoring(ActivityMonitor& activityMonitor, const Config& config)
+{
     Logger::info("Configuring activity monitor...");
     activityMonitor.setLoadThresholds(config.getHighPerformanceThreshold(), config.getPowerSaveThreshold());
     activityMonitor.setMonitoringFrequency(config.getMonitoringFrequency());
@@ -71,42 +80,51 @@ void configureMonitoring(ActivityMonitor& activityMonitor, const Config& config)
     Logger::info("Monitoring frequency: " + std::to_string(config.getMonitoringFrequency()) + " seconds");
 }
 
-void resolveConfigPath(ParsedArgs& args, const std::unique_ptr<IPlatformUtils>& platformUtils) {
-    if (!args.configPath.empty()) {
+void resolveConfigPath(ParsedArgs& args, const std::unique_ptr<IPlatformUtils>& platformUtils)
+{
+    if (!args.configPath.empty())
+    {
         std::string resolvedPath = platformUtils->resolveAbsolutePath(args.configPath);
-        if (resolvedPath != args.configPath) {
+        if (resolvedPath != args.configPath)
+        {
             args.configPath = resolvedPath;
             Logger::info("Converted relative config path to absolute: " + args.configPath);
         }
     }
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[])
+{
     auto platformUtils = PlatformFactory::createPlatformUtils();
-    if (!platformUtils || !platformUtils->isAvailable()) {
+    if (!platformUtils || !platformUtils->isAvailable())
+    {
         std::cerr << "Platform utilities are not available on this system" << std::endl;
         return 1;
     }
 
     ParsedArgs args = platformUtils->parseCommandLine(argc, argv);
 
-    if (args.hasUnknownOptions) {
+    if (args.hasUnknownOptions)
+    {
         std::cerr << "Unknown option: " << args.unknownOption << std::endl;
         printUsage(argv[0]);
         return 1;
     }
 
-    if (args.showHelp) {
+    if (args.showHelp)
+    {
         printUsage(argv[0]);
         return 0;
     }
 
-    if (args.showVersion) {
+    if (args.showVersion)
+    {
         printVersion();
         return 0;
     }
 
-    if (!platformUtils->hasRequiredPrivileges()) {
+    if (!platformUtils->hasRequiredPrivileges())
+    {
         std::cerr << platformUtils->getPrivilegeEscalationMessage() << std::endl;
         return 1;
     }
@@ -123,7 +141,8 @@ int main(int argc, char* argv[]) {
     resolveConfigPath(args, platformUtils);
 
     auto signalHandler = PlatformFactory::createSignalHandler();
-    if (!signalHandler) {
+    if (!signalHandler)
+    {
         Logger::error("Failed to create signal handler");
         std::cerr << "Failed to create signal handler" << std::endl;
         return 1;
@@ -135,7 +154,8 @@ int main(int argc, char* argv[]) {
 
     Logger::info("Loading configuration from: " + configPath);
 
-    if (!config.loadFromFile(configPath)) {
+    if (!config.loadFromFile(configPath))
+    {
         Logger::error("Failed to load configuration file: " + configPath);
         std::cerr << "Failed to load configuration file: " << configPath << std::endl;
         return 1;
@@ -146,14 +166,16 @@ int main(int argc, char* argv[]) {
     ActivityMonitor activityMonitor;
     auto powerManager = PlatformFactory::createPowerManager();
 
-    if (!validatePowerManagement(powerManager)) {
+    if (!validatePowerManagement(powerManager))
+    {
         return 1;
     }
 
     configureMonitoring(activityMonitor, config);
     configurePowerManagement(activityMonitor, powerManager);
 
-    if (!activityMonitor.start()) {
+    if (!activityMonitor.start())
+    {
         Logger::error("Failed to start activity monitor");
         std::cerr << "Failed to start activity monitor" << std::endl;
         return 1;
@@ -165,18 +187,24 @@ int main(int argc, char* argv[]) {
 
     std::cout << "DDOGreen service running - press Ctrl+C to stop" << std::endl;
 
-    try {
+    try
+    {
         signalHandler->waitForSignal();
-    } catch (const std::exception& e) {
+    }
+    catch (const std::exception& e)
+    {
         Logger::error("Exception during signal handling: " + std::string(e.what()));
     }
 
     std::cout << "DDOGreen stopping" << std::endl;
     Logger::info("Shutting down DDOGreen service");
 
-    try {
+    try
+    {
         activityMonitor.stop();
-    } catch (const std::exception& e) {
+    }
+    catch (const std::exception& e)
+    {
         Logger::error("Exception during shutdown: " + std::string(e.what()));
     }
 

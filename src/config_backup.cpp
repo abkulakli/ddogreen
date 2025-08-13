@@ -99,6 +99,68 @@ bool Config::loadFromFile(const std::string& configPath)
     return true;
 }
 
+}
+
+bool Config::validateConfiguration() const
+{
+    // Validate reasonable ranges and relationships
+    double thresholdGap = m_highPerformanceThreshold - m_powerSaveThreshold;
+
+    if (thresholdGap < 0.1)
+    {
+        Logger::warning("Small threshold gap (" + std::to_string(thresholdGap * 100) +
+                       "%) may cause frequent mode switching. Recommended minimum: 10%");
+    }
+
+    if (m_monitoringFrequency < 10)
+    {
+        Logger::warning("Very frequent monitoring (" + std::to_string(m_monitoringFrequency) +
+                       "s) may impact system performance. Consider 10+ seconds for production");
+    }
+
+    if (m_highPerformanceThreshold > 0.8)
+    {
+        Logger::warning("Very high performance threshold (" + std::to_string(m_highPerformanceThreshold * 100) +
+                       "%) may rarely trigger performance mode");
+    }
+
+    if (m_powerSaveThreshold < 0.1)
+    {
+        Logger::warning("Very low power save threshold (" + std::to_string(m_powerSaveThreshold * 100) +
+                       "%) may rarely trigger power save mode");
+    }
+
+    return true;
+}
+
+bool Config::validateConfiguration() const {
+    // Validate reasonable ranges and relationships
+    double thresholdGap = m_highPerformanceThreshold - m_powerSaveThreshold;
+
+    if (thresholdGap < 0.1) {
+        Logger::warning("Small threshold gap (" + std::to_string(thresholdGap * 100) +
+                       "%) may cause frequent mode switching. Recommended minimum: 10%");
+    }
+
+    if (m_monitoringFrequency < 10) {
+        Logger::warning("Very frequent monitoring (" + std::to_string(m_monitoringFrequency) +
+                       "s) may impact system performance. Consider 10+ seconds for production");
+    }
+
+    if (m_highPerformanceThreshold > 0.9) {
+        Logger::warning("Very high performance threshold (" + std::to_string(m_highPerformanceThreshold * 100) +
+                       "%) may rarely trigger performance mode");
+    }
+
+    if (m_powerSaveThreshold < 0.1)
+    {
+        Logger::warning("Very low power save threshold (" + std::to_string(m_powerSaveThreshold * 100) +
+                       "%) may rarely trigger power save mode");
+    }
+
+    return true;
+}
+
 bool Config::loadFromBuffer(std::span<const char> configData)
 {
     if (configData.empty())
@@ -325,36 +387,4 @@ bool Config::parseKeyValue(const std::string& key, const std::string& value)
     }
 
     return false;
-}
-
-bool Config::validateConfiguration() const
-{
-    // Validate reasonable ranges and relationships
-    double thresholdGap = m_highPerformanceThreshold - m_powerSaveThreshold;
-
-    if (thresholdGap < 0.1)
-    {
-        Logger::warning("Small threshold gap (" + std::to_string(thresholdGap * 100) +
-                       "%) may cause frequent mode switching. Recommended minimum: 10%");
-    }
-
-    if (m_monitoringFrequency < 10)
-    {
-        Logger::warning("Very frequent monitoring (" + std::to_string(m_monitoringFrequency) +
-                       "s) may impact system performance. Consider 10+ seconds for production");
-    }
-
-    if (m_highPerformanceThreshold > 0.8)
-    {
-        Logger::warning("Very high performance threshold (" + std::to_string(m_highPerformanceThreshold * 100) +
-                       "%) may rarely trigger performance mode");
-    }
-
-    if (m_powerSaveThreshold < 0.1)
-    {
-        Logger::warning("Very low power save threshold (" + std::to_string(m_powerSaveThreshold * 100) +
-                       "%) may rarely trigger power save mode");
-    }
-
-    return true;
 }

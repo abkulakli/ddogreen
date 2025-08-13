@@ -9,7 +9,8 @@ enum class LogLevel {
     ERROR
 };
 
-class Logger {
+class Logger
+{
 public:
     static void init(const std::string& logFile = "/var/log/ddogreen.log", bool consoleOutput = false);
     static void setLevel(LogLevel level);

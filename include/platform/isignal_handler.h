@@ -1,10 +1,15 @@
 #pragma once
 
+#pragma once
+
+#include <span>
+
 /**
- * Interface for platform-specific signal handling implementations
- * Provides abstraction for graceful shutdown signal management
+ * Interface for platform-specific signal handling functionality
+ * Provides graceful shutdown capabilities
  */
-class ISignalHandler {
+class ISignalHandler
+{
 public:
     virtual ~ISignalHandler() = default;
 

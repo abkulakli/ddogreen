@@ -10,9 +10,11 @@
  * Linux-specific system monitor implementation
  * Uses /proc/loadavg and /proc/cpuinfo for system monitoring
  */
-class LinuxSystemMonitor : public ISystemMonitor {
+class LinuxSystemMonitor : public ISystemMonitor
+{
 public:
-    LinuxSystemMonitor() : m_coreCount(0), m_available(false) {
+    LinuxSystemMonitor() : m_coreCount(0), m_available(false)
+    {
         // Initialize and cache core count
         m_coreCount = readCpuCoreCount();
         m_available = (m_coreCount > 0) && checkProcLoadavgAccess();
@@ -24,15 +26,18 @@ public:
      * Get system load average from /proc/loadavg
      * @return load average
      */
-    double getLoadAverage() override {
+    double getLoadAverage() override
+    {
         std::ifstream file("/proc/loadavg");
-        if (!file.is_open()) {
+        if (!file.is_open())
+        {
             Logger::error("Failed to open /proc/loadavg");
             return 0.0;
         }
 
         std::string line;
-        if (!std::getline(file, line)) {
+        if (!std::getline(file, line))
+        {
             Logger::error("Failed to read from /proc/loadavg");
             return 0.0;
         }
@@ -42,7 +47,8 @@ public:
         std::istringstream iss(line);
         double load1min;
         
-        if (!(iss >> load1min)) {
+        if (!(iss >> load1min))
+        {
             Logger::error("Failed to parse load average from /proc/loadavg");
             return 0.0;
         }
@@ -54,7 +60,8 @@ public:
      * Get CPU core count from /proc/cpuinfo
      * @return number of CPU cores
      */
-    int getCpuCoreCount() override {
+    int getCpuCoreCount() override
+    {
         return m_coreCount;
     }
 
@@ -62,7 +69,8 @@ public:
      * Check if Linux system monitoring is available
      * @return true if /proc/loadavg and /proc/cpuinfo are accessible
      */
-    bool isAvailable() override {
+    bool isAvailable() override
+    {
         return m_available;
     }
 
@@ -71,7 +79,8 @@ public:
      * @param frequencySeconds Monitoring frequency in seconds
      * Note: Linux reads load average directly from /proc/loadavg, so this is a no-op
      */
-    void setMonitoringFrequency(int frequencySeconds) override {
+    void setMonitoringFrequency(int frequencySeconds) override
+    {
         // Linux gets 1-minute load average directly from kernel via /proc/loadavg
         // No need to track monitoring frequency since kernel calculates it for us
         Logger::debug("Linux system monitor uses kernel load average (monitoring frequency ignored)");
@@ -82,9 +91,11 @@ private:
      * Read CPU core count from /proc/cpuinfo
      * @return number of CPU cores
      */
-    int readCpuCoreCount() {
+    int readCpuCoreCount()
+    {
         std::ifstream file("/proc/cpuinfo");
-        if (!file.is_open()) {
+        if (!file.is_open())
+        {
             Logger::error("Failed to open /proc/cpuinfo");
             return 1; // Default to 1 core if we can't read
         }
@@ -92,13 +103,16 @@ private:
         int coreCount = 0;
         std::string line;
         
-        while (std::getline(file, line)) {
-            if (line.find("processor") == 0) {
+        while (std::getline(file, line))
+        {
+            if (line.find("processor") == 0)
+            {
                 coreCount++;
             }
         }
 
-        if (coreCount == 0) {
+        if (coreCount == 0)
+        {
             Logger::warning("Could not determine CPU core count, defaulting to 1");
             coreCount = 1;
         }
@@ -111,11 +125,13 @@ private:
      * Check if /proc/loadavg is accessible
      * @return true if we can read /proc/loadavg
      */
-    bool checkProcLoadavgAccess() {
+    bool checkProcLoadavgAccess()
+    {
         std::ifstream file("/proc/loadavg");
         bool accessible = file.is_open();
         
-        if (!accessible) {
+        if (!accessible)
+        {
             Logger::error("Cannot access /proc/loadavg");
         }
         
@@ -127,6 +143,7 @@ private:
 };
 
 // Factory function for creating Linux system monitor
-std::unique_ptr<ISystemMonitor> createLinuxSystemMonitor() {
+std::unique_ptr<ISystemMonitor> createLinuxSystemMonitor()
+{
     return std::make_unique<LinuxSystemMonitor>();
 }

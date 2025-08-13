@@ -2,14 +2,16 @@
 
 #include <string>
 #include <vector>
+#include <span>
 
 /**
  * Structure to hold parsed command line arguments
  */
-struct ParsedArgs {
-    bool showHelp = false;
-    bool showVersion = false;
-    bool hasUnknownOptions = false;
+struct ParsedArgs
+{
+    bool showHelp{false};
+    bool showVersion{false};
+    bool hasUnknownOptions{false};
     std::string unknownOption;
     std::string configPath;
 };
@@ -18,7 +20,8 @@ struct ParsedArgs {
  * Interface for platform-specific utility functions
  * Handles privilege checking, executable path detection, and command line parsing
  */
-class IPlatformUtils {
+class IPlatformUtils
+{
 public:
     virtual ~IPlatformUtils() = default;
 
@@ -41,6 +44,21 @@ public:
      * @return parsed arguments structure
      */
     virtual ParsedArgs parseCommandLine(int argc, char* argv[]) const = 0;
+
+    /**
+     * Parse command line arguments from a span of string views
+     * @param args span of command line arguments (excluding program name)
+     * @return parsed arguments structure
+     */
+    virtual ParsedArgs parseCommandLineSpan(std::span<const std::string_view> args) const
+    {
+        // Default implementation - platforms can override for better span support
+        ParsedArgs result;
+        result.showHelp = false;
+        result.showVersion = false;
+        result.hasUnknownOptions = false;
+        return result;
+    }
 
     /**
      * Get the default installation path for the executable
@@ -84,4 +102,15 @@ public:
      * @return absolute path, or original path if resolution fails
      */
     virtual std::string resolveAbsolutePath(const std::string& relativePath) const = 0;
+
+    /**
+     * Process configuration file data from a buffer
+     * @param configData span of configuration file content
+     * @return true if configuration data appears valid
+     */
+    virtual bool validateConfigurationData(std::span<const char> configData) const
+    {
+        // Default implementation - basic validation
+        return !configData.empty() && configData.size() < 1024 * 1024; // Reasonable size limit
+    }
 };

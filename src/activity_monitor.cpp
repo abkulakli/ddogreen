@@ -10,58 +10,67 @@
 #include <iomanip>
 
 // Helper function to format numbers with exactly 2 decimal places
-std::string formatNumber(double value) {
+std::string formatNumber(double value)
+{
     std::ostringstream oss;
     oss << std::fixed << std::setprecision(2) << value;
     return oss.str();
 }
 
 ActivityMonitor::ActivityMonitor()
-    : m_isActive(false)
-    , m_running(false)
-    , m_threadReady(false)
-    , m_highPerformanceThreshold(0.0)
-    , m_powerSaveThreshold(0.0)
-    , m_monitoringFrequencySeconds(0)
-    , m_cpuCoreCount(0)
-    , m_callback(nullptr)
-    , m_systemMonitor(nullptr) {
-
+    : m_isActive{false}
+    , m_running{false}
+    , m_threadReady{false}
+    , m_highPerformanceThreshold{0.0}
+    , m_powerSaveThreshold{0.0}
+    , m_monitoringFrequencySeconds{0}
+    , m_cpuCoreCount{0}
+    , m_callback{nullptr}
+    , m_systemMonitor{nullptr}
+{
     auto now = std::chrono::steady_clock::now();
     m_lastLoadCheckTime = now;
     m_lastStateChangeTime = now;
 
     m_systemMonitor = PlatformFactory::createSystemMonitor();
 
-    if (m_systemMonitor && m_systemMonitor->isAvailable()) {
+    if (m_systemMonitor && m_systemMonitor->isAvailable())
+    {
         m_cpuCoreCount = m_systemMonitor->getCpuCoreCount();
         Logger::info("Detected " + std::to_string(m_cpuCoreCount) + " CPU core(s)");
         Logger::info("High performance threshold: " + formatNumber(m_highPerformanceThreshold) + " (" + formatNumber(m_highPerformanceThreshold * 100) + "% per core)");
         Logger::info("Power save threshold: " + formatNumber(m_powerSaveThreshold) + " (" + formatNumber(m_powerSaveThreshold * 100) + "% per core)");
         Logger::info("Absolute high performance threshold: " + formatNumber(m_highPerformanceThreshold * m_cpuCoreCount));
         Logger::info("Absolute power save threshold: " + formatNumber(m_powerSaveThreshold * m_cpuCoreCount));
-    } else {
+    }
+    else
+    {
         Logger::error("Failed to initialize platform-specific system monitor");
         m_cpuCoreCount = 1;
     }
 }
 
-ActivityMonitor::~ActivityMonitor() {
+ActivityMonitor::~ActivityMonitor()
+{
     stop();
 }
 
-bool ActivityMonitor::start() {
-    if (m_running.load()) {
+bool ActivityMonitor::start()
+{
+    if (m_running.load())
+    {
         Logger::warning("Activity monitor already running");
         return true;
     }
 
-    if (!m_systemMonitor || !m_systemMonitor->isAvailable()) {
+    if (!m_systemMonitor || !m_systemMonitor->isAvailable())
+    {
         Logger::error("Cannot start activity monitor: system monitor not available");
         return false;
     }
 
-    if (m_monitoringFrequencySeconds <= 0) {
+    if (m_monitoringFrequencySeconds <= 0)
+    {
         Logger::error("Cannot start activity monitor: invalid monitoring frequency");
         return false;
     }
@@ -71,7 +80,8 @@ bool ActivityMonitor::start() {
     m_lastLoadCheckTime = std::chrono::steady_clock::now();
 
     // Perform initial load check to set correct mode immediately
-    if (m_callback) {
+    if (m_callback)
+    {
         double load1min = getLoadAverage();
         double highPerformanceAbsoluteThreshold = m_highPerformanceThreshold * m_cpuCoreCount;
 
@@ -79,9 +89,12 @@ bool ActivityMonitor::start() {
         // High performance when load > high_performance_threshold
         // Power save when load < power_save_threshold
         // Between thresholds, maintain current state (but start with power save as default)
-        if (load1min > highPerformanceAbsoluteThreshold) {
+        if (load1min > highPerformanceAbsoluteThreshold)
+        {
             m_isActive = true;
-        } else {
+        }
+        else
+        {
             m_isActive = false;
         }
 
@@ -106,17 +119,29 @@ bool ActivityMonitor::start() {
     return true;
 }
 
-void ActivityMonitor::stop() {
+void ActivityMonitor::stop()
+{
+    if (!m_running.load())
+    {
+        return;
+    }
+
+    Logger::info("Stopping activity monitor...");
     m_running.store(false);
-    m_threadReady.store(false);
+
+    // Allow some time for the monitoring thread to exit gracefully
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
     Logger::info("Activity monitor stopped");
 }
 
-void ActivityMonitor::setActivityCallback(ActivityCallback callback) {
+void ActivityMonitor::setActivityCallback(ActivityCallback callback)
+{
     m_callback = callback;
 }
 
-void ActivityMonitor::setLoadThresholds(double highPerformanceThreshold, double powerSaveThreshold) {
+void ActivityMonitor::setLoadThresholds(double highPerformanceThreshold, double powerSaveThreshold)
+{
     m_highPerformanceThreshold = highPerformanceThreshold;
     m_powerSaveThreshold = powerSaveThreshold;
     double highPerformanceAbsoluteThreshold = highPerformanceThreshold * m_cpuCoreCount;
@@ -127,10 +152,12 @@ void ActivityMonitor::setLoadThresholds(double highPerformanceThreshold, double 
     Logger::info("Absolute power save threshold: " + formatNumber(powerSaveAbsoluteThreshold) + " (for " + std::to_string(m_cpuCoreCount) + " cores)");
 }
 
-void ActivityMonitor::setMonitoringFrequency(int frequencySeconds) {
+void ActivityMonitor::setMonitoringFrequency(int frequencySeconds)
+{
     m_monitoringFrequencySeconds = frequencySeconds;
 
-    if (m_systemMonitor && m_systemMonitor->isAvailable()) {
+    if (m_systemMonitor && m_systemMonitor->isAvailable())
+    {
         m_systemMonitor->setMonitoringFrequency(frequencySeconds);
     }
 

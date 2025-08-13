@@ -1,12 +1,16 @@
 #pragma once
 
 #include <tuple>
+#include <span>
+#include <cstring>
+#include <algorithm>
 
 /**
  * Interface for platform-specific system monitoring functionality
  * Provides CPU load and core count information
  */
-class ISystemMonitor {
+class ISystemMonitor
+{
 public:
     virtual ~ISystemMonitor() = default;
 
@@ -34,4 +38,40 @@ public:
      * @param frequencySeconds Monitoring frequency in seconds
      */
     virtual void setMonitoringFrequency(int frequencySeconds) = 0;
+
+    /**
+     * Get detailed system metrics in a structured format
+     * @param metricsBuffer span to fill with system metrics data
+     * @return number of bytes written to buffer
+     */
+    virtual size_t getSystemMetrics(std::span<char> metricsBuffer) const
+    {
+        // Default implementation - basic metrics
+        const char* metrics = "load=0.0,cores=1";
+        size_t metricsLen = strlen(metrics);
+        if (metricsBuffer.size() >= metricsLen)
+        {
+            std::copy_n(metrics, metricsLen, metricsBuffer.data());
+            return metricsLen;
+        }
+        return 0;
+    }
+
+    /**
+     * Process historical load data
+     * @param loadHistory span containing historical load average data
+     * @return computed trend information
+     */
+    virtual double analyzeLoadTrend(std::span<const double> loadHistory) const
+    {
+        // Default implementation - simple average
+        if (loadHistory.empty()) return 0.0;
+        
+        double sum = 0.0;
+        for (const auto& load : loadHistory)
+        {
+            sum += load;
+        }
+        return sum / loadHistory.size();
+    }
 };

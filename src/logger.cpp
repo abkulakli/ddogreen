@@ -9,7 +9,8 @@ std::string Logger::m_logFile = "/var/log/ddogreen.log";
 bool Logger::m_consoleOutput = false;
 LogLevel Logger::m_minLevel = LogLevel::INFO;  // Default to INFO level for release builds
 
-void Logger::init(const std::string& logFile, bool consoleOutput) {
+void Logger::init(const std::string& logFile, bool consoleOutput)
+{
     m_logFile = logFile;
     m_consoleOutput = consoleOutput;
 
@@ -22,7 +23,8 @@ void Logger::init(const std::string& logFile, bool consoleOutput) {
     log(LogLevel::INFO, "Logger initialized");
 }
 
-void Logger::setLevel(LogLevel level) {
+void Logger::setLevel(LogLevel level)
+{
     m_minLevel = level;
 }
 
