@@ -19,6 +19,14 @@ set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
 # Make GoogleTest available
 FetchContent_MakeAvailable(googletest)
 
+# Suppress warnings from GoogleTest external library (we cannot modify their code)
+if(NOT MSVC)
+    target_compile_options(gtest PRIVATE -Wno-float-equal)
+    target_compile_options(gtest_main PRIVATE -Wno-float-equal)
+    target_compile_options(gmock PRIVATE -Wno-float-equal)
+    target_compile_options(gmock_main PRIVATE -Wno-float-equal)
+endif()
+
 # Find required packages
 find_package(Threads REQUIRED)
 

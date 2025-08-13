@@ -79,7 +79,7 @@ public:
      * @param frequencySeconds Monitoring frequency in seconds
      * Note: Linux reads load average directly from /proc/loadavg, so this is a no-op
      */
-    void setMonitoringFrequency(int frequencySeconds) override
+    void setMonitoringFrequency([[maybe_unused]] int frequencySeconds) override
     {
         // Linux gets 1-minute load average directly from kernel via /proc/loadavg
         // No need to track monitoring frequency since kernel calculates it for us

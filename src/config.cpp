@@ -5,6 +5,8 @@
 #include <sstream>
 #include <algorithm>
 #include <span>
+#include <cmath>
+#include <limits>
 
 Config::Config() : m_monitoringFrequency{0}, m_highPerformanceThreshold{0.0}, m_powerSaveThreshold{0.0}
 {
@@ -59,12 +61,12 @@ bool Config::loadFromFile(const std::string& configPath)
         Logger::error("Missing required configuration: monitoring_frequency");
         hasErrors = true;
     }
-    if (m_highPerformanceThreshold == 0.0)
+    if (std::fabs(m_highPerformanceThreshold - 0.0) < std::numeric_limits<double>::epsilon())
     {
         Logger::error("Missing required configuration: high_performance_threshold");
         hasErrors = true;
     }
-    if (m_powerSaveThreshold == 0.0)
+    if (std::fabs(m_powerSaveThreshold - 0.0) < std::numeric_limits<double>::epsilon())
     {
         Logger::error("Missing required configuration: power_save_threshold");
         hasErrors = true;
@@ -151,12 +153,12 @@ bool Config::loadFromBuffer(std::span<const char> configData)
         Logger::error("Missing required configuration: monitoring_frequency");
         hasErrors = true;
     }
-    if (m_highPerformanceThreshold == 0.0)
+    if (std::fabs(m_highPerformanceThreshold - 0.0) < std::numeric_limits<double>::epsilon())
     {
         Logger::error("Missing required configuration: high_performance_threshold");
         hasErrors = true;
     }
-    if (m_powerSaveThreshold == 0.0)
+    if (std::fabs(m_powerSaveThreshold - 0.0) < std::numeric_limits<double>::epsilon())
     {
         Logger::error("Missing required configuration: power_save_threshold");
         hasErrors = true;

@@ -50,7 +50,7 @@ public:
      * @param args span of command line arguments (excluding program name)
      * @return parsed arguments structure
      */
-    virtual ParsedArgs parseCommandLineSpan(std::span<const std::string_view> args) const
+    virtual ParsedArgs parseCommandLineSpan([[maybe_unused]] std::span<const std::string_view> args) const
     {
         // Default implementation - platforms can override for better span support
         ParsedArgs result;

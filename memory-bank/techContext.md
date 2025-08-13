@@ -91,7 +91,7 @@ All Packages (Linux DEB/RPM/TGZ + Windows ZIP):
 
 ### Build System
 
-#### Current Build System (Updated July 2025)
+#### Current Build System (Updated August 2025)
 ```bash
 # CMake presets workflow
 cmake --preset debug                # Debug build configuration
@@ -104,20 +104,48 @@ cmake --preset debug|release        # Configure build
 cmake --build --preset debug|release # Build executable
 ```
 
+#### Enhanced Compiler Warning System (August 2025)
+**Comprehensive Warning Configuration - ALL WARNINGS ENABLED**:
+```cmake
+# GCC/Clang: Advanced warnings for better code quality (ALL ENABLED)
+-Wall -Wextra -Wpedantic      # Standard and pedantic warnings
+-Wconversion -Wshadow         # Type conversions and variable shadowing
+-Wfloat-equal -Wundef         # Floating point equality and undefined macros
+-Wold-style-cast              # C-style casts in C++
+-Woverloaded-virtual          # Virtual function hiding
+-Wnon-virtual-dtor            # Missing virtual destructors
+-Wcast-align                  # Alignment issues in casts
+-Werror=return-type           # Error on missing return statements
+-Werror=uninitialized         # Error on uninitialized variables
+
+# MSVC: Equivalent comprehensive warnings (ALL ENABLED)
+/W4 /we4013 /we4700           # High warning level with key errors
+```
+
+**Zero Warning Policy - Fix Code, Never Disable Warnings**:
+- **Project Code**: Zero warnings achieved through proper code fixes (never warning suppression)
+- **Code Quality Approach**: Fix underlying issues rather than silencing warnings
+- **Best Practice Implementation**: Use [[maybe_unused]], epsilon-based float comparisons, proper variable naming
+- **External Libraries**: Proper warning suppression for third-party code (GoogleTest) that we cannot modify
+- **Build Safety**: All warnings enabled to catch potential issues early
+- **Maintainability**: Clean, explicit code that compiler fully validates
+- **Completely Clean Build**: Zero warnings in entire build process
+
 #### Build Requirements
 - **cmake**: 3.16 or later
 - **make**: GNU make or compatible (Linux)
-- **gcc/g++**: C++17 support required
+- **gcc/g++**: C++20 support required (upgraded from C++17)
 - **Visual Studio or MinGW**: For Windows builds with CMake
 
 #### Current Build Features
 - **CMake Presets**: VS Code integration with standard workflow (VERIFIED WORKING)
 - **Separated Builds**: Debug and release in separate directories
-- **Testing Integration**: GoogleTest via `BUILD_TESTS=ON` (24 tests passing)
+- **Testing Integration**: GoogleTest via `BUILD_TESTS=ON` (70 tests passing)
 - **Cross-Platform**: Native builds per platform
 - **Windows Packaging**: ZIP archives + MSI installers with professional Windows integration
 - **Service Installation**: Executable service options removed; package installers handle service setup
   - **Windows Service Installation**: Uses custom installer.bat script for service management
+- **Enhanced Warnings**: Comprehensive warning system for better code quality
 
 ### Platform Abstraction
 - **Design**: Generic interfaces with platform-specific implementations

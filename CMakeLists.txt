@@ -12,15 +12,33 @@ project(ddogreen VERSION ${PROJECT_VERSION_OVERRIDE}
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Compiler-specific flags
+# Compiler-specific flags with zero warning policy (fix code, never disable warnings)
 if(MSVC)
-    # Microsoft Visual C++ flags
+    # Microsoft Visual C++ flags - comprehensive warnings
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /O2")
     # Disable specific warnings that are too verbose
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4996")  # Disable deprecation warnings
+    # Add additional useful warnings
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /we4013")  # Treat undefined functions as errors
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /we4700")  # Treat uninitialized variables as errors
 else()
-    # GCC/Clang flags
+    # GCC/Clang flags - ALL warnings enabled, project code must be warning-free
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -O2")
+    # Additional pedantic warnings (ALL ENABLED)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wpedantic")      # ISO C++ compliance
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wconversion")    # Implicit conversions
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wshadow")        # Variable shadowing
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wfloat-equal")   # Floating point equality
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wundef")         # Undefined identifiers in #if
+    # C++ specific warnings (ALL ENABLED)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wold-style-cast")      # C-style casts
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Woverloaded-virtual")  # Virtual function hiding
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wnon-virtual-dtor")    # Missing virtual destructors
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wcast-align")          # Alignment issues
+    # Error on key warnings to prevent subtle bugs
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=return-type")   # Missing return statements
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=uninitialized") # Uninitialized variables
+    # Note: ALL warnings enabled - project code must be warning-free through proper fixes
 endif()
 
 # Source files

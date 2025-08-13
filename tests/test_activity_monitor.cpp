@@ -60,7 +60,7 @@ TEST_F(TestActivityMonitor, test_set_activity_callback_stores_callback) {
     bool callbackCalled = false;
     
     // Set callback
-    monitor.setActivityCallback([&callbackCalled](bool active) {
+    monitor.setActivityCallback([&callbackCalled]([[maybe_unused]] bool active) {
         callbackCalled = true;
     });
     

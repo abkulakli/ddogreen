@@ -72,6 +72,6 @@ public:
         {
             sum += load;
         }
-        return sum / loadHistory.size();
+        return sum / static_cast<double>(loadHistory.size());
     }
 };

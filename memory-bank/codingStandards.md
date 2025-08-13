@@ -4,6 +4,44 @@
 
 This document establishes the coding standards for the ddogreen power management service, incorporating ISO C++ Core Guidelines for modern, safe, and efficient C++ development. These standards ensure code quality, maintainability, and consistency across the codebase.
 
+### Zero Warning Policy - Fix Code, Never Disable Warnings
+
+**FUNDAMENTAL RULE**: All compiler warnings must be addressed through proper code fixes, never through warning suppression.
+
+#### Warning Management Philosophy
+- **Enable ALL warnings**: Use comprehensive warning flags (-Wall, -Wextra, -Wpedantic, etc.)
+- **Fix underlying issues**: Address the root cause that triggers warnings
+- **Never suppress project warnings**: No `-Wno-*` flags for project code
+- **Proper code patterns**: Use `[[maybe_unused]]`, epsilon-based float comparisons, explicit casts
+- **External library exceptions**: Only suppress warnings from third-party code we cannot modify
+- **Zero tolerance**: Build must produce zero warnings from project source files
+
+#### Warning Resolution Examples
+```cpp
+// WRONG: Suppressing warnings
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+void func(int unused_param) { /* ... */ }
+
+// RIGHT: Proper annotation
+void func([[maybe_unused]] int param) { /* ... */ }
+
+// WRONG: Direct float comparison
+if (value == 0.0) { /* ... */ }
+
+// RIGHT: Epsilon-based comparison
+if (std::fabs(value - 0.0) < std::numeric_limits<double>::epsilon()) { /* ... */ }
+
+// WRONG: Shadowing variables
+void func() {
+    auto time_t = get_time(); // Shadows global time_t
+}
+
+// RIGHT: Clear naming
+void func() {
+    auto time_val = get_time(); // No shadowing
+}
+```
+
 ### Architecture Compliance
 
 - **NO #ifdef**: Platform-specific code must use the platform abstraction layer
