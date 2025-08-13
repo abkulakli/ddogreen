@@ -13,11 +13,10 @@ void Logger::init(const std::string& logFile, bool consoleOutput) {
     m_logFile = logFile;
     m_consoleOutput = consoleOutput;
     
-    // Set log level based on build type
 #ifdef NDEBUG
-    m_minLevel = LogLevel::INFO;   // Hide debug logs in release builds (NDEBUG defined)
+    m_minLevel = LogLevel::INFO;
 #else
-    m_minLevel = LogLevel::DEBUG;  // Show debug logs in debug builds (NDEBUG not defined)
+    m_minLevel = LogLevel::DEBUG;
 #endif
     
     log(LogLevel::INFO, "Logger initialized");
@@ -28,11 +27,9 @@ void Logger::setLevel(LogLevel level) {
 }
 
 void Logger::log(LogLevel level, const std::string& message) {
-    // Filter out messages below minimum level
     if (level < m_minLevel) {
         return;
     }
-    // Get current time with milliseconds
     auto now = std::chrono::system_clock::now();
     auto time_t = std::chrono::system_clock::to_time_t(now);
     auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
@@ -43,7 +40,6 @@ void Logger::log(LogLevel level, const std::string& message) {
 
     std::string logEntry = "[" + ss.str() + "] [" + levelToString(level) + "] " + message;
 
-    // Write to log file (only when not in console mode or for daemon mode)
     if (!m_consoleOutput) {
         std::ofstream logFileStream(m_logFile, std::ios::app);
         if (logFileStream.is_open()) {

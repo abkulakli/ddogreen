@@ -57,7 +57,6 @@ public:
         int option_index = 0;
         int c;
         
-        // Reset getopt state
         optind = 1;
 
         while ((c = getopt_long(argc, argv, "hvc:", long_options, &option_index)) != -1) {
@@ -136,21 +135,18 @@ public:
      * @return absolute path, or original path if resolution fails
      */
     std::string resolveAbsolutePath(const std::string& relativePath) const override {
-        // If already absolute, return as-is
         if (!relativePath.empty() && relativePath[0] == '/') {
             return relativePath;
         }
 
-        // Get current working directory
         char* cwd = getcwd(nullptr, 0);
         if (!cwd) {
-            return relativePath; // Fallback to original path
+            return relativePath;
         }
 
         std::string tempPath = std::string(cwd) + "/" + relativePath;
         free(cwd);
 
-        // Use realpath to resolve all . and .. components and get canonical path
         char* resolvedPath = realpath(tempPath.c_str(), nullptr);
         if (resolvedPath) {
             std::string result(resolvedPath);
@@ -158,12 +154,10 @@ public:
             return result;
         }
 
-        // If realpath fails, return the simple concatenation as fallback
         return tempPath;
     }
 };
 
-// Factory function to create Linux platform utilities
 std::unique_ptr<IPlatformUtils> createLinuxPlatformUtils() {
     return std::make_unique<LinuxPlatformUtils>();
 }

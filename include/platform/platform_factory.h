@@ -43,5 +43,5 @@ public:
     static std::string getCurrentPlatform();
 
 private:
-    PlatformFactory() = default;  // Static class, no instances
+    PlatformFactory() = default;
 };

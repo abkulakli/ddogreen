@@ -11,42 +11,30 @@ public:
     ActivityMonitor();
     ~ActivityMonitor();
 
-    // Callback function type for activity events
     using ActivityCallback = std::function<void(bool)>;
 
-    // Start monitoring system activity
     bool start();
-
-    // Stop monitoring
     void stop();
-
-    // Set callback for activity changes
     void setActivityCallback(ActivityCallback callback);
-
-    // Set load average thresholds for activity detection with hysteresis
     void setLoadThresholds(double highPerformanceThreshold, double powerSaveThreshold);
-
-    // Set monitoring frequency in seconds
     void setMonitoringFrequency(int frequencySeconds);
-
-    // Check if system is currently active
     bool isActive() const;
 
 private:
-    double getLoadAverage();  // Get load average using platform-specific monitor
-    int getCpuCoreCount();  // Get CPU core count using platform-specific monitor
+    double getLoadAverage();
+    int getCpuCoreCount();
     void monitorLoop();
 
     bool m_isActive;
     bool m_running;
-    double m_highPerformanceThreshold;  // Threshold to switch to high performance
-    double m_powerSaveThreshold;        // Threshold to switch to power save
-    int m_monitoringFrequency;          // Monitoring frequency in seconds
-    int m_coreCount;  // Number of CPU cores
+    double m_highPerformanceThreshold;
+    double m_powerSaveThreshold;
+    int m_monitoringFrequencySeconds;
+    int m_cpuCoreCount;
     ActivityCallback m_callback;
-    std::unique_ptr<ISystemMonitor> m_systemMonitor;  // Platform-specific system monitor
+    std::unique_ptr<ISystemMonitor> m_systemMonitor;
 
     std::chrono::steady_clock::time_point m_lastLoadCheckTime;
-    std::chrono::steady_clock::time_point m_lastStateChangeTime;  // Track last power state change
-    static constexpr int MINIMUM_STATE_CHANGE_INTERVAL = 60;  // Minimum seconds between state changes for energy efficiency
+    std::chrono::steady_clock::time_point m_lastStateChangeTime;
+    static constexpr int MINIMUM_STATE_CHANGE_INTERVAL = 60;
 };

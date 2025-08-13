@@ -11,7 +11,7 @@ struct ParsedArgs {
     bool showVersion = false;
     bool hasUnknownOptions = false;
     std::string unknownOption;
-    std::string configPath;  // Custom configuration file path
+    std::string configPath;
 };
 
 /**

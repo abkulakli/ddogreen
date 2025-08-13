@@ -6,7 +6,6 @@
 #include <algorithm>
 
 Config::Config() : m_monitoringFrequency(0), m_highPerformanceThreshold(0.0), m_powerSaveThreshold(0.0) {
-    // All values must be loaded from configuration file - no defaults provided
 }
 
 std::string Config::getDefaultConfigPath() {
@@ -14,7 +13,6 @@ std::string Config::getDefaultConfigPath() {
     if (platformUtils && platformUtils->isAvailable()) {
         return platformUtils->getDefaultConfigPath();
     }
-    // Fallback to Linux path if platform utilities are not available
     return "/etc/ddogreen/ddogreen.conf";
 }
 
@@ -34,7 +32,6 @@ bool Config::loadFromFile(const std::string& configPath) {
     while (std::getline(file, line)) {
         lineNumber++;
 
-        // Skip empty lines and comments
         line = trim(line);
         if (line.empty() || line[0] == '#') {
             continue;
@@ -48,7 +45,6 @@ bool Config::loadFromFile(const std::string& configPath) {
 
     file.close();
 
-    // Validate that all required configuration values were loaded
     if (m_monitoringFrequency == 0) {
         Logger::error("Missing required configuration: monitoring_frequency");
         hasErrors = true;
@@ -69,7 +65,6 @@ bool Config::loadFromFile(const std::string& configPath) {
         Logger::info("Configuration loaded successfully from: " + configPath);
     }
 
-    // Log the loaded configuration
     Logger::info("Monitoring frequency: " + std::to_string(m_monitoringFrequency) + " seconds");
     Logger::info("High performance threshold: " + std::to_string(m_highPerformanceThreshold) + " (" + std::to_string(m_highPerformanceThreshold * 100) + "%)");
     Logger::info("Power save threshold: " + std::to_string(m_powerSaveThreshold) + " (" + std::to_string(m_powerSaveThreshold * 100) + "%)");

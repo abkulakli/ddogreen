@@ -2,8 +2,6 @@
 #include "logger.h"
 #include <memory>
 
-// Forward declarations for platform-specific factory functions
-// Only declare functions for the current platform
 #if defined(__linux__)
 std::unique_ptr<ISystemMonitor> createLinuxSystemMonitor();
 std::unique_ptr<IPowerManager> createLinuxPowerManager();

@@ -38,15 +38,56 @@ void printVersion() {
               << "Copyright (c) 2025 DDOSoft Solutions (www.ddosoft.com)\n";
 }
 
+void configurePowerManagement(ActivityMonitor& activityMonitor, std::unique_ptr<IPowerManager>& powerManager) {
+    activityMonitor.setActivityCallback([&powerManager](bool isActive) {
+        if (isActive) {
+            powerManager->setPerformanceMode();
+        } else {
+            powerManager->setPowerSavingMode();
+        }
+    });
+}
+
+bool validatePowerManagement(const std::unique_ptr<IPowerManager>& powerManager) {
+    Logger::info("Checking power management availability...");
+    if (!powerManager || !powerManager->isAvailable()) {
+        Logger::error("Power management backend is not available on this system");
+        Logger::error("Ensure a supported power management backend is installed and accessible");
+        std::cerr << "Power management backend is not available on this system" << std::endl;
+        std::cerr << "Ensure a supported power management backend is installed and accessible" << std::endl;
+        return false;
+    }
+    Logger::info("Power management backend is available");
+    return true;
+}
+
+void configureMonitoring(ActivityMonitor& activityMonitor, const Config& config) {
+    Logger::info("Configuring activity monitor...");
+    activityMonitor.setLoadThresholds(config.getHighPerformanceThreshold(), config.getPowerSaveThreshold());
+    activityMonitor.setMonitoringFrequency(config.getMonitoringFrequency());
+
+    Logger::info("High performance threshold: " + std::to_string(config.getHighPerformanceThreshold()));
+    Logger::info("Power save threshold: " + std::to_string(config.getPowerSaveThreshold()));
+    Logger::info("Monitoring frequency: " + std::to_string(config.getMonitoringFrequency()) + " seconds");
+}
+
+void resolveConfigPath(ParsedArgs& args, const std::unique_ptr<IPlatformUtils>& platformUtils) {
+    if (!args.configPath.empty()) {
+        std::string resolvedPath = platformUtils->resolveAbsolutePath(args.configPath);
+        if (resolvedPath != args.configPath) {
+            args.configPath = resolvedPath;
+            Logger::info("Converted relative config path to absolute: " + args.configPath);
+        }
+    }
+}
+
 int main(int argc, char* argv[]) {
-    // Create platform utilities
     auto platformUtils = PlatformFactory::createPlatformUtils();
     if (!platformUtils || !platformUtils->isAvailable()) {
         std::cerr << "Platform utilities are not available on this system" << std::endl;
         return 1;
     }
 
-    // Parse command line arguments
     ParsedArgs args = platformUtils->parseCommandLine(argc, argv);
 
     if (args.hasUnknownOptions) {
@@ -65,36 +106,22 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
-    // Check if running with required privileges
     if (!platformUtils->hasRequiredPrivileges()) {
         std::cerr << platformUtils->getPrivilegeEscalationMessage() << std::endl;
         return 1;
     }
 
-    // Initialize logger with file output (always log to files for service operation)
     std::cout << "DDOGreen starting" << std::endl;
     std::string logPath = platformUtils->getDefaultLogPath();
-    Logger::init(logPath, false);  // Always use file logging for services
-
-    // Inform user that application is starting and where to find logs
+    Logger::init(logPath, false);
     std::cout << "DDOGreen is logging to file " << logPath << std::endl;
 
-    // Log version information
     Logger::info("Starting DDOGreen - Intelligent Green Power Management");
     Logger::info("Version: " + std::string(DDOGREEN_VERSION));
     Logger::info("Copyright (c) 2025 DDOSoft Solutions");
 
-    // Always convert relative config paths to absolute paths for consistency
-    // This prevents issues with working directory changes and provides clear path resolution
-    if (!args.configPath.empty()) {
-        std::string resolvedPath = platformUtils->resolveAbsolutePath(args.configPath);
-        if (resolvedPath != args.configPath) {
-            args.configPath = resolvedPath;
-            Logger::info("Converted relative config path to absolute: " + args.configPath);
-        }
-    }
+    resolveConfigPath(args, platformUtils);
 
-    // Create and setup signal handler for graceful shutdown
     auto signalHandler = PlatformFactory::createSignalHandler();
     if (!signalHandler) {
         Logger::error("Failed to create signal handler");
@@ -103,13 +130,11 @@ int main(int argc, char* argv[]) {
     }
     signalHandler->setupSignalHandlers();
 
-    // Load configuration
     Config config;
     std::string configPath = args.configPath.empty() ? Config::getDefaultConfigPath() : args.configPath;
 
     Logger::info("Loading configuration from: " + configPath);
 
-    // Load configuration - application fails if config file doesn't exist or has errors
     if (!config.loadFromFile(configPath)) {
         Logger::error("Failed to load configuration file: " + configPath);
         std::cerr << "Failed to load configuration file: " << configPath << std::endl;
@@ -118,42 +143,16 @@ int main(int argc, char* argv[]) {
 
     Logger::info("Configuration loaded successfully");
 
-    // Initialize components
     ActivityMonitor activityMonitor;
     auto powerManager = PlatformFactory::createPowerManager();
 
-    // Check if power management is available
-    Logger::info("Checking power management availability...");
-    if (!powerManager || !powerManager->isAvailable()) {
-        Logger::error("Power management backend is not available on this system");
-        Logger::error("Ensure a supported power management backend is installed and accessible");
-        std::cerr << "Power management backend is not available on this system" << std::endl;
-        std::cerr << "Ensure a supported power management backend is installed and accessible" << std::endl;
+    if (!validatePowerManagement(powerManager)) {
         return 1;
     }
-    Logger::info("Power management backend is available");
 
-    // Configure activity monitor with settings from config
-    Logger::info("Configuring activity monitor...");
-    activityMonitor.setLoadThresholds(config.getHighPerformanceThreshold(), config.getPowerSaveThreshold());
-    activityMonitor.setMonitoringFrequency(config.getMonitoringFrequency());
+    configureMonitoring(activityMonitor, config);
+    configurePowerManagement(activityMonitor, powerManager);
 
-    Logger::info("High performance threshold: " + std::to_string(config.getHighPerformanceThreshold()));
-    Logger::info("Power save threshold: " + std::to_string(config.getPowerSaveThreshold()));
-    Logger::info("Monitoring frequency: " + std::to_string(config.getMonitoringFrequency()) + " seconds");
-
-    // Set up activity callback
-    activityMonitor.setActivityCallback([&powerManager](bool isActive) {
-        if (isActive) {
-            // System is active (load above high performance threshold), switch to performance mode
-            powerManager->setPerformanceMode();
-        } else {
-            // System is idle (load below power save threshold), switch to power saving mode
-            powerManager->setPowerSavingMode();
-        }
-    });
-
-    // Start activity monitoring
     if (!activityMonitor.start()) {
         Logger::error("Failed to start activity monitor");
         std::cerr << "Failed to start activity monitor" << std::endl;
@@ -166,10 +165,8 @@ int main(int argc, char* argv[]) {
     
     std::cout << "DDOGreen service running - press Ctrl+C to stop" << std::endl;
 
-    // Wait for termination signal using platform signal handler
     signalHandler->waitForSignal();
 
-    // Cleanup
     std::cout << "DDOGreen stopping" << std::endl;
     Logger::info("Shutting down DDOGreen service");
     activityMonitor.stop();
