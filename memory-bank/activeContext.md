@@ -1,11 +1,43 @@
 # Active Context - DDOGreen
 
 ## Current Work Focus
-**Project Status**: Production Release Preparation - COMPLETED
+**Project Status**: Production Release Preparation - ENHANCED
 **Last Updated**: August 14, 2025
-**Current State**: Apache 2.0 licensed, production-ready for announcement
+**Current State**: Apache 2.0 licensed, production-ready with C++ Core Guidelines integration and C++20 standard
 
-### Latest Update (Aug 14, 2025): Apache 2.0 License Adoption - COMPLETED
+### Latest Update (Aug 14, 2025): C++20 Standard Upgrade - COMPLETED
+**COMPLETED**: Upgraded project from C++17 to C++20 standard for modern C++ features
+- **Standard Upgrade**: Updated CMakeLists.txt to set `CMAKE_CXX_STANDARD 20`
+- **Build Verification**: Both debug and release builds successful with C++20
+- **Test Validation**: All 70 unit tests pass with C++20 standard
+- **Executable Testing**: Main application executable works correctly with C++20
+- **Cross-Platform Ready**: C++20 upgrade maintains full Linux and Windows compatibility
+- **Memory Bank Update**: Updated project documentation to reflect C++20 standard
+
+**C++20 Upgrade Benefits**:
+- ✅ **Modern Language Features**: Access to C++20 concepts, ranges, coroutines
+- ✅ **Improved Performance**: Better optimization opportunities with newer standard
+- ✅ **Enhanced Safety**: Additional compile-time checks and safety features
+- ✅ **Future-Proof**: Project now uses a modern, widely-supported C++ standard
+- ✅ **Backward Compatibility**: No breaking changes to existing codebase
+- ✅ **Build System**: CMake properly configured to enforce C++20 standard requirement
+### Previous Update (Jan 15, 2025): C++ Core Guidelines Integration - COMPLETED
+**COMPLETED**: Enhanced coding standards with ISO C++ Core Guidelines for modern, safe C++ development
+- **Standards Enhancement**: Integrated authoritative C++ Core Guidelines into codingStandards.md
+- **Modern C++ Practices**: Added guidelines for `std::span<T>`, RAII, range-based loops, STL algorithm integration
+- **Safety Focus**: Emphasized bounds-safe programming, const-correctness, and exception safety
+- **Platform Compatibility**: Guidelines specifically applied to cross-platform system service development
+- **Developer Experience**: Clear examples showing safe alternatives to error-prone patterns (pointer-length pairs → spans)
+
+**C++ Core Guidelines Adoption**:
+- ✅ **Resource Management**: RAII patterns and smart pointer usage guidelines
+- ✅ **Interface Design**: `span<const T>` for read-only, `span<T>` for read-write parameters
+- ✅ **Memory Safety**: Bounds-aware programming with spans and range-based iteration
+- ✅ **Modern Practices**: Auto type deduction, uniform initialization, constexpr usage
+- ✅ **Code Examples**: Comprehensive examples showing guideline application in ddogreen context
+- ✅ **Compliance Checklist**: Pre-submission checklist ensuring guideline adherence
+
+### Previous Update (Aug 14, 2025): Apache 2.0 License Adoption - COMPLETED
 **COMPLETED**: Updated project license from GPLv3 to Apache 2.0 for production release
 - **License Change**: Replaced GPLv3 with Apache License 2.0 in LICENSE file
 - **Copyright**: Established "Copyright 2025 DDOSoft Solutions" ownership

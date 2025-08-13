@@ -3,7 +3,7 @@
 ## Technology Stack
 
 ### Core Technologies
-- **Language**: C++17 (Modern C++ features, standard library only)
+- **Language**: C++20 (Modern C++ features, standard library only)
 - **Build System**: CMake 3.16+ (Modern CMake practices)
 - **Target OS**: Cross-platform with equal Linux and Windows support
 - **Architecture**: Cross-platform with compile-time platform selection

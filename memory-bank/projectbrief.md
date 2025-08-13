@@ -32,7 +32,7 @@ Successfully created a robust power management daemon that:
 - **NEW**: Unified dual-platform build system supporting simultaneous Linux and Windows compilation
 
 ## Project Type: COMPLETED
-- **Language**: C++ (C++17 standard)
+- **Language**: C++ (C++20 standard)
 - **Build System**: CMake 3.16+
 - **Target Platform**: Cross-platform with equal Linux and Windows support
 - **Architecture**: Cross-platform system daemon/service with compile-time optimization
