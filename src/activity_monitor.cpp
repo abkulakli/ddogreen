@@ -19,6 +19,7 @@ std::string formatNumber(double value) {
 ActivityMonitor::ActivityMonitor()
     : m_isActive(false)
     , m_running(false)
+    , m_threadReady(false)
     , m_highPerformanceThreshold(0.0)
     , m_powerSaveThreshold(0.0)
     , m_monitoringFrequencySeconds(0)
@@ -50,7 +51,7 @@ ActivityMonitor::~ActivityMonitor() {
 }
 
 bool ActivityMonitor::start() {
-    if (m_running) {
+    if (m_running.load()) {
         Logger::warning("Activity monitor already running");
         return true;
     }
@@ -65,7 +66,8 @@ bool ActivityMonitor::start() {
         return false;
     }
 
-    m_running = true;
+    m_running.store(true);
+    m_threadReady.store(false);
     m_lastLoadCheckTime = std::chrono::steady_clock::now();
 
     // Perform initial load check to set correct mode immediately
@@ -96,12 +98,17 @@ bool ActivityMonitor::start() {
     std::thread monitorThread(&ActivityMonitor::monitorLoop, this);
     monitorThread.detach();
 
+    // Wait for the monitoring thread to signal it's ready
+    std::unique_lock<std::mutex> lock(m_readyMutex);
+    m_readyCondition.wait(lock, [this] { return m_threadReady.load(); });
+
     Logger::info("Activity monitor started (load > " + formatNumber(m_highPerformanceThreshold * 100) + "% = performance mode, load < " + formatNumber(m_powerSaveThreshold * 100) + "% = power saving mode, " + formatNumber(m_powerSaveThreshold * 100) + "-" + formatNumber(m_highPerformanceThreshold * 100) + "% = maintain current mode)");
     return true;
 }
 
 void ActivityMonitor::stop() {
-    m_running = false;
+    m_running.store(false);
+    m_threadReady.store(false);
     Logger::info("Activity monitor stopped");
 }
 
@@ -154,7 +161,14 @@ int ActivityMonitor::getCpuCoreCount() {
 }
 
 void ActivityMonitor::monitorLoop() {
-    while (m_running) {
+    // Signal that the monitoring thread is ready
+    {
+        std::lock_guard<std::mutex> lock(m_readyMutex);
+        m_threadReady.store(true);
+    }
+    m_readyCondition.notify_one();
+
+    while (m_running.load()) {
         auto now = std::chrono::steady_clock::now();
 
         if (std::chrono::duration_cast<std::chrono::seconds>(now - m_lastLoadCheckTime).count() >= m_monitoringFrequencySeconds) {

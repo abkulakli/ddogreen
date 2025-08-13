@@ -120,7 +120,7 @@ TEST_F(TestActivityMonitor, test_start_returns_true_when_already_running) {
     bool firstResult = monitor.start();
     
     if (firstResult) {
-        // Try to start again
+        // Try to start again - should return true indicating already running
         bool secondResult = monitor.start();
         EXPECT_TRUE(secondResult);
         

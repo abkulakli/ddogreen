@@ -4,6 +4,9 @@
 #include <functional>
 #include <vector>
 #include <memory>
+#include <atomic>
+#include <mutex>
+#include <condition_variable>
 #include "platform/isystem_monitor.h"
 
 class ActivityMonitor {
@@ -26,7 +29,10 @@ private:
     void monitorLoop();
 
     bool m_isActive;
-    bool m_running;
+    std::atomic<bool> m_running;
+    std::atomic<bool> m_threadReady;
+    std::mutex m_readyMutex;
+    std::condition_variable m_readyCondition;
     double m_highPerformanceThreshold;
     double m_powerSaveThreshold;
     int m_monitoringFrequencySeconds;
