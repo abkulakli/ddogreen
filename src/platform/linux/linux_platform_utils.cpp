@@ -46,7 +46,7 @@ public:
      */
     ParsedArgs parseCommandLine(int argc, char* argv[]) const override {
         ParsedArgs args;
-        
+
         static struct option long_options[] = {
             {"help",        no_argument,       0, 'h'},
             {"version",     no_argument,       0, 'v'},
@@ -56,7 +56,7 @@ public:
 
         int option_index = 0;
         int c;
-        
+
         optind = 1;
 
         while ((c = getopt_long(argc, argv, "hvc:", long_options, &option_index)) != -1) {
@@ -77,7 +77,7 @@ public:
                     break;
             }
         }
-        
+
         return args;
     }
 

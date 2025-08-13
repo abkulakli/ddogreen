@@ -12,13 +12,13 @@ LogLevel Logger::m_minLevel = LogLevel::INFO;  // Default to INFO level for rele
 void Logger::init(const std::string& logFile, bool consoleOutput) {
     m_logFile = logFile;
     m_consoleOutput = consoleOutput;
-    
+
 #ifdef NDEBUG
     m_minLevel = LogLevel::INFO;
 #else
     m_minLevel = LogLevel::DEBUG;
 #endif
-    
+
     log(LogLevel::INFO, "Logger initialized");
 }
 

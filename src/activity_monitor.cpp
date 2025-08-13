@@ -25,13 +25,13 @@ ActivityMonitor::ActivityMonitor()
     , m_cpuCoreCount(0)
     , m_callback(nullptr)
     , m_systemMonitor(nullptr) {
-    
+
     auto now = std::chrono::steady_clock::now();
     m_lastLoadCheckTime = now;
     m_lastStateChangeTime = now;
-    
+
     m_systemMonitor = PlatformFactory::createSystemMonitor();
-    
+
     if (m_systemMonitor && m_systemMonitor->isAvailable()) {
         m_cpuCoreCount = m_systemMonitor->getCpuCoreCount();
         Logger::info("Detected " + std::to_string(m_cpuCoreCount) + " CPU core(s)");
@@ -54,12 +54,12 @@ bool ActivityMonitor::start() {
         Logger::warning("Activity monitor already running");
         return true;
     }
-    
+
     if (!m_systemMonitor || !m_systemMonitor->isAvailable()) {
         Logger::error("Cannot start activity monitor: system monitor not available");
         return false;
     }
-    
+
     if (m_monitoringFrequencySeconds <= 0) {
         Logger::error("Cannot start activity monitor: invalid monitoring frequency");
         return false;
@@ -72,7 +72,7 @@ bool ActivityMonitor::start() {
     if (m_callback) {
         double load1min = getLoadAverage();
         double highPerformanceAbsoluteThreshold = m_highPerformanceThreshold * m_cpuCoreCount;
-        
+
         // Apply dual threshold logic with hysteresis:
         // High performance when load > high_performance_threshold
         // Power save when load < power_save_threshold
@@ -82,7 +82,7 @@ bool ActivityMonitor::start() {
         } else {
             m_isActive = false;
         }
-        
+
         double load1minPercentage = (load1min / m_cpuCoreCount) * 100;
         Logger::info("Initial state: load: " + formatNumber(load1min) +
                     " (" + formatNumber(load1minPercentage) + "% avg per core)");
@@ -122,11 +122,11 @@ void ActivityMonitor::setLoadThresholds(double highPerformanceThreshold, double 
 
 void ActivityMonitor::setMonitoringFrequency(int frequencySeconds) {
     m_monitoringFrequencySeconds = frequencySeconds;
-    
+
     if (m_systemMonitor && m_systemMonitor->isAvailable()) {
         m_systemMonitor->setMonitoringFrequency(frequencySeconds);
     }
-    
+
     Logger::info("Monitoring frequency set to " + std::to_string(frequencySeconds) + " seconds");
     Logger::info("Energy efficiency: minimum " + std::to_string(MINIMUM_STATE_CHANGE_INTERVAL) + "s between power state changes");
 }
@@ -171,7 +171,7 @@ void ActivityMonitor::monitorLoop() {
                          " = " + formatNumber(m_powerSaveThreshold * 100) + "% of " + std::to_string(m_cpuCoreCount) + " cores)");
 
             bool wasActive = m_isActive;
-            
+
             if (!m_isActive && load1min > highPerformanceAbsoluteThreshold) {
                 m_isActive = true;
             } else if (m_isActive && load1min < powerSaveAbsoluteThreshold) {
@@ -180,12 +180,12 @@ void ActivityMonitor::monitorLoop() {
 
             if (wasActive != m_isActive && m_callback) {
                 auto timeSinceLastChange = std::chrono::duration_cast<std::chrono::seconds>(now - m_lastStateChangeTime).count();
-                
+
                 if (timeSinceLastChange >= MINIMUM_STATE_CHANGE_INTERVAL) {
                     double load1minPercentage = (load1min / m_cpuCoreCount) * 100;
                     double highPerfPercentage = m_highPerformanceThreshold * 100;
                     double powerSavePercentage = m_powerSaveThreshold * 100;
-                    
+
                     if (m_isActive) {
                         Logger::info("System became active (load: " + formatNumber(load1min) +
                                     " = " + formatNumber(load1minPercentage) + "% avg per core > " + formatNumber(highPerfPercentage) + "%) - switching to performance mode");

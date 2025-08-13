@@ -65,7 +65,7 @@ bool Config::loadFromFile(const std::string& configPath) {
 
     // Cross-validation: ensure power_save_threshold < high_performance_threshold
     if (m_powerSaveThreshold >= m_highPerformanceThreshold) {
-        Logger::error("Configuration error: power_save_threshold (" + std::to_string(m_powerSaveThreshold) + 
+        Logger::error("Configuration error: power_save_threshold (" + std::to_string(m_powerSaveThreshold) +
                      ") must be less than high_performance_threshold (" + std::to_string(m_highPerformanceThreshold) + ")");
         Logger::error("This ensures proper hysteresis behavior and prevents rapid mode switching");
         return false;
@@ -149,26 +149,26 @@ bool Config::parseLine(const std::string& line) {
 bool Config::validateConfiguration() const {
     // Validate reasonable ranges and relationships
     double thresholdGap = m_highPerformanceThreshold - m_powerSaveThreshold;
-    
+
     if (thresholdGap < 0.1) {
-        Logger::warning("Small threshold gap (" + std::to_string(thresholdGap * 100) + 
+        Logger::warning("Small threshold gap (" + std::to_string(thresholdGap * 100) +
                        "%) may cause frequent mode switching. Recommended minimum: 10%");
     }
-    
+
     if (m_monitoringFrequency < 10) {
-        Logger::warning("Very frequent monitoring (" + std::to_string(m_monitoringFrequency) + 
+        Logger::warning("Very frequent monitoring (" + std::to_string(m_monitoringFrequency) +
                        "s) may impact system performance. Consider 10+ seconds for production");
     }
-    
+
     if (m_highPerformanceThreshold > 0.9) {
-        Logger::warning("Very high performance threshold (" + std::to_string(m_highPerformanceThreshold * 100) + 
+        Logger::warning("Very high performance threshold (" + std::to_string(m_highPerformanceThreshold * 100) +
                        "%) may rarely trigger performance mode");
     }
-    
+
     if (m_powerSaveThreshold < 0.1) {
-        Logger::warning("Very low power save threshold (" + std::to_string(m_powerSaveThreshold * 100) + 
+        Logger::warning("Very low power save threshold (" + std::to_string(m_powerSaveThreshold * 100) +
                        "%) may rarely trigger power save mode");
     }
-    
+
     return true;
 }

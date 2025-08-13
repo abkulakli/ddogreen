@@ -162,7 +162,7 @@ int main(int argc, char* argv[]) {
     Logger::info("DDOGreen service started successfully");
     Logger::info("Version: " + std::string(DDOGREEN_VERSION));
     Logger::info("Copyright (c) 2025 DDOSoft Solutions (www.ddosoft.com)");
-    
+
     std::cout << "DDOGreen service running - press Ctrl+C to stop" << std::endl;
 
     try {
@@ -173,13 +173,13 @@ int main(int argc, char* argv[]) {
 
     std::cout << "DDOGreen stopping" << std::endl;
     Logger::info("Shutting down DDOGreen service");
-    
+
     try {
         activityMonitor.stop();
     } catch (const std::exception& e) {
         Logger::error("Exception during shutdown: " + std::string(e.what()));
     }
-    
+
     std::cout << "DDOGreen stopped" << std::endl;
 
     return 0;
