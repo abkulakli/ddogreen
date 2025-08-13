@@ -51,7 +51,18 @@ ActivityMonitor::~ActivityMonitor() {
 
 bool ActivityMonitor::start() {
     if (m_running) {
+        Logger::warning("Activity monitor already running");
         return true;
+    }
+    
+    if (!m_systemMonitor || !m_systemMonitor->isAvailable()) {
+        Logger::error("Cannot start activity monitor: system monitor not available");
+        return false;
+    }
+    
+    if (m_monitoringFrequencySeconds <= 0) {
+        Logger::error("Cannot start activity monitor: invalid monitoring frequency");
+        return false;
     }
 
     m_running = true;

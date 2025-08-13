@@ -61,9 +61,21 @@ bool Config::loadFromFile(const std::string& configPath) {
     if (hasErrors) {
         Logger::error("Configuration contains errors in: " + configPath + " - please fix the configuration file and restart");
         return false;
-    } else {
-        Logger::info("Configuration loaded successfully from: " + configPath);
     }
+
+    // Cross-validation: ensure power_save_threshold < high_performance_threshold
+    if (m_powerSaveThreshold >= m_highPerformanceThreshold) {
+        Logger::error("Configuration error: power_save_threshold (" + std::to_string(m_powerSaveThreshold) + 
+                     ") must be less than high_performance_threshold (" + std::to_string(m_highPerformanceThreshold) + ")");
+        Logger::error("This ensures proper hysteresis behavior and prevents rapid mode switching");
+        return false;
+    }
+
+    if (!validateConfiguration()) {
+        return false;
+    }
+
+    Logger::info("Configuration loaded successfully from: " + configPath);
 
     Logger::info("Monitoring frequency: " + std::to_string(m_monitoringFrequency) + " seconds");
     Logger::info("High performance threshold: " + std::to_string(m_highPerformanceThreshold) + " (" + std::to_string(m_highPerformanceThreshold * 100) + "%)");
@@ -98,26 +110,65 @@ bool Config::parseLine(const std::string& line) {
     try {
         if (key == "monitoring_frequency") {
             int freq = std::stoi(value);
-            if (freq >= 1 && freq <= 300) { // 1 second to 5 minutes
+            if (freq >= 1 && freq <= 300) {
                 m_monitoringFrequency = freq;
                 return true;
+            } else {
+                Logger::warning("monitoring_frequency value " + value + " out of range (1-300 seconds)");
             }
         } else if (key == "high_performance_threshold") {
             double threshold = std::stod(value);
-            if (threshold >= 0.1 && threshold <= 1.0) { // 10% to 100%
+            if (threshold >= 0.1 && threshold <= 1.0) {
                 m_highPerformanceThreshold = threshold;
                 return true;
+            } else {
+                Logger::warning("high_performance_threshold value " + value + " out of range (0.1-1.0)");
             }
         } else if (key == "power_save_threshold") {
             double threshold = std::stod(value);
-            if (threshold >= 0.05 && threshold <= 0.9) { // 5% to 90%
+            if (threshold >= 0.05 && threshold <= 0.9) {
                 m_powerSaveThreshold = threshold;
                 return true;
+            } else {
+                Logger::warning("power_save_threshold value " + value + " out of range (0.05-0.9)");
             }
+        } else {
+            Logger::warning("Unknown configuration key: " + key);
         }
+    } catch (const std::invalid_argument& e) {
+        Logger::warning("Invalid numeric value for " + key + ": " + value);
+    } catch (const std::out_of_range& e) {
+        Logger::warning("Numeric value out of range for " + key + ": " + value);
     } catch (const std::exception& e) {
-        return false;
+        Logger::warning("Error parsing " + key + ": " + e.what());
     }
 
     return false;
+}
+
+bool Config::validateConfiguration() const {
+    // Validate reasonable ranges and relationships
+    double thresholdGap = m_highPerformanceThreshold - m_powerSaveThreshold;
+    
+    if (thresholdGap < 0.1) {
+        Logger::warning("Small threshold gap (" + std::to_string(thresholdGap * 100) + 
+                       "%) may cause frequent mode switching. Recommended minimum: 10%");
+    }
+    
+    if (m_monitoringFrequency < 10) {
+        Logger::warning("Very frequent monitoring (" + std::to_string(m_monitoringFrequency) + 
+                       "s) may impact system performance. Consider 10+ seconds for production");
+    }
+    
+    if (m_highPerformanceThreshold > 0.9) {
+        Logger::warning("Very high performance threshold (" + std::to_string(m_highPerformanceThreshold * 100) + 
+                       "%) may rarely trigger performance mode");
+    }
+    
+    if (m_powerSaveThreshold < 0.1) {
+        Logger::warning("Very low power save threshold (" + std::to_string(m_powerSaveThreshold * 100) + 
+                       "%) may rarely trigger power save mode");
+    }
+    
+    return true;
 }

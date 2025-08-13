@@ -165,11 +165,20 @@ int main(int argc, char* argv[]) {
     
     std::cout << "DDOGreen service running - press Ctrl+C to stop" << std::endl;
 
-    signalHandler->waitForSignal();
+    try {
+        signalHandler->waitForSignal();
+    } catch (const std::exception& e) {
+        Logger::error("Exception during signal handling: " + std::string(e.what()));
+    }
 
     std::cout << "DDOGreen stopping" << std::endl;
     Logger::info("Shutting down DDOGreen service");
-    activityMonitor.stop();
+    
+    try {
+        activityMonitor.stop();
+    } catch (const std::exception& e) {
+        Logger::error("Exception during shutdown: " + std::string(e.what()));
+    }
     
     std::cout << "DDOGreen stopped" << std::endl;
 

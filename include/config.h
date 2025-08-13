@@ -24,7 +24,7 @@ private:
     double m_highPerformanceThreshold;
     double m_powerSaveThreshold;
 
-    // Helper methods
     std::string trim(const std::string& str) const;
     bool parseLine(const std::string& line);
+    bool validateConfiguration() const;
 };

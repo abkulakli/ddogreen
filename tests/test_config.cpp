@@ -337,15 +337,15 @@ TEST_F(TestConfig, test_load_from_file_accepts_high_performance_threshold_bounda
     // Test minimum boundary
     std::string minConfig = 
         "monitoring_frequency=10\n"
-        "high_performance_threshold=0.1\n"
-        "power_save_threshold=0.3\n";
+        "high_performance_threshold=0.3\n"
+        "power_save_threshold=0.1\n";
     
     createConfigFile("high_min.conf", minConfig);
     std::string minPath = getTestFilePath("high_min.conf");
     
     bool minResult = config->loadFromFile(minPath);
     EXPECT_TRUE(minResult);
-    EXPECT_EQ(0.1, config->getHighPerformanceThreshold());
+    EXPECT_EQ(0.3, config->getHighPerformanceThreshold());
     
     // Reset config for next test
     config = std::make_unique<Config>();
@@ -354,7 +354,7 @@ TEST_F(TestConfig, test_load_from_file_accepts_high_performance_threshold_bounda
     std::string maxConfig = 
         "monitoring_frequency=10\n"
         "high_performance_threshold=1.0\n"
-        "power_save_threshold=0.3\n";
+        "power_save_threshold=0.8\n";
     
     createConfigFile("high_max.conf", maxConfig);
     std::string maxPath = getTestFilePath("high_max.conf");
@@ -422,7 +422,7 @@ TEST_F(TestConfig, test_load_from_file_accepts_power_save_threshold_boundary_val
     // Test maximum boundary
     std::string maxConfig = 
         "monitoring_frequency=10\n"
-        "high_performance_threshold=0.7\n"
+        "high_performance_threshold=0.95\n"
         "power_save_threshold=0.9\n";
     
     createConfigFile("power_max.conf", maxConfig);

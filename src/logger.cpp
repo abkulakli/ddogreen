@@ -45,6 +45,10 @@ void Logger::log(LogLevel level, const std::string& message) {
         if (logFileStream.is_open()) {
             logFileStream << logEntry << std::endl;
             logFileStream.close();
+        } else {
+            // Fallback to console if file logging fails
+            std::cerr << "[LOGGER ERROR] Cannot write to log file: " << m_logFile << std::endl;
+            std::cerr << logEntry << std::endl;
         }
     }
 
