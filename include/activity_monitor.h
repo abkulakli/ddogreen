@@ -34,6 +34,8 @@ private:
     std::atomic<bool> m_threadReady;
     std::mutex m_readyMutex;
     std::condition_variable m_readyCondition;
+    std::mutex m_monitorMutex;
+    std::condition_variable m_monitorCondition;
     double m_highPerformanceThreshold;
     double m_powerSaveThreshold;
     int m_monitoringFrequencySeconds;

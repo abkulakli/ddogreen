@@ -129,6 +129,10 @@ void ActivityMonitor::stop()
     Logger::info("Stopping activity monitor...");
     m_running.store(false);
 
+    // ENERGY EFFICIENT: Wake sleeping thread for immediate shutdown
+    // instead of waiting for timeout to expire
+    m_monitorCondition.notify_all();
+
     // Allow some time for the monitoring thread to exit gracefully
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
@@ -243,7 +247,10 @@ void ActivityMonitor::monitorLoop() {
             }
         }
 
-        int sleepDuration = std::max(m_monitoringFrequencySeconds, 10);
-        std::this_thread::sleep_for(std::chrono::seconds(sleepDuration));
+        // ENERGY EFFICIENT: Use condition_variable for blocking instead of polling
+        // CPU can enter low-power states during wait, reducing energy consumption
+        const auto sleepDuration = std::chrono::seconds(std::max(m_monitoringFrequencySeconds, 10));
+        std::unique_lock<std::mutex> lock(m_monitorMutex);
+        m_monitorCondition.wait_for(lock, sleepDuration, [this] { return !m_running.load(); });
     }
 }
