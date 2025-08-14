@@ -47,6 +47,20 @@
         Impersonate="no"
         Return="ignore" />
 
+    <CustomAction Id="SetServiceDisplayName"
+        Directory="INSTALLFOLDER"
+        ExeCommand="cmd.exe /c &quot;nssm.exe set ddogreen DisplayName &quot;DDOGreen - Intelligent Green Power Management&quot;&quot;"
+        Execute="deferred"
+        Impersonate="no"
+        Return="ignore" />
+
+    <CustomAction Id="SetServiceDescription"
+        Directory="INSTALLFOLDER"
+        ExeCommand="cmd.exe /c &quot;nssm.exe set ddogreen Description &quot;Automatically manages Windows power plans based on system load monitoring&quot;&quot;"
+        Execute="deferred"
+        Impersonate="no"
+        Return="ignore" />
+
     <CustomAction Id="StartService"
         Directory="INSTALLFOLDER"
         ExeCommand="cmd.exe /c &quot;net start ddogreen&quot;"
@@ -86,7 +100,9 @@
       <!-- Execute deferred actions after files are installed -->
       <Custom Action="InstallService" After="InstallFiles" Condition="NOT Installed" />
       <Custom Action="ConfigureService" After="InstallService" Condition="NOT Installed" />
-      <Custom Action="StartService" After="ConfigureService" Condition="NOT Installed" />
+      <Custom Action="SetServiceDisplayName" After="ConfigureService" Condition="NOT Installed" />
+      <Custom Action="SetServiceDescription" After="SetServiceDisplayName" Condition="NOT Installed" />
+      <Custom Action="StartService" After="SetServiceDescription" Condition="NOT Installed" />
       
       <!-- Stop and remove service during uninstall -->
       <Custom Action="StopService" Before="RemoveService" Condition="REMOVE=&quot;ALL&quot;" />

@@ -4,7 +4,16 @@
 **Project Status**: Naming Standards Implementation - Completed August 14, 2025
 **Current State**: Production-ready application with formal naming conventions established and inconsistencies resolved
 
-### Latest Update (Aug 14, 2025): Naming Standards Implementation - COMPLETED
+### Latest Update (Aug 14, 2025): MSI Service Display Name Enhancement - COMPLETED
+**COMPLETED**: Enhanced MSI installer to include proper service display names and descriptions
+- **Service Display Name**: Added NSSM configuration to set `DDOGreen - Intelligent Green Power Management`
+- **Service Description**: Added service description matching ZIP installer functionality
+- **WiX Template Enhancement**: Added custom actions for `SetServiceDisplayName` and `SetServiceDescription`
+- **Install Sequence**: Updated to configure service properties before starting service
+- **Consistency**: MSI installer now matches ZIP installer service configuration
+- **Validation**: MSI package builds successfully with new configuration
+
+**Previous (Aug 14, 2025): Naming Standards Implementation - COMPLETED**
 **COMPLETED**: Established formal naming standards and consolidated all documentation into memory bank
 - **Standards Integration**: Moved comprehensive naming standards into `memory-bank/standards.md`
 - **Documentation Consolidation**: Removed separate `NAMING_STANDARDS.md` file per memory bank rules
