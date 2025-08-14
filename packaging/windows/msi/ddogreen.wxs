@@ -32,24 +32,41 @@
       </Component>
     </DirectoryRef>
 
-    <!-- Custom actions to install/remove service using NSSM -->
+    <!-- Custom actions to install/remove service using NSSM via cmd.exe -->
     <CustomAction Id="InstallService"
         Directory="INSTALLFOLDER"
-        ExeCommand='nssm.exe install ddogreen "[INSTALLFOLDER]ddogreen.exe"'
+        ExeCommand="cmd.exe /c &quot;nssm.exe install ddogreen ddogreen.exe&quot;"
         Execute="deferred"
-        Impersonate="no" />
+        Impersonate="no"
+        Return="ignore" />
 
     <CustomAction Id="ConfigureService"
         Directory="INSTALLFOLDER"
-        ExeCommand='nssm.exe set ddogreen AppParameters "--config &quot;[CONFIGFOLDER]ddogreen.conf&quot;"'
+        ExeCommand="cmd.exe /c &quot;nssm.exe set ddogreen AppParameters --config [CONFIGFOLDER]ddogreen.conf&quot;"
         Execute="deferred"
-        Impersonate="no" />
+        Impersonate="no"
+        Return="ignore" />
+
+    <CustomAction Id="StartService"
+        Directory="INSTALLFOLDER"
+        ExeCommand="cmd.exe /c &quot;net start ddogreen&quot;"
+        Execute="deferred"
+        Impersonate="no"
+        Return="ignore" />
+
+    <CustomAction Id="StopService"
+        Directory="INSTALLFOLDER"
+        ExeCommand="cmd.exe /c &quot;net stop ddogreen&quot;"
+        Execute="deferred"
+        Impersonate="no"
+        Return="ignore" />
 
     <CustomAction Id="RemoveService"
         Directory="INSTALLFOLDER"
-        ExeCommand='nssm.exe remove ddogreen confirm'
+        ExeCommand="cmd.exe /c &quot;nssm.exe remove ddogreen confirm&quot;"
         Execute="deferred"
-        Impersonate="no" />
+        Impersonate="no"
+        Return="ignore" />
 
     <DirectoryRef Id="CONFIGFOLDER">
       <Component Id="ConfigFiles" Guid="A9B8C7D6-E5F4-3210-9876-543210FEDCBA">
@@ -66,8 +83,13 @@
 
     <!-- Install sequence for custom actions -->
     <InstallExecuteSequence>
+      <!-- Execute deferred actions after files are installed -->
       <Custom Action="InstallService" After="InstallFiles" Condition="NOT Installed" />
       <Custom Action="ConfigureService" After="InstallService" Condition="NOT Installed" />
+      <Custom Action="StartService" After="ConfigureService" Condition="NOT Installed" />
+      
+      <!-- Stop and remove service during uninstall -->
+      <Custom Action="StopService" Before="RemoveService" Condition="REMOVE=&quot;ALL&quot;" />
       <Custom Action="RemoveService" Before="RemoveFiles" Condition="REMOVE=&quot;ALL&quot;" />
     </InstallExecuteSequence>
 
