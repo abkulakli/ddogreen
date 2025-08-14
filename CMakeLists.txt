@@ -6,7 +6,7 @@ if(NOT DEFINED PROJECT_VERSION_OVERRIDE)
 endif()
 
 project(ddogreen VERSION ${PROJECT_VERSION_OVERRIDE}
-        DESCRIPTION "Intelligent Green Power Management for Sustainable Computing"
+        DESCRIPTION "Intelligent Green Power Management"
         HOMEPAGE_URL "https://www.ddosoft.com")
 
 set(CMAKE_CXX_STANDARD 20)
@@ -146,7 +146,7 @@ endif()
 
 set(CPACK_PACKAGE_NAME "ddogreen")
 set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Intelligent Green Power Management for Sustainable Computing")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Intelligent Green Power Management")
 set(CPACK_PACKAGE_DESCRIPTION "A smart sustainability-focused service that automatically optimizes your PC and laptop power consumption by intelligently switching between high-performance and power-saving modes based on actual system usage patterns.")
 set(CPACK_PACKAGE_VENDOR "DDOSoft Solutions")
 set(CPACK_PACKAGE_CONTACT "support@ddosoft.com")
@@ -163,7 +163,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_CURRENT_SOURCE_DIR}/packaging/linux/deb/postinst;${CMAKE_CURRENT_SOURCE_DIR}/packaging/linux/deb/prerm;${CMAKE_CURRENT_SOURCE_DIR}/packaging/linux/deb/postrm")
 
     # RPM-specific settings
-    set(CPACK_RPM_PACKAGE_SUMMARY "Intelligent Green Power Management for Sustainable Computing")
+    set(CPACK_RPM_PACKAGE_SUMMARY "Intelligent Green Power Management")
     set(CPACK_RPM_PACKAGE_DESCRIPTION "A smart sustainability-focused service that automatically optimizes your PC and laptop power consumption by intelligently switching between high-performance and power-saving modes based on actual system usage patterns.")
     set(CPACK_RPM_PACKAGE_GROUP "Applications/System")
     set(CPACK_RPM_PACKAGE_LICENSE "MIT")

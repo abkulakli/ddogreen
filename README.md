@@ -140,7 +140,7 @@ ddogreen requires a configuration file. Packages ship a template at `share/ddogr
 
 Default configuration paths
 - Linux: `/etc/ddogreen/ddogreen.conf`
-- Windows: `%ProgramData%\DDOSoft\ddogreen\ddogreen.conf`
+- Windows: `%ProgramData%\ddosoft\ddogreen\ddogreen.conf`
 
 Quick setup (Linux)
 ```bash
@@ -150,8 +150,8 @@ sudo nano /etc/ddogreen/ddogreen.conf
 ```
 
 Quick setup (Windows, ZIP)
-1. Create `%ProgramData%\DDOSoft\ddogreen` if missing
-2. Copy `share\ddogreen\ddogreen.conf.default` to `%ProgramData%\DDOSoft\ddogreen\ddogreen.conf`
+1. Create `%ProgramData%\ddosoft\ddogreen` if missing
+2. Copy `share\ddogreen\ddogreen.conf.default` to `%ProgramData%\ddosoft\ddogreen\ddogreen.conf`
 3. Edit values as needed
 
 ### Configuration Format

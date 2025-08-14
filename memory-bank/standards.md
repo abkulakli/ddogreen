@@ -11,6 +11,17 @@
 
 ## Core Development Principles
 
+### Documentation Management
+**CRITICAL RULE**: All documentation must follow the established memory bank structure
+
+#### Documentation Placement Rules
+- **User Information**: Add to `README.md` (installation, usage, configuration guides)
+- **Developer Information**: Add to memory bank files (architecture, standards, development processes)
+- **FORBIDDEN**: Creating additional `.md` files (CODING_STANDARDS.md, CONTRIBUTING.md, etc.)
+- **Memory Bank Structure**: Use only `context.md`, `standards.md`, and `active.md`
+
+**RATIONALE**: Maintains centralized, consistent documentation without file proliferation
+
 ### Energy Efficiency First
 **FUNDAMENTAL PRINCIPLE**: Write code that minimizes computational and energy overhead while maintaining functionality and readability.
 
@@ -115,6 +126,67 @@ This project follows the **ISO C++ Core Guidelines** for modern C++ development 
 3. **Dynamic Testing**: Run full test suite on all supported platforms
 4. **Performance Validation**: Measure energy consumption impact
 5. **Documentation Updates**: Keep memory bank synchronized with changes
+
+### Naming Standards and Conventions
+**ESTABLISHED**: Comprehensive naming standards for consistent branding and technical compatibility
+
+#### Brand Names (Display/Marketing)
+- **Company**: `DDOSoft` or `DDOSoft Solutions`
+- **Product**: `DDOGreen`
+- **Full Title**: `DDOGreen - Intelligent Green Power Management`
+- **Copyright**: `Copyright (c) 2025 DDOSoft Solutions (www.ddosoft.com)`
+
+#### Technical Names (Files/Folders/Executables)
+- **Company Folders**: `ddosoft` (lowercase)
+- **Product Folders**: `ddogreen` (lowercase)
+- **Executables**: `ddogreen` (lowercase)
+- **Services**: `ddogreen` (lowercase)
+- **Configuration**: `ddogreen.conf` (lowercase)
+- **URLs/Email**: `www.ddosoft.com`, `support@ddosoft.com` (lowercase)
+
+#### Folder Structure Standards
+```
+Program Files/ddosoft/ddogreen/ddogreen.exe       # Windows
+ProgramData/ddosoft/ddogreen/ddogreen.conf        # Windows
+/usr/local/bin/ddogreen                           # Linux/macOS
+/etc/ddogreen/ddogreen.conf                       # Linux/macOS
+```
+
+#### Code Naming (C++)
+- **Classes**: `PascalCase` (ActivityMonitor, Config, Logger)
+- **Interfaces**: `IPascalCase` (IPowerManager, ISystemMonitor)
+- **Functions**: `camelCase` (getLoadAverage, setLogLevel)
+- **Variables**: `camelCase` (monitoringInterval, configPath)
+- **Constants**: `SCREAMING_SNAKE_CASE` (DEFAULT_INTERVAL, MAX_LOG_SIZE)
+- **Files**: `snake_case` (activity_monitor.cpp, platform_utils.h)
+
+#### Platform-Specific Rules
+- **Windows Paths**: Use lowercase folders, display names for registry/services
+- **Linux/Unix**: Use lowercase throughout
+- **Package Names**: `ddogreen-platform` (ddogreen-linux.deb, ddogreen-windows.msi)
+- **Service Display Name**: `DDOGreen - Intelligent Green Power Management`
+
+**RATIONALE**: Display names use proper branding, technical names use lowercase for cross-platform compatibility
+
+### Documentation and File Management Rules
+**CRITICAL**: Do not create additional documentation files outside the memory bank system
+
+#### File Creation Rules
+- **User Information**: Add to `README.md` (installation, usage, configuration)
+- **Developer Information**: Add to memory bank files (architecture, standards, processes)
+- **No Additional MD Files**: All documentation must go into existing structure
+- **Memory Bank Only**: Technical standards, workflows, and development guidelines stay in memory bank
+
+#### Approved Documentation Structure
+```
+README.md                    # User-facing information only
+memory-bank/
+├── context.md              # Project essentials and architecture
+├── standards.md            # Working methodology and standards (THIS FILE)
+└── active.md              # Current focus and priorities
+```
+
+**RULE**: Never create separate documentation files like CODING_STANDARDS.md, CONTRIBUTING.md, etc.
 
 ### Response Quality Guidelines
 - **Always read memory bank first**: Understand current project state before making changes

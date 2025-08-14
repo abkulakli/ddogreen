@@ -30,7 +30,7 @@ print_error() {
 
 # Service configuration
 SERVICE_NAME="ddogreen"
-SERVICE_DESCRIPTION="DDOGreen by DDOSoft - Intelligent Green Power Management for Sustainable Computing"
+SERVICE_DESCRIPTION="DDOGreen - Intelligent Green Power Management"
 TARGET_EXECUTABLE_PATH="/usr/local/bin/ddogreen"
 SERVICE_FILE="/etc/systemd/system/ddogreen.service"
 LOG_FILE="/var/log/ddogreen.log"

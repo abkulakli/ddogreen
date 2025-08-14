@@ -81,10 +81,10 @@ public:
 
     /**
      * Get the default installation path for Windows
-     * @return C:\Program Files\DDOSoft\ddogreen\ddogreen.exe
+     * @return C:\Program Files\ddosoft\ddogreen\ddogreen.exe
      */
     std::string getDefaultInstallPath() const override {
-        return "C:\\Program Files\\DDOSoft\\ddogreen\\ddogreen.exe";
+        return "C:\\Program Files\\ddosoft\\ddogreen\\ddogreen.exe";
     }
 
     /**
@@ -92,7 +92,7 @@ public:
      * @return path to default log file using %ProgramData% environment variable
      */
     std::string getDefaultLogPath() const override {
-        return getProgramDataPath() + "\\DDOSoft\\ddogreen\\ddogreen.log";
+        return getProgramDataPath() + "\\ddosoft\\ddogreen\\ddogreen.log";
     }
 
     /**
@@ -100,7 +100,7 @@ public:
      * @return path to default PID file using %ProgramData% environment variable
      */
     std::string getDefaultPidPath() const override {
-        return getProgramDataPath() + "\\DDOSoft\\ddogreen\\ddogreen.pid";
+        return getProgramDataPath() + "\\ddosoft\\ddogreen\\ddogreen.pid";
     }
 
     /**
@@ -108,7 +108,7 @@ public:
      * @return path to default configuration file using %ProgramData% environment variable
      */
     std::string getDefaultConfigPath() const override {
-        return getProgramDataPath() + "\\DDOSoft\\ddogreen\\ddogreen.conf";
+        return getProgramDataPath() + "\\ddosoft\\ddogreen\\ddogreen.conf";
     }
 
     /**

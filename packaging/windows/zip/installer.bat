@@ -7,7 +7,7 @@ setlocal enabledelayedexpansion
 
 REM Service configuration
 set SERVICE_NAME=ddogreen
-set SERVICE_DISPLAY_NAME=DDOGreen by DDOSoft - Intelligent Green Power Management for Sustainable Computing
+set SERVICE_DISPLAY_NAME=DDOGreen - Intelligent Green Power Management
 set SERVICE_DESCRIPTION=Automatically manages Windows power plans based on system load monitoring for sustainable computing
 set TARGET_EXECUTABLE_PATH=%ProgramFiles%\ddosoft\ddogreen\ddogreen.exe
 set CONFIG_DIR=%ProgramData%\ddosoft\ddogreen

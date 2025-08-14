@@ -1,5 +1,5 @@
 /*
- * DDOGreen - Intelligent Green Power Management for Sustainable Computing
+ * DDOGreen - Intelligent Green Power Management
  *
  * Automatically manages TLP power settings based on system load monitoring
  *
@@ -36,7 +36,7 @@ void printUsage(const char* programName)
 void printVersion()
 {
     std::cout << "DDOGreen version " << DDOGREEN_VERSION << "\n"
-              << "Intelligent Green Power Management for Sustainable Computing\n"
+              << "DDOGreen - Intelligent Green Power Management\n"
               << "Copyright (c) 2025 DDOSoft Solutions (www.ddosoft.com)\n";
 }
 

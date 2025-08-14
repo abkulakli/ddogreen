@@ -1,8 +1,32 @@
 # DDOGreen - Current Focus & Active Context
 
 ## Current Work Focus
-**Project Status**: Battery/AC Power Detection Implementation - Completed August 14, 2025
-**Current State**: Production-ready application enhanced with cross-platform power source detection functionality
+**Project Status**: Naming Standards Implementation - Completed August 14, 2025
+**Current State**: Production-ready application with formal naming conventions established and inconsistencies resolved
+
+### Latest Update (Aug 14, 2025): Naming Standards Implementation - COMPLETED
+**COMPLETED**: Established formal naming standards and consolidated all documentation into memory bank
+- **Standards Integration**: Moved comprehensive naming standards into `memory-bank/standards.md`
+- **Documentation Consolidation**: Removed separate `NAMING_STANDARDS.md` file per memory bank rules
+- **File Management Rules**: Added strict rules against creating additional documentation files
+- **Brand Names**: `DDOSoft`/`DDOGreen` for display/marketing purposes  
+- **Technical Names**: `ddosoft`/`ddogreen` for folders, executables, and URLs
+- **Codebase Fixes**: Updated all inconsistent naming across the project
+  - Fixed MSI packaging to use lowercase `ddosoft` folder names
+  - Updated Windows platform utils hardcoded paths to use `ddosoft`
+  - Fixed README.md documentation to reflect correct paths
+- **Documentation Rule**: User info → README.md, Developer info → memory bank
+- **Validation**: Platform and configuration tests passing (70/71 tests, 1 unrelated threading test failing)
+
+**Technical Implementation**:
+```
+Brand Names (Display):     DDOSoft, DDOGreen
+Technical Names (Files):   ddosoft, ddogreen  
+Folder Structure:          C:\Program Files\ddosoft\ddogreen\
+Configuration:             %ProgramData%\ddosoft\ddogreen\ddogreen.conf
+```
+
+**Result**: Consistent naming throughout project following industry best practices for cross-platform compatibility
 
 ### Latest Update (Aug 14, 2025): Battery/AC Power Detection - COMPLETED
 **COMPLETED**: Successfully implemented cross-platform battery/AC power source detection

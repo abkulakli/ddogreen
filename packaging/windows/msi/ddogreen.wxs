@@ -14,12 +14,12 @@
 
     <!-- Install directories -->
     <StandardDirectory Id="ProgramFiles6432Folder">
-      <Directory Id="ManufacturerFolder" Name="DDOSoft">
+      <Directory Id="ManufacturerFolder" Name="ddosoft">
         <Directory Id="INSTALLFOLDER" Name="ddogreen" />
       </Directory>
     </StandardDirectory>
     <StandardDirectory Id="CommonAppDataFolder">
-      <Directory Id="CommonAppDataManufacturerFolder" Name="DDOSoft">
+      <Directory Id="CommonAppDataManufacturerFolder" Name="ddosoft">
         <Directory Id="CONFIGFOLDER" Name="ddogreen" />
       </Directory>
     </StandardDirectory>
