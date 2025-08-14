@@ -6,6 +6,8 @@
 #include <iostream>
 #include <memory>
 #include <mach-o/dyld.h>
+#include <IOKit/ps/IOPowerSources.h>
+#include <CoreFoundation/CoreFoundation.h>
 
 /**
  * macOS-specific platform utilities implementation
@@ -158,6 +160,50 @@ public:
 
         // If realpath fails, return the simple concatenation as fallback
         return tempPath;
+    }
+
+    /**
+     * Get the current power source using macOS IOKit
+     * @return PowerSource enumeration value
+     */
+    PowerSource getPowerSource() const override {
+        CFTypeRef powerSourceInfo = IOPSCopyPowerSourcesInfo();
+        if (!powerSourceInfo) {
+            return PowerSource::UNKNOWN;
+        }
+
+        CFArrayRef powerSources = IOPSCopyPowerSourcesList(powerSourceInfo);
+        if (!powerSources) {
+            CFRelease(powerSourceInfo);
+            return PowerSource::UNKNOWN;
+        }
+
+        PowerSource result = PowerSource::UNKNOWN;
+        CFIndex count = CFArrayGetCount(powerSources);
+
+        for (CFIndex i = 0; i < count; i++) {
+            CFTypeRef powerSource = CFArrayGetValueAtIndex(powerSources, i);
+            CFDictionaryRef description = IOPSGetPowerSourceDescription(powerSourceInfo, powerSource);
+            
+            if (description) {
+                // Check if this is an AC adapter
+                CFStringRef powerSourceState = (CFStringRef)CFDictionaryGetValue(description, CFSTR(kIOPSPowerSourceStateKey));
+                
+                if (powerSourceState) {
+                    if (CFStringCompare(powerSourceState, CFSTR(kIOPSACPowerValue), 0) == kCFCompareEqualTo) {
+                        result = PowerSource::AC_POWER;
+                        break;  // AC power found, can return immediately
+                    } else if (CFStringCompare(powerSourceState, CFSTR(kIOPSBatteryPowerValue), 0) == kCFCompareEqualTo) {
+                        result = PowerSource::BATTERY;
+                        // Don't break here, keep looking for AC power which takes precedence
+                    }
+                }
+            }
+        }
+
+        CFRelease(powerSources);
+        CFRelease(powerSourceInfo);
+        return result;
     }
 };
 

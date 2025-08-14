@@ -7,6 +7,8 @@
 #include <string>
 #include <iostream>
 #include <memory>
+#include <fstream>
+#include <filesystem>
 
 /**
  * Linux-specific platform utilities implementation
@@ -172,6 +174,87 @@ public:
         }
 
         return tempPath;
+    }
+
+    /**
+     * Get the current power source by checking Linux power supply subsystem
+     * @return PowerSource enumeration value
+     */
+    PowerSource getPowerSource() const override
+    {
+        try
+        {
+            // Check /sys/class/power_supply for AC adapters and batteries
+            const std::string powerSupplyPath = "/sys/class/power_supply";
+            
+            if (!std::filesystem::exists(powerSupplyPath))
+            {
+                return PowerSource::UNKNOWN;
+            }
+
+            bool hasAC = false;
+            bool hasBattery = false;
+            bool acOnline = false;
+
+            // Iterate through power supply devices
+            for (const auto& entry : std::filesystem::directory_iterator(powerSupplyPath))
+            {
+                if (!entry.is_directory()) continue;
+
+                std::string devicePath = entry.path().string();
+                std::string typePath = devicePath + "/type";
+                std::string onlinePath = devicePath + "/online";
+
+                // Read device type
+                std::ifstream typeFile(typePath);
+                if (typeFile.is_open())
+                {
+                    std::string deviceType;
+                    std::getline(typeFile, deviceType);
+                    typeFile.close();
+
+                    if (deviceType == "Mains" || deviceType == "ADP1")
+                    {
+                        hasAC = true;
+                        // Check if AC is online
+                        std::ifstream onlineFile(onlinePath);
+                        if (onlineFile.is_open())
+                        {
+                            std::string online;
+                            std::getline(onlineFile, online);
+                            onlineFile.close();
+                            if (online == "1")
+                            {
+                                acOnline = true;
+                            }
+                        }
+                    }
+                    else if (deviceType == "Battery")
+                    {
+                        hasBattery = true;
+                    }
+                }
+            }
+
+            // Determine power source based on detected devices
+            if (hasAC && acOnline)
+            {
+                return PowerSource::AC_POWER;
+            }
+            else if (hasBattery)
+            {
+                return PowerSource::BATTERY;
+            }
+            else
+            {
+                return PowerSource::UNKNOWN;
+            }
+        }
+        catch (const std::exception&)
+        {
+            // If we can't determine power source, assume unknown
+            return PowerSource::UNKNOWN;
+        }
     }
 };
 

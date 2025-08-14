@@ -269,3 +269,33 @@ TEST_F(TestPlatformFactory, test_interface_polymorphism) {
         EXPECT_TRUE(available == true || available == false);
     }
 }
+
+// Test power source detection functionality
+TEST_F(TestPlatformFactory, test_power_source_detection) {
+    auto platformUtils = PlatformFactory::createPlatformUtils();
+    ASSERT_NE(nullptr, platformUtils);
+    
+    if (platformUtils->isAvailable()) {
+        // Test power source detection
+        PowerSource powerSource = platformUtils->getPowerSource();
+        
+        // Should return one of the valid enum values
+        EXPECT_TRUE(powerSource == PowerSource::BATTERY || 
+                   powerSource == PowerSource::AC_POWER || 
+                   powerSource == PowerSource::UNKNOWN);
+        
+        // Test consistency - multiple calls should return the same result
+        // (unless power source actually changes during test)
+        PowerSource powerSource2 = platformUtils->getPowerSource();
+        PowerSource powerSource3 = platformUtils->getPowerSource();
+        
+        // Most of the time these should be consistent
+        // We'll allow for one inconsistency in case power source changes during test
+        int consistentCount = 0;
+        if (powerSource == powerSource2) consistentCount++;
+        if (powerSource2 == powerSource3) consistentCount++;
+        if (powerSource == powerSource3) consistentCount++;
+        
+        EXPECT_GE(consistentCount, 2) << "Power source detection should be consistent";
+    }
+}

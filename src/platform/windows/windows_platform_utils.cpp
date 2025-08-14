@@ -157,6 +157,30 @@ public:
         return tempPath;
     }
 
+    /**
+     * Get the current power source using Windows API
+     * @return PowerSource enumeration value
+     */
+    PowerSource getPowerSource() const override {
+        SYSTEM_POWER_STATUS powerStatus;
+        
+        if (GetSystemPowerStatus(&powerStatus)) {
+            // Check AC line status
+            switch (powerStatus.ACLineStatus) {
+                case 0:  // Offline (battery)
+                    return PowerSource::BATTERY;
+                case 1:  // Online (AC power)
+                    return PowerSource::AC_POWER;
+                case 255: // Unknown status
+                default:
+                    return PowerSource::UNKNOWN;
+            }
+        }
+        
+        // If GetSystemPowerStatus fails, return unknown
+        return PowerSource::UNKNOWN;
+    }
+
 private:
     /**
      * Get the ProgramData directory path from environment variable

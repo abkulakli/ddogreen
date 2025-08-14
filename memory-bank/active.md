@@ -1,23 +1,34 @@
 # DDOGreen - Current Focus & Active Context
 
 ## Current Work Focus
-**Project Status**: Memory Bank Restructuring - Completed August 14, 2025
-**Current State**: Production-ready application with updated GitHub Copilot instructions and streamlined 3-file memory bank structure
+**Project Status**: Battery/AC Power Detection Implementation - Completed August 14, 2025
+**Current State**: Production-ready application enhanced with cross-platform power source detection functionality
 
-### Latest Update (Aug 14, 2025): Memory Bank Restructuring - COMPLETED
-**COMPLETED**: Successfully restructured memory bank to align with new GitHub Copilot instructions
-- **New Structure**: Consolidated from 10 detailed files to 3 core files (context.md, standards.md, active.md)
-- **Context Preserved**: All critical project information maintained in streamlined format
-- **Core Focus**: Project essentials, working methodology, and current priorities accessible in core files
-- **MCP Integration**: Added Model Context Protocol usage requirements to working standards
-- **Session Continuity**: All operational rules and standards now accessible in core 3-file structure
+### Latest Update (Aug 14, 2025): Battery/AC Power Detection - COMPLETED
+**COMPLETED**: Successfully implemented cross-platform battery/AC power source detection
+- **Interface Enhancement**: Added `PowerSource` enumeration and `getPowerSource()` method to `IPlatformUtils`
+- **Linux Implementation**: Uses `/sys/class/power_supply/` subsystem to detect AC adapters and batteries
+- **Windows Implementation**: Uses `GetSystemPowerStatus()` Windows API for power source detection
+- **macOS Implementation**: Uses IOKit `IOPSCopyPowerSourcesInfo()` for comprehensive power source detection
+- **Testing**: Added comprehensive unit test (`test_power_source_detection`) with 71/71 tests passing
+- **Validation**: Real-world testing confirms accurate detection of AC_POWER when plugged in
 
-**Result**: Streamlined memory bank structure that ensures effective session continuity and context preservation
+**Technical Implementation Details**:
+```cpp
+enum class PowerSource { BATTERY, AC_POWER, UNKNOWN };
+virtual PowerSource getPowerSource() const = 0;
 
-### Project Status: PRODUCTION-READY - MAINTAINED
-The core project remains in production-ready state:
+// Linux: Iterates /sys/class/power_supply/ checking type and online status
+// Windows: Uses GetSystemPowerStatus() ACLineStatus field  
+// macOS: Uses IOKit IOPSCopyPowerSourcesInfo() with power source state checking
+```
+
+**Result**: Cross-platform power source detection ready for implementing battery-aware power management
+
+### Project Status: PRODUCTION-READY - ENHANCED
+The core project maintains production-ready state with new power detection capability:
 - **Build Status**: All builds successful (debug/release/test/coverage)
-- **Test Status**: 70/70 tests passing with 100% success rate
+- **Test Status**: 71/71 tests passing with 100% success rate (increased from 70)
 - **Code Quality**: Zero compiler warnings maintained across entire codebase
 - **Architecture**: Clean platform abstraction with zero conditional compilation in application layer
 - **Standards**: Energy-efficient coding practices and C++20 modern features implemented

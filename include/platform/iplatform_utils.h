@@ -5,6 +5,16 @@
 #include <span>
 
 /**
+ * Enumeration for power source types
+ */
+enum class PowerSource
+{
+    BATTERY,    ///< System is running on battery power
+    AC_POWER,   ///< System is connected to AC power
+    UNKNOWN     ///< Power source cannot be determined
+};
+
+/**
  * Structure to hold parsed command line arguments
  */
 struct ParsedArgs
@@ -102,6 +112,12 @@ public:
      * @return absolute path, or original path if resolution fails
      */
     virtual std::string resolveAbsolutePath(const std::string& relativePath) const = 0;
+
+    /**
+     * Get the current power source (battery vs AC power)
+     * @return PowerSource enumeration value
+     */
+    virtual PowerSource getPowerSource() const = 0;
 
     /**
      * Process configuration file data from a buffer
