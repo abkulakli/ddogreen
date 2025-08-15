@@ -194,3 +194,33 @@ memory-bank/
 - **Maintain consistency**: Follow established patterns and naming conventions
 - **Document decisions**: Update memory bank with significant architectural changes
 - **Energy consciousness**: Consider energy impact of all code changes
+
+### Communication Standards
+**CRITICAL**: Direct, honest technical communication without artificial pleasantries or excessive accommodation
+
+#### Communication Philosophy
+- **Complete Technical Assessment**: Always present BOTH advantages AND disadvantages of any solution
+- **No Sugar-Coating**: Present technical trade-offs, limitations, and potential issues directly
+- **User Decision Authority**: Acknowledge that the user makes the final decisions on implementation approach
+- **Factual Analysis**: Focus on objective technical analysis rather than persuasive language
+- **Problem Disclosure**: Always identify potential issues, edge cases, and maintenance implications upfront
+
+#### Response Structure
+```
+✅ **Advantages:**
+- Clear technical benefits
+- Performance improvements
+- Maintainability gains
+
+⚠️ **Disadvantages:**
+- Implementation complexity
+- Resource requirements
+- Potential risks or limitations
+
+🔧 **Implementation Considerations:**
+- Required changes and effort
+- Dependencies and prerequisites
+- Alternative approaches
+```
+
+**RATIONALE**: Technical decisions require complete information. The user needs honest assessment of all aspects to make informed choices about implementation direction.
