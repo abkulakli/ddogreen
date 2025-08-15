@@ -14,17 +14,14 @@ Developed by DDOSoft Solutions (www.ddosoft.com)
 ## Why Use ddogreen?
 
 ### Longer Battery Life
-- **20-30% more battery time** with no effort from you
 - Automatically switches to power-saving when you're not actively using the system
 - Full performance when you need it for work
 
 ### Environmental Benefits
-- **Reduces energy consumption** when your laptop is idle
-- Lower carbon footprint from reduced electricity usage
-- Contributes to sustainable computing practices
+- Contributes to sustainable computing practices through intelligent power management
+- Enables more efficient use of system resources
 
 ### Cost Savings
-- **Lower electricity bills** from reduced power consumption
 - Extended laptop lifespan from better thermal management
 
 ## How It Works
@@ -99,7 +96,7 @@ Options:
 
 **Make your laptop more sustainable with zero effort - on Linux and Windows!**
 
-*Every laptop running ddogreen helps reduce global energy consumption.*
+*ddogreen provides intelligent power management for more efficient computing.*
 
 ## Platform Support
 
@@ -255,17 +252,6 @@ sudo tlp-stat -s
 powercfg /getactivescheme
 ```
 
-## Your Energy Impact
-
-### Individual Benefits
-- **Daily savings**: Reduced energy consumption per laptop
-- **Annual impact**: Significant reduction in electricity usage
-- **Environmental benefit**: Lower carbon footprint from reduced power consumption
-
-### Cost Savings
-- **Lower electricity bills** from reduced power consumption
-- Extended laptop lifespan from better thermal management
-
 ## Troubleshooting
 
 ### Linux
@@ -350,7 +336,7 @@ ZIP installs: run `installer.bat` and choose uninstall (run as Administrator).
 
 **Make your laptop more sustainable with zero effort - on Linux and Windows!**
 
-*Every laptop running ddogreen helps reduce global energy consumption.*
+*ddogreen provides intelligent power management for more efficient computing.*
 
 ## Platform Support
 

@@ -118,13 +118,13 @@ This project follows the **ISO C++ Core Guidelines** for modern C++ development 
 - **Test-driven development**: Write tests before implementation when possible
 - **Mock objects**: Use proper mocking for platform abstractions
 - **Integration tests**: Verify cross-platform behavior
-- **Performance tests**: Validate energy efficiency claims
+- **Performance tests**: Validate system responsiveness and resource usage
 
 ### Quality Assurance Workflow
 1. **Code Review**: All changes require review for energy efficiency and architecture compliance
 2. **Static Analysis**: Use compiler warnings and static analysis tools
 3. **Dynamic Testing**: Run full test suite on all supported platforms
-4. **Performance Validation**: Measure energy consumption impact
+4. **Performance Validation**: Monitor system resource usage and responsiveness
 5. **Documentation Updates**: Keep memory bank synchronized with changes
 
 ### Naming Standards and Conventions
