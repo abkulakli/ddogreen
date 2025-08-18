@@ -1,5 +1,6 @@
 #include "platform/ipower_manager.h"
 #include "logger.h"
+#include "rate_limiter.h"
 #include <cstdlib>
 #include <memory>
 #include <array>
@@ -12,9 +13,10 @@
 class LinuxPowerManager : public IPowerManager
 {
 public:
-    LinuxPowerManager() : m_currentMode{"unknown"}
+    LinuxPowerManager() : m_currentMode{"unknown"}, m_rateLimiter(5, 1000)
     {
         // TLP availability will be checked by the caller
+        // Rate limiter: max 5 power mode changes per 1000ms (1 second)
     }
 
     virtual ~LinuxPowerManager() = default;
@@ -25,6 +27,12 @@ public:
      */
     bool setPerformanceMode() override
     {
+        // Rate limiting check
+        if (!m_rateLimiter.isAllowed("power_mode_change")) {
+            Logger::warning("Power mode change request rate limited - ignoring request");
+            return false;
+        }
+
         if (m_currentMode == "performance")
         {
             return true;  // Already in performance mode
@@ -62,6 +70,12 @@ public:
      */
     bool setPowerSavingMode() override
     {
+        // Rate limiting check
+        if (!m_rateLimiter.isAllowed("power_mode_change")) {
+            Logger::warning("Power mode change request rate limited - ignoring request");
+            return false;
+        }
+
         if (m_currentMode == "powersaving")
         {
             return true;  // Already in power saving mode
@@ -230,6 +244,7 @@ private:
     }
 
     std::string m_currentMode;
+    RateLimiter m_rateLimiter;
 };
 
 // Factory function for creating Linux power manager

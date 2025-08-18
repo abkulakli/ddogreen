@@ -1,4 +1,5 @@
 #include "platform/iplatform_utils.h"
+#include "security_utils.h"
 #include <windows.h>
 #include <string>
 #include <iostream>
@@ -65,7 +66,14 @@ public:
                 args.showVersion = true;
             } else if (arg == "-c" || arg == "--config") {
                 if (i + 1 < argc) {
-                    args.configPath = argv[++i];
+                    // Security validation: Check config path for traversal
+                    std::string configPath = argv[++i];
+                    if (SecurityUtils::validatePathTraversal(configPath)) {
+                        args.configPath = configPath;
+                    } else {
+                        args.hasUnknownOptions = true;
+                        args.unknownOption = "Invalid config path: " + configPath;
+                    }
                 } else {
                     args.hasUnknownOptions = true;
                     args.unknownOption = arg + " (missing argument)";

@@ -135,3 +135,15 @@ add_executable(test_integration
 )
 add_platform_sources(test_integration)
 configure_test_executable(test_integration)
+
+# Security tests
+add_executable(test_security
+    test_security.cpp
+    ${CMAKE_SOURCE_DIR}/src/config.cpp
+    ${CMAKE_SOURCE_DIR}/src/logger.cpp
+    ${CMAKE_SOURCE_DIR}/src/security_utils.cpp
+    ${CMAKE_SOURCE_DIR}/src/rate_limiter.cpp
+    ${CMAKE_SOURCE_DIR}/src/platform/platform_factory.cpp
+)
+add_platform_sources(test_security)
+configure_test_executable(test_security)

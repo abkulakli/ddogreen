@@ -1,4 +1,5 @@
 #include "platform/iplatform_utils.h"
+#include "security_utils.h"
 #include <unistd.h>
 #include <getopt.h>
 #include <libgen.h>
@@ -78,7 +79,16 @@ public:
                     args.showVersion = true;
                     break;
                 case 'c':
-                    args.configPath = optarg;
+                    // Security validation: Check config path for traversal
+                    if (optarg && SecurityUtils::validatePathTraversal(optarg))
+                    {
+                        args.configPath = optarg;
+                    }
+                    else
+                    {
+                        args.hasUnknownOptions = true;
+                        args.unknownOption = std::string("Invalid config path: ") + (optarg ? optarg : "null");
+                    }
                     break;
                 case '?':
                     args.hasUnknownOptions = true;

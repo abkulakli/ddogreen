@@ -48,6 +48,8 @@ set(SOURCES
     src/logger.cpp
     src/config.cpp
     src/platform/platform_factory.cpp
+    src/rate_limiter.cpp
+    src/security_utils.cpp
 )
 
 # Platform-specific source files

@@ -1,5 +1,6 @@
 #include "platform/ipower_manager.h"
 #include "logger.h"
+#include "rate_limiter.h"
 #include <memory>
 #include <string>
 #include <sstream>
@@ -15,8 +16,10 @@
  */
 class WindowsPowerManager : public IPowerManager {
 public:
-    WindowsPowerManager() {
+    WindowsPowerManager() : m_rateLimiter(5, 1000) {
         Logger::info("Windows Power Manager initialized");
+        
+        // Rate limiter: max 5 power mode changes per 1000ms (1 second)
         
         // Verify powercfg is available
         if (!isAvailable()) {
@@ -31,6 +34,12 @@ public:
      * @return true if successful
      */
     bool setPerformanceMode() override {
+        // Rate limiting check
+        if (!m_rateLimiter.isAllowed("power_mode_change")) {
+            Logger::warning("Power mode change request rate limited - ignoring request");
+            return false;
+        }
+
         const std::string currentMode = getCurrentMode();
         if (currentMode == "performance") {
             Logger::info("Already in performance mode");
@@ -57,6 +66,12 @@ public:
      * @return true if successful
      */
     bool setPowerSavingMode() override {
+        // Rate limiting check
+        if (!m_rateLimiter.isAllowed("power_mode_change")) {
+            Logger::warning("Power mode change request rate limited - ignoring request");
+            return false;
+        }
+
         const std::string currentMode = getCurrentMode();
         if (currentMode == "powersaving") {
             Logger::info("Already in power saving mode");
@@ -133,6 +148,8 @@ public:
     }
 
 private:
+    RateLimiter m_rateLimiter;
+
     /**
      * Execute a Windows command
      * @param command Command to execute

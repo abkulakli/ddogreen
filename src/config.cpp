@@ -1,6 +1,7 @@
 #include "config.h"
 #include "logger.h"
 #include "platform/platform_factory.h"
+#include "security_utils.h"
 #include <fstream>
 #include <sstream>
 #include <algorithm>
@@ -24,14 +25,37 @@ std::string Config::getDefaultConfigPath()
 
 bool Config::loadFromFile(const std::string& configPath)
 {
-    std::ifstream file(configPath);
-    if (!file.is_open())
+    // Security validation: Check for path traversal
+    if (!SecurityUtils::validatePathTraversal(configPath))
     {
-        Logger::error("Configuration file not found: " + configPath);
+        Logger::error("Security: Invalid path detected: " + configPath);
         return false;
     }
 
-    Logger::info("Loading configuration from: " + configPath);
+    // Security validation: Canonicalize path to prevent traversal
+    std::string safePath = SecurityUtils::canonicalizePath(configPath);
+    if (safePath.empty())
+    {
+        Logger::error("Security: Failed to canonicalize config path: " + configPath);
+        return false;
+    }
+
+    std::ifstream file(safePath);
+    if (!file.is_open())
+    {
+        Logger::error("Configuration file not found: " + safePath);
+        return false;
+    }
+
+    // Security validation: Check file permissions
+    if (!SecurityUtils::validateConfigFilePermissions(safePath))
+    {
+        Logger::error("Security: Configuration file has insecure permissions: " + safePath);
+        file.close();
+        return false;
+    }
+
+    Logger::info("Loading configuration from: " + safePath);
 
     std::string line;
     int lineNumber = 0;
