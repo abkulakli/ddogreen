@@ -94,6 +94,8 @@ add_executable(test_config
     test_config_platform.cpp
     ${CMAKE_SOURCE_DIR}/src/config.cpp
     ${CMAKE_SOURCE_DIR}/src/logger.cpp
+    ${CMAKE_SOURCE_DIR}/src/security_utils.cpp
+    ${CMAKE_SOURCE_DIR}/src/rate_limiter.cpp
     ${CMAKE_SOURCE_DIR}/src/platform/platform_factory.cpp
 )
 add_platform_sources(test_config)
@@ -104,6 +106,8 @@ add_executable(test_activity_monitor
     test_activity_monitor.cpp
     ${CMAKE_SOURCE_DIR}/src/activity_monitor.cpp
     ${CMAKE_SOURCE_DIR}/src/logger.cpp
+    ${CMAKE_SOURCE_DIR}/src/security_utils.cpp
+    ${CMAKE_SOURCE_DIR}/src/rate_limiter.cpp
     ${CMAKE_SOURCE_DIR}/src/platform/platform_factory.cpp
 )
 add_platform_sources(test_activity_monitor)
@@ -120,6 +124,8 @@ configure_test_executable(test_logger)
 add_executable(test_platform_factory
     test_platform_factory.cpp
     ${CMAKE_SOURCE_DIR}/src/logger.cpp
+    ${CMAKE_SOURCE_DIR}/src/security_utils.cpp
+    ${CMAKE_SOURCE_DIR}/src/rate_limiter.cpp
     ${CMAKE_SOURCE_DIR}/src/platform/platform_factory.cpp
 )
 add_platform_sources(test_platform_factory)
@@ -131,6 +137,8 @@ add_executable(test_integration
     ${CMAKE_SOURCE_DIR}/src/activity_monitor.cpp
     ${CMAKE_SOURCE_DIR}/src/config.cpp
     ${CMAKE_SOURCE_DIR}/src/logger.cpp
+    ${CMAKE_SOURCE_DIR}/src/security_utils.cpp
+    ${CMAKE_SOURCE_DIR}/src/rate_limiter.cpp
     ${CMAKE_SOURCE_DIR}/src/platform/platform_factory.cpp
 )
 add_platform_sources(test_integration)
