@@ -33,6 +33,7 @@ Application Layer (main.cpp, config.cpp, logger.cpp) - ZERO platform-specific co
 - **Architecture**: Cross-platform with compile-time platform selection
 - **Service Framework**: systemd (Linux), Windows Service Manager (Windows)
 - **Testing**: GoogleTest framework (70 tests, 100% passing)
+- **CI/CD**: Package validation scripts in `scripts/` directory
 - **Dependencies**: None (only standard C++ and platform-specific system calls)
 
 ## Build System

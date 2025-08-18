@@ -311,14 +311,14 @@ jobs:
         echo "=== Running Comprehensive DEB Package Tests ==="
 
         # Make test script executable
-        chmod +x tests/test_packages.sh
+        chmod +x scripts/test_packages.sh
 
         # Copy DEB package to build directory structure expected by test script
         mkdir -p build/release
         cp *.deb build/release/
 
         # Run DEB-specific testing
-        sudo tests/test_packages.sh build/release 2>&1 | grep -A 50 "Testing DEB package" | head -100 || echo "Test completed"
+        sudo scripts/test_packages.sh build/release 2>&1 | grep -A 50 "Testing DEB package" | head -100 || echo "Test completed"
 
         echo "=== Manual DEB Package Validation ==="
 
@@ -429,14 +429,14 @@ jobs:
         echo "=== Running Comprehensive TGZ Package Tests ==="
 
         # Make test script executable
-        chmod +x tests/test_packages.sh
+        chmod +x scripts/test_packages.sh
 
         # Copy TGZ package to build directory structure expected by test script
         mkdir -p build/release
         cp *.tar.gz build/release/ddogreen-linux.tar.gz
 
         # Run TGZ-specific testing
-        sudo tests/test_packages.sh build/release 2>&1 | grep -A 50 "Testing TGZ package" | head -100 || echo "Test completed"
+        sudo scripts/test_packages.sh build/release 2>&1 | grep -A 50 "Testing TGZ package" | head -100 || echo "Test completed"
 
         echo "=== Manual TGZ Package Validation ==="
 
