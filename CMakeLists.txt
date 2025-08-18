@@ -12,6 +12,31 @@ project(ddogreen VERSION ${PROJECT_VERSION_OVERRIDE}
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Energy-efficient build acceleration with ccache
+# Reduces compilation time and CPU energy consumption during development
+if(NOT CMAKE_DISABLE_FIND_PACKAGE_ccache)
+    find_program(CCACHE_PROGRAM ccache)
+    if(CCACHE_PROGRAM)
+        message(STATUS "Found ccache: ${CCACHE_PROGRAM}")
+        set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
+        set(CMAKE_C_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
+        
+        # Configure ccache for optimal performance
+        # Set reasonable cache size (default 5GB might be too much for this project)
+        execute_process(COMMAND ${CCACHE_PROGRAM} --max-size=1G)
+        
+        # Enable direct mode for better cache hit ratio
+        execute_process(COMMAND ${CCACHE_PROGRAM} --set-config=direct_mode=true)
+        
+        # Ignore time-based macros for better cache consistency
+        execute_process(COMMAND ${CCACHE_PROGRAM} --set-config=sloppiness=time_macros)
+    else()
+        message(STATUS "ccache not found - builds will run without caching")
+    endif()
+else()
+    message(STATUS "ccache disabled via CMAKE_DISABLE_FIND_PACKAGE_ccache")
+endif()
+
 # Compiler-specific flags with zero warning policy (fix code, never disable warnings)
 if(MSVC)
     # Microsoft Visual C++ flags - comprehensive warnings

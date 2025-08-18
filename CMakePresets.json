@@ -20,6 +20,28 @@
                 "CMAKE_BUILD_TYPE": "Release",
                 "BUILD_TESTS": "ON"
             }
+        },
+        {
+            "name": "coverage",
+            "displayName": "Configure: Coverage",
+            "description": "Debug build with coverage analysis enabled",
+            "binaryDir": "${sourceDir}/build/coverage",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "BUILD_TESTS": "ON",
+                "BUILD_WITH_COVERAGE": "ON"
+            }
+        },
+        {
+            "name": "debug-no-ccache",
+            "displayName": "Configure: Debug (No ccache)",
+            "description": "Debug build without ccache for clean builds",
+            "binaryDir": "${sourceDir}/build/debug-no-ccache",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "BUILD_TESTS": "ON",
+                "CMAKE_DISABLE_FIND_PACKAGE_ccache": "ON"
+            }
         }
     ],
     "buildPresets": [
@@ -33,6 +55,18 @@
             "name": "release",
             "displayName": "Build: Release",
             "configurePreset": "release",
+            "jobs": 0
+        },
+        {
+            "name": "coverage",
+            "displayName": "Build: Coverage",
+            "configurePreset": "coverage",
+            "jobs": 0
+        },
+        {
+            "name": "debug-no-ccache",
+            "displayName": "Build: Debug (No ccache)",
+            "configurePreset": "debug-no-ccache",
             "jobs": 0
         }
     ],
@@ -49,6 +83,14 @@
             "name": "release-tests",
             "displayName": "Test: Release Tests",
             "configurePreset": "release",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "coverage-tests",
+            "displayName": "Test: Coverage Tests",
+            "configurePreset": "coverage",
             "output": {
                 "outputOnFailure": true
             }

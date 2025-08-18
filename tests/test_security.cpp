@@ -163,7 +163,7 @@ TEST_F(TestSecurity, test_privilege_validation_prevents_unprivileged_execution) 
     // 3. Provides clear error messages
     
     // For now, just test that privilege checking exists
-    bool hasPrivileges = platformUtils->hasRequiredPrivileges();
+    [[maybe_unused]] bool hasPrivileges = platformUtils->hasRequiredPrivileges();
     std::string escalationMsg = platformUtils->getPrivilegeEscalationMessage();
     
     EXPECT_FALSE(escalationMsg.empty()) << "Should provide escalation guidance";
@@ -189,7 +189,7 @@ TEST_F(TestSecurity, test_command_line_argument_sanitization) {
     
     for (const auto& args : maliciousArgs) {
         // TODO: This should test that argument parsing is secure
-        auto result = platformUtils->parseCommandLine(args.size(), const_cast<char**>(args.data()));
+        auto result = platformUtils->parseCommandLine(static_cast<int>(args.size()), const_cast<char**>(args.data()));
         
         // The secure implementation should:
         // 1. Sanitize all input arguments
@@ -220,7 +220,7 @@ TEST_F(TestSecurity, test_power_manager_rate_limiting) {
     // Test rate limiting by making rapid sequential calls
     // Rate limiter is configured for 5 requests per 1000ms
     
-    int successful_calls = 0;
+    [[maybe_unused]] int successful_calls = 0;
     int total_calls = 0;
     
     // Make rapid requests - first 5 should succeed (or fail due to TLP), 
@@ -248,7 +248,7 @@ TEST_F(TestSecurity, test_power_manager_rate_limiting) {
     std::this_thread::sleep_for(std::chrono::milliseconds(1100)); // Wait for rate limit window to reset
     
     // Now a new request should be allowed (though it may still fail due to TLP command issues)
-    bool after_delay_result = powerManager->setPerformanceMode();
+    [[maybe_unused]] bool after_delay_result = powerManager->setPerformanceMode();
     // We can't assert success here because TLP might not be available,
     // but at least the rate limiter should allow the attempt
     

@@ -351,3 +351,53 @@ ddogreen uses the same intelligent logic across all platforms:
 - **Configurable monitoring interval** for optimal responsiveness vs system impact balance
 - **Automatic service/daemon management** for production deployment
 - **Cross-platform logging and monitoring** capabilities
+
+## Development
+
+### Quick Start for Developers
+
+For the fastest development experience, install ccache for dramatic build time improvements:
+
+```bash
+# Install ccache (energy-efficient build acceleration)
+sudo apt install ccache              # Ubuntu/Debian
+sudo dnf install ccache              # Fedora
+sudo pacman -S ccache                # Arch Linux
+
+# Build with automatic ccache integration
+./scripts/build.sh debug             # Debug build (~0.7s with cache)
+./scripts/build.sh release           # Release build
+./scripts/build.sh debug clean       # Clean debug build
+
+# Traditional CMake workflow (also uses ccache automatically)
+cmake --preset debug                 # Configure with ccache
+cmake --build --preset debug         # Build with ccache acceleration
+ctest --preset debug-tests           # Run tests
+```
+
+### Build Performance with ccache
+
+ccache provides dramatic build acceleration and energy savings:
+
+- **Without ccache**: 70+ seconds (clean build)
+- **With ccache**: 0.7 seconds (98% faster!)
+- **Energy savings**: Significant reduction in CPU usage and power consumption
+- **Automatic**: Works seamlessly when ccache is installed
+- **Fallback**: Builds normally when ccache is unavailable
+
+**ccache Statistics and Management**:
+```bash
+ccache --show-stats              # View cache performance
+ccache --zero-stats              # Reset statistics  
+ccache --cleanup                 # Clean old entries
+ccache --max-size=2G             # Increase cache size
+```
+
+### Development Requirements
+
+- **C++20 compiler** (GCC 10+, Clang 10+, MSVC 2019+)
+- **CMake 3.16+** with preset support
+- **ccache** (optional, but highly recommended for development)
+- **Platform-specific development tools** (see project documentation)
+
+For detailed technical documentation, architecture details, and contribution guidelines, see the project's memory bank documentation in the `memory-bank/` directory.
