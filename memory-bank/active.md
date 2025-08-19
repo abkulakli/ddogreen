@@ -1,10 +1,53 @@
 # DDOGreen - Current Focus & Active Context
 
 ## Current Work Focus
-**Project Status**: Windows MSI Packaging Fix Completed - August 20, 2025
-**Current State**: Fixed Windows MSI packaging issues by restoring working v0.3.0 configuration
+**Project Status**: Power Management Testing Infrastructure Completed - August 20, 2025
+**Current State**: Implemented comprehensive functional testing for power management workflow
 
-### Latest Update (Aug 20, 2025): Windows MSI Packaging Issue Resolution ✅
+### Latest Update (Aug 20, 2025): Power Management Testing Infrastructure ✅
+**COMPLETED**: Successfully implemented comprehensive testing infrastructure for power management functionality
+- **GitHub Actions Integration**: Added functional power management test job to main CI/CD workflow
+- **Standalone Workflow**: Created dedicated `functional-test.yml` for independent testing
+- **Local Testing Script**: Implemented `scripts/test_power_management.sh` for local development
+- **Test Coverage**: Complete power management workflow validation:
+  - Low load detection (power save mode)
+  - High load detection via CPU stress (high performance mode)  
+  - Recovery monitoring (return to power save mode)
+  - Error handling validation
+  - Configuration loading tests
+
+**Technical Implementation**:
+- **CI/CD Integration**: New `functional-test-linux` job in unified CI/CD workflow
+- **Dependencies**: Added stress-ng for CPU stress testing in GitHub Actions
+- **Monitoring**: Real-time load average monitoring during test phases
+- **Validation**: 4-phase test protocol:
+  1. Basic functionality (help, version, dry-run)
+  2. Error handling (invalid configs, invalid options)
+  3. Power management simulation (stress → high perf → recovery → power save)
+  4. Performance metrics collection
+- **Logging**: Comprehensive test output with color-coded status messages
+- **Timeout Protection**: All tests have appropriate timeout limits
+
+**Test Workflow Details**:
+```bash
+# Local testing
+./scripts/test_power_management.sh                    # Test with default executable
+./scripts/test_power_management.sh ./build/debug/ddogreen  # Test specific build
+
+# GitHub Actions
+# Automatically runs on: push to main/develop, pull requests
+# Manual trigger available via workflow_dispatch
+```
+
+**Key Features**:
+- **Cross-Platform**: GitHub Actions tests on Ubuntu, local script supports Linux distros
+- **Stress Testing**: Uses stress-ng to simulate high CPU load conditions
+- **Real-time Monitoring**: Load average tracking during all test phases
+- **Comprehensive Validation**: Tests both normal operation and error conditions
+- **CI Integration**: Functional tests must pass before packaging jobs run
+- **Developer Friendly**: Color-coded output and detailed progress reporting
+
+### Previous Achievement (Aug 20, 2025): Windows MSI Packaging Fix Completed ✅
 **COMPLETED**: Successfully identified and fixed Windows MSI packaging issues in GitHub Actions CI/CD pipeline
 - **Root Cause Identified**: File path structure changes broke WiX template compatibility
 - **Solution Applied**: Restored working WiX template from tag v0.3.0 

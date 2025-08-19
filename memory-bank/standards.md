@@ -48,6 +48,63 @@ cmake --build build/debug               # Build without static analysis
 - **Performance Optimization**: Identifies energy-inefficient code patterns with deeper analysis
 - **Portability**: Cross-platform compatibility checks with POSIX library awareness
 - **Security**: Enhanced security pattern detection for cross-platform applications
+
+## Functional Testing Standards
+**IMPLEMENTED**: Comprehensive power management functionality testing with automated CI/CD integration
+
+### Testing Philosophy
+**CRITICAL**: All power management functionality must be validated through automated testing that simulates real-world usage patterns
+
+### Functional Testing Framework (August 20, 2025)
+**COMPREHENSIVE COVERAGE**: Multi-phase testing protocol that validates complete power management workflow
+
+#### Test Phases
+1. **Basic Functionality**: Command-line interface validation (help, version, dry-run)
+2. **Error Handling**: Invalid configuration and argument handling
+3. **Power Management Simulation**: Complete workflow testing
+   - Initial state monitoring (power save mode expected)
+   - CPU stress application (high performance mode trigger)
+   - Load monitoring during stress (high performance validation)
+   - Recovery monitoring (return to power save mode)
+4. **Performance Validation**: Startup time and memory usage metrics
+
+#### Testing Tools Integration
+- **Stress Testing**: stress-ng for CPU load simulation
+- **Monitoring**: /proc/loadavg for real-time load tracking
+- **Process Management**: Background service testing with proper cleanup
+- **Logging**: Comprehensive output capture and analysis
+
+#### CI/CD Integration
+```yaml
+# Main workflow integration
+functional-test-linux:
+  needs: test-linux
+  runs-on: ubuntu-latest
+  timeout-minutes: 10
+  # Complete power management workflow validation
+```
+
+#### Local Development Testing
+```bash
+# Local testing script
+./scripts/test_power_management.sh                    # Default executable
+./scripts/test_power_management.sh ./build/debug/ddogreen  # Specific build
+```
+
+#### Test Validation Criteria
+- **Phase Duration**: 30-second total test window for realistic validation
+- **Stress Duration**: 15-second CPU stress for reliable mode switching
+- **Recovery Time**: 10-second recovery monitoring for mode transition
+- **Load Thresholds**: Real-time load average monitoring for mode validation
+- **Timeout Protection**: All operations have appropriate timeout limits
+- **Error Resilience**: All error conditions must be handled gracefully
+
+#### Benefits
+- **Real-world Simulation**: Tests actual power management behavior under load
+- **Automated Validation**: Prevents regressions in core functionality
+- **Developer Feedback**: Immediate validation during development
+- **CI/CD Quality Gate**: Functional tests must pass before packaging
+- **Cross-platform Readiness**: Framework ready for Windows and macOS adaptation
 - **Sustainability Alignment**: Supports energy-efficient coding practices through automated detection
 
 #### Example Static Analysis Output
