@@ -20,7 +20,7 @@ public:
      * @param maxRequests Maximum number of requests allowed in the time window
      * @param timeWindowMs Time window in milliseconds
      */
-    RateLimiter(int maxRequests = 5, int timeWindowMs = 1000);
+    explicit RateLimiter(int maxRequests = 5, int timeWindowMs = 1000);
     
     /**
      * @brief Check if an operation is allowed for the given key

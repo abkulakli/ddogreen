@@ -18,7 +18,7 @@ class LinuxPlatformUtils : public IPlatformUtils
 {
 public:
     LinuxPlatformUtils() = default;
-    virtual ~LinuxPlatformUtils() = default;
+    virtual ~LinuxPlatformUtils() override = default;
 
     /**
      * Check if running with root privileges
@@ -213,7 +213,6 @@ public:
 
                 std::string devicePath = entry.path().string();
                 std::string typePath = devicePath + "/type";
-                std::string onlinePath = devicePath + "/online";
 
                 // Read device type
                 std::ifstream typeFile(typePath);
@@ -227,6 +226,7 @@ public:
                     {
                         hasAC = true;
                         // Check if AC is online
+                        std::string onlinePath = devicePath + "/online";
                         std::ifstream onlineFile(onlinePath);
                         if (onlineFile.is_open())
                         {

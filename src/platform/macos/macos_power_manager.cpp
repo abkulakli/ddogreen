@@ -15,7 +15,7 @@ public:
         // Rate limiter: max 2 power mode changes per 60000ms (60 seconds)
     }
 
-    virtual ~MacOSPowerManager() = default;
+    virtual ~MacOSPowerManager() override = default;
 
     /**
      * Set system to performance mode using pmset

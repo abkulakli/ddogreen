@@ -12,7 +12,7 @@
 class WindowsPlatformUtils : public IPlatformUtils {
 public:
     WindowsPlatformUtils() = default;
-    virtual ~WindowsPlatformUtils() = default;
+    virtual ~WindowsPlatformUtils() override = default;
 
     /**
      * Check if running with administrator privileges

@@ -99,8 +99,6 @@ bool Config::loadFromFile(const std::string& configPath)
     return true;
 }
 
-}
-
 bool Config::validateConfiguration() const
 {
     // Validate reasonable ranges and relationships

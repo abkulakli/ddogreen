@@ -23,7 +23,7 @@ bool SecurityUtils::validateConfigFilePermissions(const std::string& filePath)
 #ifndef _WIN32
         // On Unix systems, check that file is not world-writable
         bool isWorldWritable = (perms & fs::perms::others_write) != fs::perms::none;
-        
+
         if (isWorldWritable)
         {
             Logger::error("Security: Configuration file is world-writable: " + filePath);
@@ -96,7 +96,7 @@ bool SecurityUtils::validatePathTraversal(const std::string& path)
     {
         dotDotCount++;
         pos += 2;
-        
+
         // If we see too many ".." sequences, it's suspicious
         if (dotDotCount > 3)
         {
@@ -121,7 +121,7 @@ std::string SecurityUtils::canonicalizePath(const std::string& path)
 
         // Use filesystem library to canonicalize the path
         fs::path fsPath(path);
-        
+
         // If path is relative, make it absolute relative to current directory
         if (fsPath.is_relative())
         {
@@ -130,10 +130,10 @@ std::string SecurityUtils::canonicalizePath(const std::string& path)
 
         // Canonicalize to resolve any . or .. components
         fs::path canonical = fs::weakly_canonical(fsPath);
-        
+
         std::string result = canonical.string();
         Logger::debug("Canonicalized path: " + path + " -> " + result);
-        
+
         return result;
     }
     catch (const fs::filesystem_error& e)
@@ -155,7 +155,7 @@ bool SecurityUtils::isPathWithinDirectory(const std::string& path, const std::st
         // Canonicalize both paths to resolve any relative components
         std::string canonicalPath = canonicalizePath(path);
         std::string canonicalAllowedDir = canonicalizePath(allowedDir);
-        
+
         if (canonicalPath.empty() || canonicalAllowedDir.empty())
         {
             Logger::error("Failed to canonicalize paths for security check");
@@ -163,8 +163,8 @@ bool SecurityUtils::isPathWithinDirectory(const std::string& path, const std::st
         }
 
         // Ensure allowed directory ends with separator for proper prefix matching
-        if (!canonicalAllowedDir.empty() && 
-            canonicalAllowedDir.back() != '/' && 
+        if (!canonicalAllowedDir.empty() &&
+            canonicalAllowedDir.back() != '/' &&
             canonicalAllowedDir.back() != '\\')
         {
             canonicalAllowedDir += fs::path::preferred_separator;
@@ -172,14 +172,14 @@ bool SecurityUtils::isPathWithinDirectory(const std::string& path, const std::st
 
         // Check if the canonical path starts with the allowed directory
         bool isWithin = canonicalPath.find(canonicalAllowedDir) == 0;
-        
+
         if (!isWithin)
         {
             Logger::error("Security: Path is outside allowed directory");
             Logger::error("Path: " + canonicalPath);
             Logger::error("Allowed directory: " + canonicalAllowedDir);
         }
-        
+
         return isWithin;
     }
     catch (const std::exception& e)

@@ -27,7 +27,7 @@ public:
         }
     }
 
-    virtual ~WindowsPowerManager() = default;
+    virtual ~WindowsPowerManager() override = default;
 
     /**
      * Set system to high performance mode using Windows Power Plans

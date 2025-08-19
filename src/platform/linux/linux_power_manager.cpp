@@ -19,7 +19,7 @@ public:
         // Rate limiter: max 2 power mode changes per 60000ms (60 seconds)
     }
 
-    virtual ~LinuxPowerManager() = default;
+    virtual ~LinuxPowerManager() override = default;
 
     /**
      * Set system to AC mode using 'tlp ac'

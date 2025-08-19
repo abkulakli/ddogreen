@@ -22,7 +22,7 @@ public:
         Logger::info("MOCK: Detected " + std::to_string(m_coreCount) + " CPU cores");
     }
 
-    virtual ~MacOSSystemMonitor() = default;
+    virtual ~MacOSSystemMonitor() override = default;
 
     /**
      * Get system load average using sysctl

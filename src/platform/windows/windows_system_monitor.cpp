@@ -11,6 +11,7 @@
 #include <span>
 #include <queue>
 #include <algorithm>
+#include <numeric>
 #include <windows.h>
 #include <pdh.h>
 #include <pdhmsg.h>
@@ -36,7 +37,7 @@ public:
         }
     }
 
-    virtual ~WindowsSystemMonitor() {
+    virtual ~WindowsSystemMonitor() override {
         // Cleanup PDH resources
         if (m_cpuQuery != nullptr) {
             PdhCloseQuery(m_cpuQuery);
@@ -239,13 +240,9 @@ private:
         const size_t numSamples = (std::min)(samples, values.size());
         const size_t startIndex = values.size() - numSamples;
         
-        double sum = 0.0;
         // Use range-based for loop with subspan for better bounds safety
         auto valueSpan = std::span<const double>{values}.subspan(startIndex);
-        for (const auto& value : valueSpan)
-        {
-            sum += value;
-        }
+        double sum = std::accumulate(valueSpan.begin(), valueSpan.end(), 0.0);
         
         return sum / static_cast<double>(numSamples);
     }

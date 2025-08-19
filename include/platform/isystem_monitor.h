@@ -6,9 +6,15 @@
 #include <cstring>
 #include <algorithm>
 
+#include <vector>
+#include <tuple>
+#include <numeric>
+
 /**
- * Interface for platform-specific system monitoring functionality
- * Provides CPU load and core count information
+ * @brief Abstract interface for system monitoring functionality
+ * 
+ * Provides cross-platform abstraction for monitoring system load,
+ * CPU core count, and load averaging calculations.
  */
 class ISystemMonitor
 {
@@ -68,11 +74,7 @@ public:
         // Default implementation - simple average
         if (loadHistory.empty()) return 0.0;
         
-        double sum = 0.0;
-        for (const auto& load : loadHistory)
-        {
-            sum += load;
-        }
+        double sum = std::accumulate(loadHistory.begin(), loadHistory.end(), 0.0);
         return sum / static_cast<double>(loadHistory.size());
     }
 };

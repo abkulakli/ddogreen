@@ -16,7 +16,7 @@
 class MacOSPlatformUtils : public IPlatformUtils {
 public:
     MacOSPlatformUtils() = default;
-    virtual ~MacOSPlatformUtils() = default;
+    virtual ~MacOSPlatformUtils() override = default;
 
     /**
      * Check if running with root privileges

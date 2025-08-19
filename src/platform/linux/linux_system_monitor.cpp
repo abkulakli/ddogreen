@@ -20,7 +20,7 @@ public:
         m_available = (m_coreCount > 0) && checkProcLoadavgAccess();
     }
 
-    virtual ~LinuxSystemMonitor() = default;
+    virtual ~LinuxSystemMonitor() override = default;
 
     /**
      * Get system load average from /proc/loadavg
@@ -105,7 +105,7 @@ private:
         
         while (std::getline(file, line))
         {
-            if (line.find("processor") == 0)
+            if (line.starts_with("processor"))
             {
                 coreCount++;
             }
