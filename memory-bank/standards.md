@@ -98,10 +98,12 @@ test-linux:
 ```
 
 #### Test Validation Criteria
-- **Phase Duration**: 60-second total test window for realistic validation
-- **Stress Duration**: 30-second CPU stress for reliable mode switching
-- **Recovery Time**: 10-second recovery monitoring for mode transition
+- **Phase Duration**: 240-second total test window for realistic validation
+- **Stress Duration**: 60-second CPU stress for reliable mode switching (reaches 70%+ threshold)
+- **Recovery Time**: 90-second recovery monitoring for complete mode transition back to power save
 - **Load Thresholds**: Real-time load average monitoring for mode validation
+- **Governor Monitoring**: Real-time CPU governor state tracking to verify mode switches
+- **Clean Logging**: Professional output format without emojis or special characters
 - **Timeout Protection**: All operations have appropriate timeout limits
 - **Error Resilience**: All error conditions must be handled gracefully
 

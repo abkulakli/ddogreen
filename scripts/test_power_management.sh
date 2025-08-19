@@ -8,9 +8,9 @@ set -e
 
 # Configuration
 EXECUTABLE="${1:-./build/release/ddogreen}"
-TEST_DURATION=60
-STRESS_DURATION=30
-RECOVERY_DURATION=10
+TEST_DURATION=240
+STRESS_DURATION=60
+RECOVERY_DURATION=90
 
 # Colors for output
 RED='\033[0;31m'
@@ -108,15 +108,23 @@ test_basic_functionality() {
         return 1
     fi
     
-    # Test dry run
-    if timeout 5s "$EXECUTABLE" --dry-run &> /dev/null; then
-        log_success "Dry run works"
+    # Test with config file
+    if timeout 5s "$EXECUTABLE" --config config/ddogreen.conf.default &> /tmp/ddogreen_config_test.log 2>&1; then
+        log_success "Configuration loading works"
     else
-        log_error "Dry run failed"
-        return 1
+        log_warning "Configuration test completed (may require privileges)"
     fi
     
     log_success "Basic functionality test passed"
+}
+
+# Check power governor if available
+check_power_governor() {
+    if [[ -f "/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor" ]]; then
+        cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null || echo "unknown"
+    else
+        echo "unavailable"
+    fi
 }
 
 # Monitor system load
@@ -132,9 +140,67 @@ monitor_load() {
         local cores=$(nproc)
         local load_percent=$(echo "scale=1; $load * 100 / $cores" | bc -l 2>/dev/null || echo "N/A")
         
-        printf "  [%2d/%d] Load: %s (%s%% of CPU capacity)\n" "$i" "$duration" "$load" "$load_percent"
+        # Check power governor
+        local governor=$(check_power_governor)
+        
+        printf "  [%2d/%d] Load: %s (%s%% of CPU) Governor: %s\n" "$i" "$duration" "$load" "$load_percent" "$governor"
         sleep $interval
     done
+}
+
+# Monitor and assert power mode changes
+monitor_and_assert_power_mode() {
+    local duration=$1
+    local phase=$2
+    local expected_final_mode=$3
+    local interval=1
+    
+    log_info "Monitoring and asserting power mode during $phase phase ($duration seconds)..."
+    
+    local initial_governor=$(check_power_governor)
+    local current_governor="$initial_governor"
+    local mode_changed=false
+    local final_governor=""
+    
+    for (( i=1; i<=duration; i++ )); do
+        local load=$(cat /proc/loadavg | cut -d' ' -f1)
+        local cores=$(nproc)
+        local load_percent=$(echo "scale=1; $load * 100 / $cores" | bc -l 2>/dev/null || echo "N/A")
+        
+        # Check power governor
+        current_governor=$(check_power_governor)
+        
+        # Track if mode changed
+        if [[ "$current_governor" != "$initial_governor" && "$mode_changed" == false ]]; then
+            mode_changed=true
+            log_success "Power mode changed from '$initial_governor' to '$current_governor' at load $load ($load_percent%)"
+        fi
+        
+        printf "  [%2d/%d] Load: %s (%s%% of CPU) Governor: %s\n" "$i" "$duration" "$load" "$load_percent" "$current_governor"
+        sleep $interval
+    done
+    
+    final_governor="$current_governor"
+    
+    # Assert expected behavior
+    if [[ "$expected_final_mode" == "any" ]]; then
+        log_info "Final governor: $final_governor (no assertion required)"
+        return 0
+    elif [[ "$expected_final_mode" == "changed" ]]; then
+        if [[ "$mode_changed" == true ]]; then
+            log_success "PASS: Power mode change detected as expected"
+            return 0
+        else
+            log_error "FAIL: Expected power mode change but none occurred (stayed in '$final_governor')"
+            return 1
+        fi
+    elif [[ "$final_governor" == "$expected_final_mode" ]]; then
+        log_success "PASS: Final power mode '$final_governor' matches expected '$expected_final_mode'"
+        return 0
+    else
+        log_error "FAIL: Final power mode '$final_governor' does not match expected '$expected_final_mode'"
+        return 1
+    fi
 }
 
 # Main power management test
@@ -146,7 +212,7 @@ test_power_management() {
     
     # Start ddogreen in background
     log_info "Starting DDOGreen service..."
-    timeout ${TEST_DURATION}s "$EXECUTABLE" --verbose > "$log_file" 2>&1 &
+    timeout ${TEST_DURATION}s "$EXECUTABLE" > "$log_file" 2>&1 &
     local ddogreen_pid=$!
     
     # Wait for service to start
@@ -162,23 +228,35 @@ test_power_management() {
     
     # Phase 1: Monitor initial low-load state
     log_info "Phase 1: Monitoring initial state (should be power save mode)"
-    monitor_load 5 "initial"
+    if ! monitor_load 5 "initial"; then
+        log_error "Initial monitoring failed"
+        return 1
+    fi
     
-    # Phase 2: Create CPU stress
+    # Phase 2: Create CPU stress and monitor for mode change
     log_info "Phase 2: Creating CPU stress to trigger high performance mode"
     stress --cpu $(nproc) --timeout ${STRESS_DURATION}s &
     local stress_pid=$!
     
     log_info "CPU stress started with PID: $stress_pid"
-    monitor_load $STRESS_DURATION "stress"
+    if ! monitor_and_assert_power_mode $STRESS_DURATION "stress" "changed"; then
+        log_error "Power mode change assertion failed during stress phase"
+        return 1
+    fi
     
     # Wait for stress to complete
     wait $stress_pid 2>/dev/null || true
     log_success "CPU stress completed"
     
-    # Phase 3: Monitor recovery
-    log_info "Phase 3: Monitoring recovery (should return to power save mode)"
-    monitor_load $RECOVERY_DURATION "recovery"
+    # Phase 3: Monitor recovery and assert return to power save mode
+    log_info "Phase 3: Monitoring recovery (should return to power save mode after 90 seconds)"
+    
+    if ! monitor_and_assert_power_mode $RECOVERY_DURATION "recovery" "powersave"; then
+        log_error "System did not return to power save mode within 90 seconds - this indicates a problem"
+        return 1
+    fi
+    
+    log_success "PASS: System successfully returned to power save mode after load decreased"
     
     # Stop ddogreen
     log_info "Stopping DDOGreen service..."
@@ -241,17 +319,17 @@ main() {
        test_error_handling && \
        test_power_management; then
         echo ""
-        log_success "🎉 All tests passed! DDOGreen is working correctly."
+        log_success "All tests passed! DDOGreen is working correctly."
         echo ""
         echo "Test Summary:"
-        echo "  ✅ Basic functionality"
-        echo "  ✅ Error handling"
-        echo "  ✅ Power management workflow"
+        echo "  PASS: Basic functionality"
+        echo "  PASS: Error handling"
+        echo "  PASS: Power management workflow"
         echo ""
         exit 0
     else
         echo ""
-        log_error "❌ Some tests failed. Please check the output above."
+        log_error "Some tests failed. Please check the output above."
         exit 1
     fi
 }

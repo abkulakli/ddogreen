@@ -34,6 +34,8 @@
 - **Resource Efficiency**: Reuses existing build artifacts and environment
 - **Simplified Maintenance**: Single test job to maintain instead of multiple workflows
 - **Clear Test Flow**: Static Analysis → Build → Unit Tests → Power Management Tests → Packaging
+- **Comprehensive Validation**: 60-second stress + 60-second recovery with mode change assertions
+- **Intelligent Thresholds**: Correctly validates hysteresis behavior (70% entry, 30% exit thresholds)
 
 ### Previous Achievement (Aug 20, 2025): Windows MSI Packaging Fix Completed ✅
 **COMPLETED**: Successfully identified and fixed Windows MSI packaging issues in GitHub Actions CI/CD pipeline

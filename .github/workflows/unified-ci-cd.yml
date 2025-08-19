@@ -175,47 +175,57 @@ jobs:
 
     - name: Test power management functionality
       run: |
-        echo "🔋 Power Management Functional Test"
-        echo "==================================="
+        echo "Power Management Functional Test"
+        echo "================================"
         
         # Show system information
-        echo "📊 System Information:"
+        echo "System Information:"
         echo "CPU cores: $(nproc)"
         echo "Initial load: $(cat /proc/loadavg)"
         echo ""
         
         # Test basic functionality
-        echo "🧪 Testing basic functionality..."
-        timeout 5s ./build/release/ddogreen --dry-run || echo "Dry run completed"
-        echo "✅ Basic functionality test passed"
+        echo "Testing basic functionality..."
+        timeout 5s ./build/release/ddogreen --config config/ddogreen.conf.default || echo "Config test completed (may require privileges)"
+        echo "PASS: Basic functionality test passed"
         echo ""
         
         # Test power management workflow
-        echo "🧪 Testing power management workflow..."
+        echo "Testing power management workflow..."
         
         # Start ddogreen in background
-        echo "📈 Starting DDOGreen monitoring..."
-        timeout 90s ./build/release/ddogreen --verbose &
+        echo "Starting DDOGreen monitoring..."
+        timeout 300s ./build/release/ddogreen &
         DDOGREEN_PID=$!
         sleep 2
         
         # Monitor initial state (should be low load)
-        echo "📊 Initial state monitoring (5 seconds):"
+        echo "Initial state monitoring (5 seconds):"
         for i in {1..5}; do
           echo "  Load: $(cat /proc/loadavg | cut -d' ' -f1)"
           sleep 1
         done
         
         # Create CPU stress to trigger high performance mode
-        echo "🔥 Creating CPU stress to trigger high performance mode..."
-        stress --cpu $(nproc) --timeout 30s &
+        echo "Creating CPU stress to trigger high performance mode..."
+        stress --cpu $(nproc) --timeout 60s &
         STRESS_PID=$!
         
         # Monitor during stress
-        echo "⚡ Monitoring under stress (30 seconds):"
-        for i in {1..30}; do
+        echo "Monitoring under stress (60 seconds):"
+        PERFORMANCE_MODE_DETECTED=false
+        
+        for i in {1..60}; do
           LOAD=$(cat /proc/loadavg | cut -d' ' -f1)
-          echo "  Load: $LOAD (stress active)"
+          GOVERNOR=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null || echo "N/A")
+          
+          # Track when performance mode is activated
+          if [[ "$GOVERNOR" == "performance" && "$PERFORMANCE_MODE_DETECTED" == "false" ]]; then
+            PERFORMANCE_MODE_DETECTED=true
+            echo "  PASS: High performance mode activated at step $i with load $LOAD"
+          fi
+          
+          echo "  Load: $LOAD Governor: $GOVERNOR (stress active)"
           sleep 1
         done
         
@@ -223,20 +233,48 @@ jobs:
         wait $STRESS_PID 2>/dev/null || echo "Stress test completed"
         
         # Monitor recovery (should return to power save mode)
-        echo "🔄 Monitoring recovery to power save mode (10 seconds):"
-        for i in {1..10}; do
+        echo "Monitoring recovery to power save mode (90 seconds):"
+        PERFORMANCE_MODE_DETECTED=false
+        POWERSAVE_MODE_RESTORED=false
+        
+        for i in {1..90}; do
           LOAD=$(cat /proc/loadavg | cut -d' ' -f1)
-          echo "  Load: $LOAD (recovery phase)"
+          GOVERNOR=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null || echo "N/A")
+          
+          # Track mode changes
+          if [[ "$GOVERNOR" == "performance" ]]; then
+            PERFORMANCE_MODE_DETECTED=true
+          elif [[ "$GOVERNOR" == "powersave" && "$PERFORMANCE_MODE_DETECTED" == "true" ]]; then
+            POWERSAVE_MODE_RESTORED=true
+            echo "  PASS: Power save mode restored at step $i with load $LOAD"
+          fi
+          
+          echo "  Load: $LOAD Governor: $GOVERNOR (recovery phase)"
           sleep 1
         done
         
+        # Assert power management worked
+        if [[ "$PERFORMANCE_MODE_DETECTED" == "true" ]]; then
+          echo "PASS: High performance mode was activated during stress test"
+        else
+          echo "FAIL: High performance mode was never activated"
+          exit 1
+        fi
+        
+        if [[ "$POWERSAVE_MODE_RESTORED" == "true" ]]; then
+          echo "PASS: Power save mode was restored during recovery"
+        else
+          echo "FAIL: Power save mode was not restored within 90 seconds - test failed"
+          exit 1
+        fi
+        
         # Stop ddogreen
-        echo "🛑 Stopping DDOGreen..."
+        echo "Stopping DDOGreen..."
         kill $DDOGREEN_PID 2>/dev/null || echo "Process already stopped"
         wait $DDOGREEN_PID 2>/dev/null || echo "DDOGreen stopped"
         
-        echo "✅ Power management functionality test passed"
-        echo "🎉 All functional tests completed successfully!"
+        echo "PASS: Power management functionality test passed"
+        echo "All functional tests completed successfully!"
 
   # Step 2b: Test Application (Windows)
   test-windows:
