@@ -9,7 +9,43 @@
 3. **Implementation**: Apply documented patterns and best practices from MCP sources
 4. **Validation**: Cross-reference implementation against MCP-provided examples
 
-## Core Development Principles
+## Static Analysis Integration
+**IMPLEMENTED**: Continuous code quality monitoring using cppcheck static analysis tool
+
+### Static Analysis Workflow
+**Tools**: cppcheck 2.17.1 (clang-tidy disabled per project requirements)
+
+#### Build Integration Commands
+```bash
+# Enable static analysis during build
+cmake --preset static-analysis           # Configure with static analysis enabled
+cmake --build build/static-analysis      # Build with real-time code analysis
+
+# Standard development builds (analysis disabled by default)
+cmake --preset debug                     # Regular debug build
+cmake --build build/debug               # Build without static analysis
+```
+
+#### Configuration Details
+- **Scope**: All source files in `src/` with `include/` headers
+- **Standards**: C++20 compliance with comprehensive rule set
+- **Integration**: Automatic execution during compilation when enabled
+- **Coverage**: 179/856 available checkers active for thorough analysis
+
+#### Key Benefits
+- **Real-time Feedback**: Issues detected during compilation, not post-build
+- **Performance Optimization**: Identifies energy-inefficient code patterns
+- **Code Quality**: Catches style violations, potential bugs, and improvement opportunities
+- **Sustainability Alignment**: Supports energy-efficient coding practices through automated detection
+
+#### Example Static Analysis Output
+```
+/path/to/file.cpp:23:5: style: Class 'RateLimiter' has a constructor with 1 argument that is not explicit. [noExplicitConstructor]
+/path/to/file.cpp:108:17: performance: Inefficient usage of string::find() in condition; string::starts_with() could be faster. [stlIfStrFind]  
+/path/to/file.cpp:74:17: style: Consider using std::accumulate algorithm instead of a raw loop. [useStlAlgorithm]
+```
+
+### Code Quality Standards
 
 ### Documentation Management
 **CRITICAL RULE**: All documentation must follow the established memory bank structure

@@ -46,6 +46,18 @@
                 "BUILD_TESTS": "ON",
                 "CMAKE_DISABLE_FIND_PACKAGE_ccache": "ON"
             }
+        },
+        {
+            "name": "static-analysis",
+            "displayName": "Configure: Static Analysis",
+            "description": "Debug build with static analysis enabled (clang-tidy, cppcheck)",
+            "binaryDir": "${sourceDir}/build/static-analysis",
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "BUILD_TESTS": "ON",
+                "ENABLE_STATIC_ANALYSIS": "ON"
+            }
         }
     ],
     "buildPresets": [
@@ -71,6 +83,12 @@
             "name": "debug-no-ccache",
             "displayName": "Build: Debug (No ccache)",
             "configurePreset": "debug-no-ccache",
+            "jobs": 0
+        },
+        {
+            "name": "static-analysis",
+            "displayName": "Build: Static Analysis",
+            "configurePreset": "static-analysis",
             "jobs": 0
         }
     ],

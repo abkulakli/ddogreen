@@ -106,6 +106,33 @@ endif()
 # Include directories
 include_directories(include)
 
+# Static Analysis Tools Configuration
+option(ENABLE_STATIC_ANALYSIS "Enable static analysis tools (cppcheck only)" OFF)
+
+# Find static analysis tools
+if(ENABLE_STATIC_ANALYSIS)
+    find_program(CPPCHECK_EXE NAMES "cppcheck" DOC "Path to cppcheck executable")
+    
+    if(CPPCHECK_EXE)
+        message(STATUS "Found cppcheck: ${CPPCHECK_EXE}")
+        set(CMAKE_CXX_CPPCHECK "${CPPCHECK_EXE}"
+            "--enable=all"
+            "--inconclusive"
+            "--force"
+            "--inline-suppr"
+            "--language=c++"
+            "--std=c++20"
+            "--suppress=missingIncludeSystem"
+            "--suppress=unmatchedSuppression"
+            "--suppress=unusedFunction"
+            "--quiet")
+    else()
+        message(WARNING "cppcheck not found - install with: sudo apt install cppcheck")
+    endif()
+else()
+    message(STATUS "Static analysis disabled - enable with: cmake -DENABLE_STATIC_ANALYSIS=ON")
+endif()
+
 # Create executable
 add_executable(ddogreen ${SOURCES})
 
@@ -321,3 +348,94 @@ if(BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
 endif()
+
+# Static Analysis Targets (manual execution)
+if(CLANG_TIDY_EXE)
+    # Clang-tidy target for manual analysis
+    add_custom_target(clang-tidy
+        COMMAND ${CLANG_TIDY_EXE} 
+            ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/src/platform/*.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/src/platform/*/*.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h
+            ${CMAKE_CURRENT_SOURCE_DIR}/include/*/*.h
+            --
+            -I${CMAKE_CURRENT_SOURCE_DIR}/include
+            -std=c++20
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        COMMENT "Running clang-tidy static analysis"
+    )
+    
+    # Clang-tidy with fixes (use with caution)
+    add_custom_target(clang-tidy-fix
+        COMMAND ${CLANG_TIDY_EXE} 
+            ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/src/platform/*.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/src/platform/*/*.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h
+            ${CMAKE_CURRENT_SOURCE_DIR}/include/*/*.h
+            --fix
+            --
+            -I${CMAKE_CURRENT_SOURCE_DIR}/include
+            -std=c++20
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        COMMENT "Running clang-tidy with automatic fixes (CAUTION: modifies source files)"
+    )
+endif()
+
+if(CPPCHECK_EXE)
+    # Cppcheck target for manual analysis
+    add_custom_target(cppcheck
+        COMMAND ${CPPCHECK_EXE}
+            --enable=all
+            --inconclusive
+            --force
+            --inline-suppr
+            --language=c++
+            --std=c++20
+            --suppress=missingIncludeSystem
+            --suppress=unmatchedSuppression
+            --suppress=unusedFunction
+            --verbose
+            -I ${CMAKE_CURRENT_SOURCE_DIR}/include
+            ${CMAKE_CURRENT_SOURCE_DIR}/src
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        COMMENT "Running cppcheck static analysis"
+    )
+    
+    # Cppcheck with XML output for CI/reporting
+    add_custom_target(cppcheck-xml
+        COMMAND ${CPPCHECK_EXE}
+            --enable=all
+            --inconclusive
+            --force
+            --inline-suppr
+            --language=c++
+            --std=c++20
+            --suppress=missingIncludeSystem
+            --suppress=unmatchedSuppression
+            --suppress=unusedFunction
+            --xml
+            --xml-version=2
+            -I ${CMAKE_CURRENT_SOURCE_DIR}/include
+            ${CMAKE_CURRENT_SOURCE_DIR}/src
+            2> ${CMAKE_BINARY_DIR}/cppcheck-report.xml
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        COMMENT "Running cppcheck with XML output"
+    )
+endif()
+
+# Combined static analysis target
+add_custom_target(static-analysis
+    COMMENT "Running all available static analysis tools"
+)
+
+if(CLANG_TIDY_EXE)
+    add_dependencies(static-analysis clang-tidy)
+endif()
+
+if(CPPCHECK_EXE)
+    add_dependencies(static-analysis cppcheck)
+endif()
+
+include(CPack)
