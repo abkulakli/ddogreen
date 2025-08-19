@@ -122,6 +122,8 @@ if(ENABLE_STATIC_ANALYSIS)
             "--inline-suppr"
             "--language=c++"
             "--std=c++20"
+            "--check-level=exhaustive"
+            "--library=posix"
             "--suppress=missingIncludeSystem"
             "--suppress=unmatchedSuppression"
             "--suppress=unusedFunction"
@@ -393,6 +395,8 @@ if(CPPCHECK_EXE)
             --inline-suppr
             --language=c++
             --std=c++20
+            --check-level=exhaustive
+            --library=posix
             --suppress=missingIncludeSystem
             --suppress=unmatchedSuppression
             --suppress=unusedFunction
@@ -400,7 +404,7 @@ if(CPPCHECK_EXE)
             -I ${CMAKE_CURRENT_SOURCE_DIR}/include
             ${CMAKE_CURRENT_SOURCE_DIR}/src
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        COMMENT "Running cppcheck static analysis"
+        COMMENT "Running cppcheck static analysis with exhaustive checks"
     )
     
     # Cppcheck with XML output for CI/reporting
@@ -412,6 +416,8 @@ if(CPPCHECK_EXE)
             --inline-suppr
             --language=c++
             --std=c++20
+            --check-level=exhaustive
+            --library=posix
             --suppress=missingIncludeSystem
             --suppress=unmatchedSuppression
             --suppress=unusedFunction

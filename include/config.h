@@ -28,7 +28,7 @@ private:
     double m_highPerformanceThreshold;
     double m_powerSaveThreshold;
 
-    std::string trim(std::span<const char> str) const;
+    static std::string trim(std::span<const char> str);
     bool parseLine(std::span<const char> line);
     bool parseLineString(const std::string& line);
     bool parseKeyValue(const std::string& key, const std::string& value);

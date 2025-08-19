@@ -138,36 +138,6 @@ private:
     }
     
     /**
-     * Get current CPU usage percentage
-     * @return CPU usage as percentage (0.0 to 100.0)
-     */
-    double getCurrentCpuUsage() {
-        if (m_cpuQuery == nullptr) {
-            Logger::debug("CPU query not initialized, returning 0%");
-            return 0.0;
-        }
-        
-        // Collect current CPU data
-        PDH_STATUS status = PdhCollectQueryData(m_cpuQuery);
-        if (status != ERROR_SUCCESS) {
-            Logger::debug("Failed to collect CPU data: " + std::to_string(status));
-            return 0.0;
-        }
-        
-        // Get formatted CPU usage value
-        PDH_FMT_COUNTERVALUE value;
-        status = PdhGetFormattedCounterValue(m_cpuCounter, PDH_FMT_DOUBLE, NULL, &value);
-        if (status != ERROR_SUCCESS) {
-            Logger::debug("Failed to get formatted CPU value: " + std::to_string(status));
-            return 0.0;
-        }
-        
-        const double cpuUsage = value.doubleValue;
-        
-        return cpuUsage;
-    }
-    
-    /**
      * Get current processor queue length (Windows equivalent of load average)
      * @return Number of threads waiting for CPU time
      */

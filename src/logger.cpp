@@ -37,7 +37,16 @@ void Logger::log(LogLevel level, const std::string& message) {
     auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
 
     std::stringstream ss;
-    ss << std::put_time(std::localtime(&time_val), "%Y-%m-%d %H:%M:%S");
+    
+    // Use thread-safe localtime_r on POSIX systems, localtime_s on Windows
+    std::tm timeinfo;
+#ifdef _WIN32
+    localtime_s(&timeinfo, &time_val);
+#else
+    localtime_r(&time_val, &timeinfo);
+#endif
+    
+    ss << std::put_time(&timeinfo, "%Y-%m-%d %H:%M:%S");
     ss << '.' << std::setfill('0') << std::setw(3) << ms.count();
 
     std::string logEntry = "[" + ss.str() + "] [" + levelToString(level) + "] " + message;

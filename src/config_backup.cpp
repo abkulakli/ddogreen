@@ -245,7 +245,7 @@ bool Config::loadFromBuffer(std::span<const char> configData)
     return true;
 }
 
-std::string Config::trim(std::span<const char> str) const
+std::string Config::trim(std::span<const char> str)
 {
     if (str.empty())
     {

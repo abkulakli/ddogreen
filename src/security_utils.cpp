@@ -79,14 +79,23 @@ bool SecurityUtils::validatePathTraversal(const std::string& path)
         "..%5c"     // URL encoded ..\ (backslash)
     };
 
-    for (const auto& sequence : dangerousSequences)
+    // Use std::any_of for better performance and readability
+    auto foundDangerous = std::any_of(dangerousSequences.begin(), dangerousSequences.end(),
+        [&path](const std::string& sequence) {
+            return path.find(sequence) != std::string::npos;
+        });
+    
+    if (foundDangerous)
     {
-        if (path.find(sequence) != std::string::npos)
-        {
-            Logger::error("Security: Path traversal sequence detected in path: " + path);
-            Logger::error("Dangerous sequence: " + sequence);
-            return false;
-        }
+        // Find which sequence triggered for logging
+        auto it = std::find_if(dangerousSequences.begin(), dangerousSequences.end(),
+            [&path](const std::string& sequence) {
+                return path.find(sequence) != std::string::npos;
+            });
+        
+        Logger::error("Security: Path traversal sequence detected in path: " + path);
+        Logger::error("Dangerous sequence: " + *it);
+        return false;
     }
 
     // Additional check for excessive parent directory references

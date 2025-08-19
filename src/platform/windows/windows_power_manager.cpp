@@ -21,8 +21,8 @@ public:
         
         // Rate limiter: max 2 power mode changes per 60000ms (60 seconds)
         
-        // Verify powercfg is available
-        if (!isAvailable()) {
+        // Verify powercfg is available (use non-virtual method in constructor)
+        if (!checkAvailabilityInternal()) {
             Logger::warning("powercfg command not available - power management may not work");
         }
     }
@@ -149,6 +149,24 @@ public:
 
 private:
     RateLimiter m_rateLimiter;
+
+    /**
+     * Internal availability check (non-virtual for constructor use)
+     * @return true if powercfg is available
+     */
+    bool checkAvailabilityInternal() {
+        // Test if powercfg command is available
+        const std::string command = "powercfg /list";
+        const std::string output = executeCommandWithOutput(command);
+        
+        if (output.empty()) {
+            Logger::debug("powercfg command not available or failed");
+            return false;
+        }
+        
+        Logger::debug("Windows power management is available");
+        return true;
+    }
 
     /**
      * Execute a Windows command
