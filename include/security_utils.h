@@ -1,4 +1,5 @@
-#pragma once
+#ifndef DDOGREEN_SECURITY_UTILS_H
+#define DDOGREEN_SECURITY_UTILS_H
 
 #include <string>
 #include <filesystem>
@@ -46,3 +47,5 @@ public:
 private:
     SecurityUtils() = default; // Static utility class
 };
+
+#endif // DDOGREEN_SECURITY_UTILS_H

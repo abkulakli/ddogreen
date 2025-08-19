@@ -14,7 +14,6 @@
 #include <windows.h>
 #include <pdh.h>
 #include <pdhmsg.h>
-#pragma comment(lib, "pdh.lib")
 
 /**
  * Windows-specific system monitor implementation

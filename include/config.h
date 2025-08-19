@@ -1,4 +1,5 @@
-#pragma once
+#ifndef DDOGREEN_CONFIG_H
+#define DDOGREEN_CONFIG_H
 
 #include <string>
 #include <span>
@@ -33,3 +34,5 @@ private:
     bool parseKeyValue(const std::string& key, const std::string& value);
     bool validateConfiguration() const;
 };
+
+#endif // DDOGREEN_CONFIG_H

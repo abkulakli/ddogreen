@@ -1,4 +1,5 @@
-#pragma once
+#ifndef DDOGREEN_PLATFORM_FACTORY_H
+#define DDOGREEN_PLATFORM_FACTORY_H
 
 #include "platform/isystem_monitor.h"
 #include "platform/ipower_manager.h"
@@ -45,3 +46,5 @@ public:
 private:
     PlatformFactory() = default;
 };
+
+#endif // DDOGREEN_PLATFORM_FACTORY_H

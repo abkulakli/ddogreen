@@ -1,4 +1,5 @@
-#pragma once
+#ifndef DDOGREEN_IPLATFORM_UTILS_H
+#define DDOGREEN_IPLATFORM_UTILS_H
 
 #include <string>
 #include <vector>
@@ -130,3 +131,5 @@ public:
         return !configData.empty() && configData.size() < 1024 * 1024; // Reasonable size limit
     }
 };
+
+#endif // DDOGREEN_IPLATFORM_UTILS_H

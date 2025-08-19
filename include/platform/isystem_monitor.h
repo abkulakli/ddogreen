@@ -1,4 +1,5 @@
-#pragma once
+#ifndef DDOGREEN_ISYSTEM_MONITOR_H
+#define DDOGREEN_ISYSTEM_MONITOR_H
 
 #include <tuple>
 #include <span>
@@ -75,3 +76,5 @@ public:
         return sum / static_cast<double>(loadHistory.size());
     }
 };
+
+#endif // DDOGREEN_ISYSTEM_MONITOR_H

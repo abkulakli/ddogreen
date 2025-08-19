@@ -6,6 +6,7 @@
             "displayName": "Configure: Debug",
             "description": "Debug build with unit tests enabled",
             "binaryDir": "${sourceDir}/build/debug",
+            "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
                 "BUILD_TESTS": "ON"
@@ -16,6 +17,7 @@
             "displayName": "Configure: Release",
             "description": "Release build with unit tests enabled",
             "binaryDir": "${sourceDir}/build/release",
+            "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
                 "BUILD_TESTS": "ON"
@@ -26,6 +28,7 @@
             "displayName": "Configure: Coverage",
             "description": "Debug build with coverage analysis enabled",
             "binaryDir": "${sourceDir}/build/coverage",
+            "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
                 "BUILD_TESTS": "ON",
@@ -37,6 +40,7 @@
             "displayName": "Configure: Debug (No ccache)",
             "description": "Debug build without ccache for clean builds",
             "binaryDir": "${sourceDir}/build/debug-no-ccache",
+            "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
                 "BUILD_TESTS": "ON",

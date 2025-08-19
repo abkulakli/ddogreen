@@ -1,4 +1,5 @@
-#pragma once
+#ifndef DDOGREEN_MOCK_PLATFORM_UTILS_H
+#define DDOGREEN_MOCK_PLATFORM_UTILS_H
 
 #include <gmock/gmock.h>
 #include "platform/iplatform_utils.h"
@@ -16,3 +17,5 @@ public:
     MOCK_METHOD(std::string, getPrivilegeEscalationMessage, (), (const, override));
     MOCK_METHOD(std::string, resolveAbsolutePath, (const std::string& relativePath), (const, override));
 };
+
+#endif // DDOGREEN_MOCK_PLATFORM_UTILS_H

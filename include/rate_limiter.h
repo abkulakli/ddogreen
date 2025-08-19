@@ -1,4 +1,5 @@
-#pragma once
+#ifndef DDOGREEN_RATE_LIMITER_H
+#define DDOGREEN_RATE_LIMITER_H
 
 #include <chrono>
 #include <unordered_map>
@@ -55,3 +56,5 @@ private:
     
     void cleanupOldEntries();
 };
+
+#endif // DDOGREEN_RATE_LIMITER_H

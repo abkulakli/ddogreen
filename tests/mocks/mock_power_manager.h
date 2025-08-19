@@ -1,4 +1,5 @@
-#pragma once
+#ifndef DDOGREEN_MOCK_POWER_MANAGER_H
+#define DDOGREEN_MOCK_POWER_MANAGER_H
 
 #include <gmock/gmock.h>
 #include "platform/ipower_manager.h"
@@ -10,3 +11,5 @@ public:
     MOCK_METHOD(std::string, getCurrentMode, (), (override));
     MOCK_METHOD(bool, isAvailable, (), (override));
 };
+
+#endif // DDOGREEN_MOCK_POWER_MANAGER_H

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef DDOGREEN_IPOWER_MANAGER_H
+#define DDOGREEN_IPOWER_MANAGER_H
 
 #include <string>
 #include <span>
@@ -73,3 +74,5 @@ public:
         return 0;
     }
 };
+
+#endif // DDOGREEN_IPOWER_MANAGER_H

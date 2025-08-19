@@ -1,4 +1,5 @@
-#pragma once
+#ifndef DDOGREEN_MOCK_SYSTEM_MONITOR_H
+#define DDOGREEN_MOCK_SYSTEM_MONITOR_H
 
 #include <gmock/gmock.h>
 #include "platform/isystem_monitor.h"
@@ -10,3 +11,5 @@ public:
     MOCK_METHOD(bool, isAvailable, (), (override));
     MOCK_METHOD(void, setMonitoringFrequency, (int frequencySeconds), (override));
 };
+
+#endif // DDOGREEN_MOCK_SYSTEM_MONITOR_H

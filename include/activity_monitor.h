@@ -1,4 +1,5 @@
-#pragma once
+#ifndef DDOGREEN_ACTIVITY_MONITOR_H
+#define DDOGREEN_ACTIVITY_MONITOR_H
 
 #include <chrono>
 #include <functional>
@@ -47,3 +48,5 @@ private:
     std::chrono::steady_clock::time_point m_lastStateChangeTime;
     static constexpr int MINIMUM_STATE_CHANGE_INTERVAL = 60;
 };
+
+#endif // DDOGREEN_ACTIVITY_MONITOR_H

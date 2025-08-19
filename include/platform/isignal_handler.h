@@ -1,6 +1,5 @@
-#pragma once
-
-#pragma once
+#ifndef DDOGREEN_ISIGNAL_HANDLER_H
+#define DDOGREEN_ISIGNAL_HANDLER_H
 
 #include <span>
 
@@ -30,3 +29,5 @@ public:
      */
     virtual void waitForSignal() = 0;
 };
+
+#endif // DDOGREEN_ISIGNAL_HANDLER_H

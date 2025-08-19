@@ -1,4 +1,5 @@
-#pragma once
+#ifndef DDOGREEN_LOGGER_H
+#define DDOGREEN_LOGGER_H
 
 #include <string>
 
@@ -26,3 +27,5 @@ private:
     static bool m_consoleOutput;
     static LogLevel m_minLevel;
 };
+
+#endif // DDOGREEN_LOGGER_H
