@@ -39,10 +39,11 @@ Application Layer (main.cpp, config.cpp, logger.cpp) - ZERO platform-specific co
 ## Build System
 ```bash
 # Unified build script with ccache acceleration (RECOMMENDED)
-./scripts/build.sh debug            # Fast debug build with ccache
-./scripts/build.sh release          # Optimized release build
-./scripts/build.sh debug clean      # Clean debug build
-./scripts/build.sh release test     # Release build with tests
+./scripts/build.sh debug                    # Fast debug build with ccache
+./scripts/build.sh release                  # Optimized release build
+./scripts/build.sh debug --clean            # Clean debug build
+./scripts/build.sh release --with-tests     # Release build with tests
+./scripts/build.sh debug --clean --with-tests  # Clean debug build with tests
 
 # Traditional CMake workflow (also uses ccache automatically)
 cmake --preset debug                # Configure debug build with ccache

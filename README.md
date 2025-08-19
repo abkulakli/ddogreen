@@ -365,9 +365,11 @@ sudo dnf install ccache              # Fedora
 sudo pacman -S ccache                # Arch Linux
 
 # Build with automatic ccache integration
-./scripts/build.sh debug             # Debug build (~0.7s with cache)
-./scripts/build.sh release           # Release build
-./scripts/build.sh debug clean       # Clean debug build
+./scripts/build.sh debug                    # Debug build (~0.7s with cache)
+./scripts/build.sh release                  # Release build
+./scripts/build.sh debug --clean            # Clean debug build
+./scripts/build.sh release --with-tests     # Release build with tests
+./scripts/build.sh debug --clean --with-tests  # Clean debug build with tests
 
 # Traditional CMake workflow (also uses ccache automatically)
 cmake --preset debug                 # Configure with ccache
