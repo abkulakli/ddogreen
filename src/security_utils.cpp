@@ -172,8 +172,7 @@ bool SecurityUtils::isPathWithinDirectory(const std::string& path, const std::st
         }
 
         // Ensure allowed directory ends with separator for proper prefix matching
-        if (!canonicalAllowedDir.empty() &&
-            canonicalAllowedDir.back() != '/' &&
+        if (canonicalAllowedDir.back() != '/' &&
             canonicalAllowedDir.back() != '\\')
         {
             canonicalAllowedDir += fs::path::preferred_separator;
