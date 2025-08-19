@@ -32,7 +32,7 @@ Application Layer (main.cpp, config.cpp, logger.cpp) - ZERO platform-specific co
 - **Target OS**: Cross-platform with equal Linux and Windows support
 - **Architecture**: Cross-platform with compile-time platform selection
 - **Service Framework**: systemd (Linux), Windows Service Manager (Windows)
-- **Testing**: GoogleTest framework (70 tests, 100% passing)
+- **Testing**: GoogleTest framework (122 tests, 100% passing)
 - **CI/CD**: Package validation scripts in `scripts/` directory
 - **Dependencies**: None (only standard C++ and platform-specific system calls)
 
@@ -91,7 +91,7 @@ ccache --max-size=2G         # Increase cache size if needed
 - **Enhanced Windows Support**: Real Performance Counter implementation with dynamic load averaging
 - **Configurable Monitoring**: User-configurable monitoring frequency (1-300 seconds) with proper scaling
 - **Clean Architecture**: Zero platform-specific code in main application layer
-- **Quality Assurance**: Clean build, all 70 unit tests passing, zero compiler warnings
+- **Quality Assurance**: Clean build, all 122 unit tests passing, zero compiler warnings
 - **Service Integration**: Full systemd (Linux) and SCM (Windows) service management
 - **Cross-Platform Packaging**: DEB/RPM/TGZ (Linux), ZIP/MSI (Windows)
 

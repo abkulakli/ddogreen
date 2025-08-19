@@ -161,3 +161,19 @@ add_executable(test_security
 )
 add_platform_sources(test_security)
 configure_test_executable(test_security)
+
+# Rate Limiter unit tests
+add_executable(test_rate_limiter
+    test_rate_limiter.cpp
+    ${CMAKE_SOURCE_DIR}/src/rate_limiter.cpp
+    ${CMAKE_SOURCE_DIR}/src/logger.cpp
+)
+configure_test_executable(test_rate_limiter)
+
+# Security Utils unit tests
+add_executable(test_security_utils
+    test_security_utils.cpp
+    ${CMAKE_SOURCE_DIR}/src/security_utils.cpp
+    ${CMAKE_SOURCE_DIR}/src/logger.cpp
+)
+configure_test_executable(test_security_utils)
