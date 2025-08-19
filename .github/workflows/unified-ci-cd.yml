@@ -310,8 +310,14 @@ jobs:
         cd build
         cmake --build . --config Release --parallel
 
-        Write-Host "Generating Windows packages (ZIP + MSI)..."
-        cpack
+        Write-Host "Installing project for packaging..."
+        cmake --install . --config Release
+
+        Write-Host "Generating Windows ZIP package..."
+        cpack -G ZIP
+
+        Write-Host "Generating Windows MSI package..."
+        cpack -G WIX
 
         Write-Host "Generated packages:"
         Get-ChildItem *.zip, *.msi | Format-Table Name, Length

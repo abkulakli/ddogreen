@@ -443,5 +443,3 @@ endif()
 if(CPPCHECK_EXE)
     add_dependencies(static-analysis cppcheck)
 endif()
-
-include(CPack)
