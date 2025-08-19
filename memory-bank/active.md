@@ -5,10 +5,10 @@
 **Current State**: Implemented comprehensive functional testing for power management workflow
 
 ### Latest Update (Aug 20, 2025): Power Management Testing Infrastructure ✅
-**COMPLETED**: Successfully implemented comprehensive testing infrastructure for power management functionality
-- **GitHub Actions Integration**: Added functional power management test job to main CI/CD workflow
-- **Standalone Workflow**: Created dedicated `functional-test.yml` for independent testing
-- **Local Testing Script**: Implemented `scripts/test_power_management.sh` for local development
+**COMPLETED**: Successfully implemented streamlined power management testing integrated directly into CI/CD workflow
+- **Integrated Testing**: Power management tests now run as part of existing `test-linux` job
+- **Streamlined Workflow**: Eliminated redundant separate job - tests run before packaging
+- **Local Testing Script**: Maintained `scripts/test_power_management.sh` for local development
 - **Test Coverage**: Complete power management workflow validation:
   - Low load detection (power save mode)
   - High load detection via CPU stress (high performance mode)  
@@ -17,35 +17,23 @@
   - Configuration loading tests
 
 **Technical Implementation**:
-- **CI/CD Integration**: New `functional-test-linux` job in unified CI/CD workflow
-- **Dependencies**: Added stress-ng for CPU stress testing in GitHub Actions
+- **CI/CD Integration**: Power management tests integrated into existing `test-linux` job
+- **Dependencies**: Added stress tool installation to existing dependency step
 - **Monitoring**: Real-time load average monitoring during test phases
-- **Validation**: 4-phase test protocol:
+- **Efficient Workflow**: Tests run immediately after unit tests, before packaging
+- **4-Phase Test Protocol**:
   1. Basic functionality (help, version, dry-run)
-  2. Error handling (invalid configs, invalid options)
-  3. Power management simulation (stress → high perf → recovery → power save)
-  4. Performance metrics collection
-- **Logging**: Comprehensive test output with color-coded status messages
-- **Timeout Protection**: All tests have appropriate timeout limits
+  2. Power management simulation (stress → high perf → recovery → power save)
+  3. Real-time load monitoring during all phases
+  4. Process cleanup and validation
+- **Streamlined Dependencies**: Package jobs depend only on build and test jobs
 
-**Test Workflow Details**:
-```bash
-# Local testing
-./scripts/test_power_management.sh                    # Test with default executable
-./scripts/test_power_management.sh ./build/debug/ddogreen  # Test specific build
-
-# GitHub Actions
-# Automatically runs on: push to main/develop, pull requests
-# Manual trigger available via workflow_dispatch
-```
-
-**Key Features**:
-- **Cross-Platform**: GitHub Actions tests on Ubuntu, local script supports Linux distros
-- **Stress Testing**: Uses stress-ng to simulate high CPU load conditions
-- **Real-time Monitoring**: Load average tracking during all test phases
-- **Comprehensive Validation**: Tests both normal operation and error conditions
-- **CI Integration**: Functional tests must pass before packaging jobs run
-- **Developer Friendly**: Color-coded output and detailed progress reporting
+**Workflow Optimization Benefits**:
+- **Reduced CI Time**: No separate job overhead - tests run in existing infrastructure
+- **Faster Feedback**: Power management issues detected immediately after unit tests
+- **Resource Efficiency**: Reuses existing build artifacts and environment
+- **Simplified Maintenance**: Single test job to maintain instead of multiple workflows
+- **Clear Test Flow**: Static Analysis → Build → Unit Tests → Power Management Tests → Packaging
 
 ### Previous Achievement (Aug 20, 2025): Windows MSI Packaging Fix Completed ✅
 **COMPLETED**: Successfully identified and fixed Windows MSI packaging issues in GitHub Actions CI/CD pipeline

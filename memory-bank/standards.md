@@ -69,20 +69,26 @@ cmake --build build/debug               # Build without static analysis
 4. **Performance Validation**: Startup time and memory usage metrics
 
 #### Testing Tools Integration
-- **Stress Testing**: stress-ng for CPU load simulation
+- **Stress Testing**: stress tool for CPU load simulation with `--cpu $(nproc)` 
 - **Monitoring**: /proc/loadavg for real-time load tracking
 - **Process Management**: Background service testing with proper cleanup
 - **Logging**: Comprehensive output capture and analysis
 
 #### CI/CD Integration
 ```yaml
-# Main workflow integration
-functional-test-linux:
-  needs: test-linux
-  runs-on: ubuntu-latest
-  timeout-minutes: 10
-  # Complete power management workflow validation
+# Integrated into existing test job
+test-linux:
+  steps:
+    - name: Install dependencies (includes stress-ng)
+    - name: Run unit tests
+    - name: Test power management functionality  # ← Integrated here
 ```
+
+#### Workflow Optimization
+- **Streamlined**: Power management tests integrated into existing `test-linux` job
+- **Efficient**: Reuses build artifacts and test environment
+- **Fast Feedback**: Tests run immediately after unit tests, before packaging
+- **Resource Efficient**: No separate job overhead or duplicate setup steps
 
 #### Local Development Testing
 ```bash
@@ -92,8 +98,8 @@ functional-test-linux:
 ```
 
 #### Test Validation Criteria
-- **Phase Duration**: 30-second total test window for realistic validation
-- **Stress Duration**: 15-second CPU stress for reliable mode switching
+- **Phase Duration**: 60-second total test window for realistic validation
+- **Stress Duration**: 30-second CPU stress for reliable mode switching
 - **Recovery Time**: 10-second recovery monitoring for mode transition
 - **Load Thresholds**: Real-time load average monitoring for mode validation
 - **Timeout Protection**: All operations have appropriate timeout limits

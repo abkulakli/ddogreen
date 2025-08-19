@@ -8,8 +8,8 @@ set -e
 
 # Configuration
 EXECUTABLE="${1:-./build/release/ddogreen}"
-TEST_DURATION=30
-STRESS_DURATION=15
+TEST_DURATION=60
+STRESS_DURATION=30
 RECOVERY_DURATION=10
 
 # Colors for output
@@ -50,17 +50,17 @@ check_prerequisites() {
     # Make executable if needed
     chmod +x "$EXECUTABLE"
     
-    # Check if stress-ng is available
-    if ! command -v stress-ng &> /dev/null; then
-        log_warning "stress-ng not found. Installing..."
+    # Check if stress is available
+    if ! command -v stress &> /dev/null; then
+        log_warning "stress not found. Installing..."
         if command -v apt-get &> /dev/null; then
-            sudo apt-get update && sudo apt-get install -y stress-ng
+            sudo apt-get update && sudo apt-get install -y stress
         elif command -v yum &> /dev/null; then
-            sudo yum install -y stress-ng
+            sudo yum install -y stress
         elif command -v dnf &> /dev/null; then
-            sudo dnf install -y stress-ng
+            sudo dnf install -y stress
         else
-            log_error "Could not install stress-ng. Please install it manually."
+            log_error "Could not install stress. Please install it manually."
             exit 1
         fi
     fi
@@ -166,7 +166,7 @@ test_power_management() {
     
     # Phase 2: Create CPU stress
     log_info "Phase 2: Creating CPU stress to trigger high performance mode"
-    stress-ng --cpu $(nproc) --timeout ${STRESS_DURATION}s &
+    stress --cpu $(nproc) --timeout ${STRESS_DURATION}s &
     local stress_pid=$!
     
     log_info "CPU stress started with PID: $stress_pid"
