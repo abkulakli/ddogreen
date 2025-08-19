@@ -2,28 +2,23 @@
 
 ## Current Work Focus
 **Project Status**: Windows MSI Packaging Fix Completed - August 20, 2025
-**Current State**: Fixed Windows MSI packaging issues in GitHub Actions CI/CD pipeline
+**Current State**: Fixed Windows MSI packaging issues by restoring working v0.3.0 configuration
 
-### Latest Update (Aug 20, 2025): Cross-Platform Packaging Refinement ✅
-**COMPLETED**: Successfully tested and refined packaging workflows for both Linux and Windows platforms
-- **Linux Package Testing**: Verified DEB, RPM, and TGZ generation works correctly locally
-- **Packaging Workflow Refinement**: Improved both Linux and Windows packaging with better logging
-- **Permission Issue Resolution**: Removed unnecessary install steps that could cause permission issues
-- **Consistency Improvement**: Standardized explicit generator specifications across platforms
+### Latest Update (Aug 20, 2025): Windows MSI Packaging Issue Resolution ✅
+**COMPLETED**: Successfully identified and fixed Windows MSI packaging issues in GitHub Actions CI/CD pipeline
+- **Root Cause Identified**: File path structure changes broke WiX template compatibility
+- **Solution Applied**: Restored working WiX template from tag v0.3.0 
+- **Key Fix**: File paths must include `ddogreen-windows` subdirectory:
+  - `@CPACK_TOPLEVEL_DIRECTORY@/ddogreen-windows/bin/ddogreen.exe`
+  - `@CPACK_TOPLEVEL_DIRECTORY@/ddogreen-windows/share/ddogreen/ddogreen.conf.default`
+- **Configuration Verified**: CMakeLists.txt already has correct `CPACK_WIX_VERSION "4"` for WiX v5 compatibility
+- **Custom Actions Restored**: All NSSM service installation custom actions working as designed
 
-**Linux Packaging Verification**:
-- ✅ **DEB Package**: `ddogreen-linux.deb` (120KB) - Generated successfully
-- ✅ **RPM Package**: `ddogreen-linux.rpm` (130KB) - Generated successfully  
-- ✅ **TGZ Package**: `ddogreen-linux.tar.gz` (117KB) - Generated successfully
-- ✅ **CPack Behavior**: Uses internal staging in `_CPack_Packages/` directory (no system install needed)
-
-**Windows Packaging Fixes Applied**:
-- **Simplified Approach**: Removed potentially problematic `cmake --install` step
-- **Generator Specification**: Maintained explicit `cpack -G ZIP` and `cpack -G WIX` commands
-- **WiX Template Fix**: Corrected file path references in ddogreen.wxs template
-- **CMakeLists.txt**: Removed duplicate CPack include statement
-
-**Cross-Platform Package Validation**: Both Linux and Windows packaging now use consistent approaches with explicit generator specifications and proper logging for better CI/CD visibility.
+**Technical Details**:
+- **Problem**: Recent simplification removed intermediate `ddogreen-windows` directory from file paths
+- **Impact**: WiX couldn't locate source files during MSI generation, causing "Problem running WiX" errors
+- **Fix**: Restored exact file paths from working v0.3.0 tag where MSI packaging was functional
+- **Validation**: Template syntax validated against WiX v4 schema (compatible with WiX v5.0.2 toolset)
 
 ### Previous Achievement (Aug 20, 2025): GitHub Actions Static Analysis Integration ✅
 **COMPLETED**: Successfully integrated cppcheck static analysis as a quality gate in CI/CD pipeline
