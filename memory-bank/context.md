@@ -38,7 +38,13 @@ Application Layer (main.cpp, config.cpp, logger.cpp) - ZERO platform-specific co
 
 ## Build System
 ```bash
-# CMake presets workflow with ccache acceleration
+# Unified build script with ccache acceleration (RECOMMENDED)
+./scripts/build.sh debug            # Fast debug build with ccache
+./scripts/build.sh release          # Optimized release build
+./scripts/build.sh debug clean      # Clean debug build
+./scripts/build.sh release test     # Release build with tests
+
+# Traditional CMake workflow (also uses ccache automatically)
 cmake --preset debug                # Configure debug build with ccache
 cmake --build --preset debug        # Build debug executable with ccache
 cmake --preset release              # Configure release build with ccache  
@@ -47,11 +53,6 @@ cmake --build --preset release      # Build release executable with ccache
 # Additional presets available
 cmake --preset coverage             # Coverage analysis build
 cmake --preset debug-no-ccache      # Debug build without ccache (for clean builds)
-
-# Energy-efficient build script
-./scripts/build.sh debug            # Standard debug build
-./scripts/build.sh release          # Standard release build
-./scripts/build.sh debug clean      # Clean debug build
 
 # Testing
 cmake --build --preset debug --target test
