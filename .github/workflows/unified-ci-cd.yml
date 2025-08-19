@@ -240,9 +240,18 @@ jobs:
     - name: Create packages
       run: |
         cd build/release
+        
+        echo "Generating Linux DEB package..."
         cpack -G DEB
+        
+        echo "Generating Linux RPM package..."
         cpack -G RPM
+        
+        echo "Generating Linux TGZ package..."
         cpack -G TGZ
+        
+        echo "Generated packages:"
+        ls -la *.deb *.rpm *.tar.gz
 
     - name: Upload DEB package
       uses: actions/upload-artifact@v4
@@ -309,9 +318,6 @@ jobs:
       run: |
         cd build
         cmake --build . --config Release --parallel
-
-        Write-Host "Installing project for packaging..."
-        cmake --install . --config Release
 
         Write-Host "Generating Windows ZIP package..."
         cpack -G ZIP
