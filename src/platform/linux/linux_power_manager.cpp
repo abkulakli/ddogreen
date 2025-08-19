@@ -13,10 +13,10 @@
 class LinuxPowerManager : public IPowerManager
 {
 public:
-    LinuxPowerManager() : m_currentMode{"unknown"}, m_rateLimiter(5, 1000)
+    LinuxPowerManager() : m_currentMode{"unknown"}, m_rateLimiter(2, 60000)
     {
         // TLP availability will be checked by the caller
-        // Rate limiter: max 5 power mode changes per 1000ms (1 second)
+        // Rate limiter: max 2 power mode changes per 60000ms (60 seconds)
     }
 
     virtual ~LinuxPowerManager() = default;

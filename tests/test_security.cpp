@@ -218,34 +218,34 @@ TEST_F(TestSecurity, test_power_manager_rate_limiting) {
     }
     
     // Test rate limiting by making rapid sequential calls
-    // Rate limiter is configured for 5 requests per 1000ms
+    // Rate limiter is configured for 2 requests per 60000ms (60 seconds)
     
     [[maybe_unused]] int successful_calls = 0;
     int total_calls = 0;
     
-    // Make rapid requests - first 5 should succeed (or fail due to TLP), 
+    // Make rapid requests - first 2 should succeed (or fail due to TLP), 
     // but subsequent ones should be rate limited
-    for (int i = 0; i < 15; ++i) {
+    for (int i = 0; i < 5; ++i) {
         bool result = powerManager->setPerformanceMode();
         total_calls++;
         
         // Don't count TLP command failures as successful,
-        // but rate limiting should kick in after 5 requests
-        if (i < 5) {
-            // First 5 requests should at least attempt to run (may fail due to TLP)
+        // but rate limiting should kick in after 2 requests
+        if (i < 2) {
+            // First 2 requests should at least attempt to run (may fail due to TLP)
             // Rate limiting shouldn't block these
         } else {
-            // Requests 6-15 should be rate limited and return false immediately
+            // Requests 3-5 should be rate limited and return false immediately
             // These should all be false due to rate limiting
             EXPECT_FALSE(result) << "Request " << (i+1) << " should be rate limited";
         }
     }
     
     // Verify that we made the expected number of calls
-    EXPECT_EQ(total_calls, 15) << "Should have attempted 15 total requests";
+    EXPECT_EQ(total_calls, 5) << "Should have attempted 5 total requests";
     
     // Test that after a delay, rate limiting resets
-    std::this_thread::sleep_for(std::chrono::milliseconds(1100)); // Wait for rate limit window to reset
+    std::this_thread::sleep_for(std::chrono::milliseconds(61000)); // Wait for rate limit window to reset (60s + margin)
     
     // Now a new request should be allowed (though it may still fail due to TLP command issues)
     [[maybe_unused]] bool after_delay_result = powerManager->setPerformanceMode();
@@ -253,7 +253,7 @@ TEST_F(TestSecurity, test_power_manager_rate_limiting) {
     // but at least the rate limiter should allow the attempt
     
     std::cout << "Rate limiting test completed: made " << total_calls 
-              << " requests, rate limiting should have blocked requests 6-15" << std::endl;
+              << " requests, rate limiting should have blocked requests 3-5" << std::endl;
 }
 
 // RED: Test configuration validation prevents extreme values

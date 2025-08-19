@@ -10,9 +10,9 @@
  */
 class MacOSPowerManager : public IPowerManager {
 public:
-    MacOSPowerManager() : m_currentMode("unknown"), m_rateLimiter(5, 1000) {
+    MacOSPowerManager() : m_currentMode("unknown"), m_rateLimiter(2, 60000) {
         Logger::info("macOS Power Manager initialized (Mock Implementation)");
-        // Rate limiter: max 5 power mode changes per 1000ms (1 second)
+        // Rate limiter: max 2 power mode changes per 60000ms (60 seconds)
     }
 
     virtual ~MacOSPowerManager() = default;

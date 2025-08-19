@@ -16,10 +16,10 @@
  */
 class WindowsPowerManager : public IPowerManager {
 public:
-    WindowsPowerManager() : m_rateLimiter(5, 1000) {
+    WindowsPowerManager() : m_rateLimiter(2, 60000) {
         Logger::info("Windows Power Manager initialized");
         
-        // Rate limiter: max 5 power mode changes per 1000ms (1 second)
+        // Rate limiter: max 2 power mode changes per 60000ms (60 seconds)
         
         // Verify powercfg is available
         if (!isAvailable()) {
