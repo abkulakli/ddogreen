@@ -337,11 +337,11 @@ bool Config::parseKeyValue(const std::string& key, const std::string& value)
             Logger::warning("Unknown configuration key: " + key);
         }
     }
-    catch (const std::invalid_argument& e)
+    catch (const std::invalid_argument&)
     {
         Logger::warning("Invalid numeric value for " + key + ": " + value);
     }
-    catch (const std::out_of_range& e)
+    catch (const std::out_of_range&)
     {
         Logger::warning("Numeric value out of range for " + key + ": " + value);
     }

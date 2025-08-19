@@ -74,6 +74,12 @@ function(configure_test_executable target_name)
         Threads::Threads
     )
     
+    # Platform-specific libraries (same as main executable)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+        # Link Windows-specific libraries for Performance Counters
+        target_link_libraries(${target_name} pdh)
+    endif()
+    
     target_compile_definitions(${target_name} PRIVATE DDOGREEN_VERSION="test")
     
     # Apply coverage flags if coverage is enabled
