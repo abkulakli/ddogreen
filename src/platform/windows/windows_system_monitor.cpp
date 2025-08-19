@@ -247,7 +247,7 @@ private:
             sum += value;
         }
         
-        return sum / numSamples;
+        return sum / static_cast<double>(numSamples);
     }
     
     /**
