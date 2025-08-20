@@ -148,13 +148,10 @@ jobs:
           cmake \
           stress \
           power-profiles-daemon \
-          tlp \
-          tlp-rdw \
           cpufrequtils \
           linux-tools-common \
           linux-tools-generic \
           acpi \
-          laptop-mode-tools \
           powertop \
           bc
         
@@ -213,10 +210,6 @@ jobs:
         sudo systemctl stop power-profiles-daemon 2>/dev/null || echo "  power-profiles-daemon was not running"
         sudo systemctl start power-profiles-daemon 2>/dev/null || echo "  power-profiles-daemon start failed"
         sudo systemctl enable power-profiles-daemon 2>/dev/null || echo "  power-profiles-daemon enable failed"
-        
-        # Configure TLP (disable to avoid conflicts with power-profiles-daemon)
-        sudo systemctl stop tlp 2>/dev/null || echo "  TLP was not running"
-        sudo systemctl disable tlp 2>/dev/null || echo "  TLP disable failed"
         
         # Set initial power state
         sleep 2  # Give power-profiles-daemon time to start
