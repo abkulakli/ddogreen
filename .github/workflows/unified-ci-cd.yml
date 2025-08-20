@@ -154,7 +154,6 @@ jobs:
           linux-tools-common \
           linux-tools-generic \
           acpi \
-          acpi-tools \
           laptop-mode-tools \
           powertop \
           bc
