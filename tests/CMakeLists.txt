@@ -177,3 +177,27 @@ add_executable(test_security_utils
     ${CMAKE_SOURCE_DIR}/src/logger.cpp
 )
 configure_test_executable(test_security_utils)
+
+# Config Buffer tests (testing loadFromBuffer functionality)
+add_executable(test_config_buffer
+    test_config_buffer.cpp
+    ${CMAKE_SOURCE_DIR}/src/config.cpp
+    ${CMAKE_SOURCE_DIR}/src/logger.cpp
+    ${CMAKE_SOURCE_DIR}/src/security_utils.cpp
+    ${CMAKE_SOURCE_DIR}/src/rate_limiter.cpp
+    ${CMAKE_SOURCE_DIR}/src/platform/platform_factory.cpp
+)
+add_platform_sources(test_config_buffer)
+configure_test_executable(test_config_buffer)
+
+# Config Validation tests (testing cross-validation and warnings)
+add_executable(test_config_validation
+    test_config_validation.cpp
+    ${CMAKE_SOURCE_DIR}/src/config.cpp
+    ${CMAKE_SOURCE_DIR}/src/logger.cpp
+    ${CMAKE_SOURCE_DIR}/src/security_utils.cpp
+    ${CMAKE_SOURCE_DIR}/src/rate_limiter.cpp
+    ${CMAKE_SOURCE_DIR}/src/platform/platform_factory.cpp
+)
+add_platform_sources(test_config_validation)
+configure_test_executable(test_config_validation)
